@@ -1,0 +1,80 @@
+/*
+ * fwrisc_tb_main.cpp
+ *
+ *  Created on: Oct 23, 2018
+ *      Author: ballance
+ */
+#include "Vfwrisc_tb_hdl.h"
+#include "GoogletestVlTestListener.h"
+#include "verilated.h"
+#include "verilated_lxt2_c.h"
+#include "gtest/gtest.h"
+#include <stdio.h>
+#include <stdint.h>
+
+
+
+int main(int argc, char **argv) {
+	bool trace = true;
+	uint32_t timestamp = 0;
+	GoogletestVlTestListener *listener = new GoogletestVlTestListener();
+
+	// TODO: must expand out any filelists
+
+	if (trace) {
+		Verilated::traceEverOn(true);
+	}
+
+	::testing::InitGoogleTest(&argc, argv);
+
+    ::testing::TestEventListeners &listeners =
+                     ::testing::UnitTest::GetInstance()->listeners();
+     listeners.Append(listener);
+
+
+	Verilated::commandArgs(argc, argv);
+
+	for (int i=0; i<argc; i++) {
+		fprintf(stdout, "ARG[%d]=%s\n", i, argv[i]);
+	}
+
+	int ret = RUN_ALL_TESTS();
+
+	if (listener->num_passed() && !listener->num_failed()) {
+		fprintf(stdout, "PASSED: %s\n", "foo");
+	} else if (listener->num_failed()) {
+		fprintf(stdout, "FAILED: %s (%d errors)\n", "foo", listener->num_failed());
+	} else {
+		fprintf(stdout, "FAILED: %s (no tests run)\n", "foo");
+	}
+
+	return ret;
+
+	Vfwrisc_tb_hdl *top = new Vfwrisc_tb_hdl();
+	VerilatedLxt2C *tfp = 0;
+
+
+	if (trace) {
+		tfp = new VerilatedLxt2C();
+		top->trace(tfp, 99);
+		tfp->open("simx.lxt");
+	}
+
+	for (int i=0; i<100000; i++) {
+		top->clock = 1;
+		top->eval();
+		tfp->dump(timestamp);
+		timestamp += 5;
+		top->clock = 0;
+		top->eval();
+		tfp->dump(timestamp);
+		timestamp += 5;
+	}
+
+	if (tfp) {
+		tfp->close();
+	}
+
+}
+
+
