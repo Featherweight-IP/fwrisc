@@ -27,11 +27,12 @@ module fwrisc #()(
 
 	reg[31:0]			instr;
 	
-	typedef enum {
+	typedef enum bit[3:0] {
 		FETCH, // 
 		DECODE,
 		EXECUTE,
-		MEM
+		MEMW,
+		MEMR
 	} state_e;
 	
 	state_e				state;
@@ -68,8 +69,21 @@ module fwrisc #()(
 				end
 				
 				EXECUTE: begin
-					pc <= pc_next;
-					state <= FETCH;
+					if (op_ld) begin
+						state <= MEMR;
+					end else if (op_st) begin
+						state <= MEMW;
+					end else begin
+						pc <= pc_next;
+						state <= FETCH;
+					end
+				end
+				
+				MEMW, MEMR: begin
+					if (dvalid && dready) begin
+						pc <= pc_next;
+						state <= FETCH;
+					end
 				end
 			endcase
 		end
@@ -77,8 +91,8 @@ module fwrisc #()(
 	
 	
 	// RS1, RS2, and RD are always in the same place
-	wire[4:0]		rs1 = instr[24:20];
-	wire[4:0]		rs2 = instr[19:15];
+	wire[4:0]		rs1 = instr[19:15];
+	wire[4:0]		rs2 = instr[24:20];
 	wire[4:0]		rd  = instr[11:7];
 
 	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
@@ -94,35 +108,68 @@ module fwrisc #()(
 	
 	wire[31:0]      jal_off = (instr[31])?{{21{1'b1}}, instr[31], instr[19:12], instr[20], instr[30:21],1'b0}:
 											{{21{1'b0}}, instr[31], instr[19:12], instr[20], instr[30:21],1'b0};
-	wire[31:0]      imm_31_12 = (instr[31])?{{22{1'b1}}, instr[31:12]}:{{22{1'b0}}, instr[31:12]};
-	wire[31:0]      imm_11_0 = (instr[31])?{{22{1'b1}}, instr[31:12]}:{{22{1'b0}}, instr[31:12]};
+	wire[31:0]      auipc_imm_31_12 = {instr[31:12], {12{1'b0}}};
+	wire[31:0]      imm_11_0 = (instr[31])?{{22{1'b1}}, instr[31:20]}:{{22{1'b0}}, instr[31:20]};
+	wire[31:0]      st_imm_11_0 = (instr[31])?
+		{{22{1'b1}}, instr[31:25], instr[11:7]}:
+		{{22{1'b0}}, instr[31:25], instr[11:7]};
 	
 	wire[31:0]      imm_lui = {instr[31:12], 12'h000};
+	wire[31:0]		imm_branch = (instr[31])?
+		{{19{1'b1}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0}:
+		{{19{1'b0}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
 	wire[31:0]		zero = 32'h00000000;
 
 	wire[5:0]		ra_raddr;
 	wire[5:0]		rb_raddr;
 	wire[31:0]		ra_rdata;
 	wire[31:0]		rb_rdata;
+	wire[31:0]		rb_rdata_neg;
 	wire[5:0]		rd_waddr;
 	wire[31:0]		rd_wdata;
 	wire			rd_wen;
-
+	
 	// ALU signals
 	wire[31:0]					alu_op_a;
 	wire[31:0]					alu_op_b;
 	wire [4:0]					alu_op;
 	wire[31:0]					alu_out;
 	
+	// Comparator signals
+	wire[31:0]					comp_op_a = ra_rdata;
+	wire[31:0]					comp_op_b = rb_rdata;
+	wire[4:0]					comp_op;
+	wire						comp_out;
+	wire						branch_cond;
+	
+	fwrisc_comparator u_comp (
+		.clock  (clock 		), 
+		.reset  (reset 		), 
+		.in_a   (comp_op_a  ), 
+		.in_b   (comp_op_b  ), 
+		.op     (comp_op    ), 
+		.out    (comp_out   ));
+	
+	always @* begin
+		case (instr[14:13]) 
+			2'b00: comp_op = COMPARE_EQ;  // BEQ, BNE
+			2'b10: comp_op = COMPARE_LT;  // BLT, BGE
+			2'b11: comp_op = COMPARE_LTU; // BLTU BGEU
+		endcase
+	end
+	assign branch_cond = (instr[12])?!comp_out:comp_out;
+	
 	// TEMP: just assign
 	assign ra_raddr = rs1;
 	assign rb_raddr = rs2;
 	assign rd_waddr = rd;
 	
-	assign rd_wdata = (op_jal)?pc:alu_out;
 	always @* begin
 		if (op_jal || op_jalr) begin
-			rd_wdata = pc_plus4;
+			rd_wdata = {pc_plus4, 2'b0};
+		end else if (op_ld) begin
+			// TODO: need to handle byte enables
+			rd_wdata = drdata;
 		end else begin
 			rd_wdata = alu_out;
 		end
@@ -131,7 +178,15 @@ module fwrisc #()(
 
 	// Write at the end of the execute state 
 	// when the destination isn't $zero
-	assign rd_wen = (state == EXECUTE && |rd);
+	//
+	// For load instructions, 
+	always @* begin
+		if (op_ld || op_st) begin
+			rd_wen = (state == MEMR && |rd && dready);
+		end else begin
+			rd_wen = (state == EXECUTE && |rd);
+		end
+	end
 	
 	fwrisc_regfile u_regfile (
 		.clock     (clock    ), 
@@ -144,31 +199,72 @@ module fwrisc #()(
 		.rd_wdata  (rd_wdata ), 
 		.rd_wen    (rd_wen   ));
 	
+	assign rb_rdata_neg = -rb_rdata;
+	
 
 	always @* begin
 		if (op_lui) begin
 			alu_op_a = imm_lui;
 			alu_op_b = zero;
-			alu_op = OP_ADD;
 		end else if (op_auipc) begin
-			alu_op_a = 0;
-			alu_op_b = pc;
-			alu_op = OP_ADD;
+			alu_op_a = auipc_imm_31_12;
+			alu_op_b = {pc, 2'b0};
 		end else if (op_jal) begin
-			alu_op_b = pc;
+			alu_op_b = {pc, 2'b0};
 			alu_op_a = jal_off;
-			alu_op = OP_ADD;
 		end else if (op_jalr) begin
 			alu_op_b = pc;
-			alu_op = OP_ADD;
-		end else if (op_ld || op_st || op_arith_imm) begin
+		end else if (op_ld || op_arith_imm) begin
+			alu_op_a = imm_11_0; // sign-extended immediate
+			alu_op_b = ra_rdata; // rs1
+		end else if (op_st) begin
+			alu_op_a = st_imm_11_0; // sign-extended immediate
 			alu_op_b = ra_rdata; // rs1
 		end else if (op_arith_reg) begin
-			alu_op_a = rb_raddr; // rs2
-			alu_op_b = ra_raddr; // rs1
+			if (instr[14:12] == 3'b000 && instr[30]) begin // SUB
+				alu_op_a = rb_rdata_neg;
+			end else begin
+				alu_op_a = rb_rdata; // rs2
+			end
+			alu_op_b = ra_rdata; // rs1
+		end else if (op_branch) begin
+			// For branches, we use branch_immediate
+			alu_op_a = imm_branch;
+			alu_op_b = {pc, 2'b0};
 		end else begin
 			alu_op_a = zero;
 			alu_op_b = zero;
+		end
+		
+		if (op_lui || op_auipc || op_jal || op_jalr || op_ld || op_st || op_branch) begin
+			alu_op = OP_ADD;
+		end else if (op_arith_imm || op_arith_reg) begin
+			case (instr[14:12]) 
+				3'b000: begin // ADDI, ADD, SUB
+					// TODO: handle register subtract
+					alu_op = OP_ADD;
+				end
+				3'b001: begin // SLL, SLLI
+					// TODO:
+				end
+				3'b010: begin // SLT
+				end
+				3'b011: begin // SLTU
+				end
+				3'b100: begin // XOR
+					alu_op = OP_XOR;
+				end
+				3'b101: begin // SRA, SRAI
+					// TODO:
+				end
+				3'b110: begin // OR
+					alu_op = OP_OR;
+				end
+				3'b111: begin // AND
+					alu_op = OP_AND;
+				end
+			endcase
+		end else begin
 			alu_op = OP_ADD;
 		end
 	end
@@ -183,13 +279,20 @@ module fwrisc #()(
 	
 	
 	always @* begin
-		if (op_jal || op_jalr) begin
+		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
 		end else begin
 			pc_next = pc_plus4;
 		end
 	end
-
+	
+	// Handle data-access control signals
+	assign dvalid = (state == MEMR || state == MEMW);
+	assign dwrite = (state == MEMW);
+	assign daddr = alu_out; // Always use the ALU for address
+	assign dwdata = rb_rdata; // Write data is always @ rs2
+	assign dstrb = 4'hf; // TODO
+	
 endmodule
 
 
