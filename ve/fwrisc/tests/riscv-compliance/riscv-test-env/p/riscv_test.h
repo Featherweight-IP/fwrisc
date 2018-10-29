@@ -141,6 +141,7 @@ handle_exception:                                                       \
         sw TESTNUM, tohost, t5;                                         \
         j write_tohost;                                                 \
 reset_vector:                                                           \
+        j begin_testcode; /* MSB */										\
         RISCV_MULTICORE_DISABLE;                                        \
         INIT_SPTBR;                                                     \
         INIT_PMP;                                                       \

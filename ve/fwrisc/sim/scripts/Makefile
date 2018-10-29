@@ -5,7 +5,6 @@ include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc/tb/fwrisc_tb.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc/tests/fwrisc_tests.mk
 
-BUILD_PRECOMPILE_TARGETS += embedded_sw
 RUN_PRE_TARGETS += ram.hex
 
 SRC_DIRS += $(FWRISC)/ve/fwrisc/tb
@@ -14,6 +13,10 @@ TB_MODULES_HDL=fwrisc_tb_hdl
 
 SW_IMAGES := $(call get_plusarg,SW_IMAGE,$(PLUSARGS))
 SW_IMAGE := $(firstword $(SW_IMAGES))
+
+ifneq (,$(SW_IMAGES))
+  BUILD_PRECOMPILE_TARGETS += embedded_sw
+endif
 
 
 ifeq (vl,$(SIM))

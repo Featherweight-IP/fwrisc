@@ -293,6 +293,17 @@ module fwrisc #()(
 	assign dwdata = rb_rdata; // Write data is always @ rs2
 	assign dstrb = 4'hf; // TODO
 	
+
+	fwrisc_tracer u_tracer (
+		.clock   (clock  			), 
+		.reset   (reset  			), 
+		.addr    ({pc, 2'b0}		), 
+		.instr   (instr  			), 
+		.ivalid  ((state == EXECUTE)), 
+		.raddr   (rd_waddr			), 
+		.rdata   (rd_wdata			), 
+		.rwrite  (rd_wen 			));
+	
 endmodule
 
 
