@@ -60,7 +60,22 @@ module fwrisc_tb_hdl(input clock);
 		.i_address_b       (daddr[31:2]				),
 		.i_byte_enable_b   (dstrb  					),
 		.o_read_data_b     (drdata					));
-	
+
+	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
+			.clock(clock),
+			.reset(reset),
+			.addr(addr),
+			.instr(instr),
+			.ivalid(ivalid),
+			.raddr(raddr),
+			.rdata(rdata),
+			.rwrite(rwrite),
+			.maddr(maddr),
+			.mdata(mdata),
+			.mstrb(mstrb),
+			.mwrite(mwrite),
+			.mvalid(mvalid)
+		);
 
 endmodule
 

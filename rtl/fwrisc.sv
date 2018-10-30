@@ -302,7 +302,13 @@ module fwrisc #()(
 		.ivalid  ((state == EXECUTE)), 
 		.raddr   (rd_waddr			), 
 		.rdata   (rd_wdata			), 
-		.rwrite  (rd_wen 			));
+		.rwrite  (rd_wen 			),
+		.maddr   (daddr				),
+		.mdata   ((dwrite)?dwdata:drdata),
+		.mstrb   (dstrb				),
+		.mwrite  (dwrite			),
+		.mvalid  ((dvalid && dready))
+		);
 	
 endmodule
 

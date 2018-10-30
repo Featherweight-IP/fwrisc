@@ -16,21 +16,16 @@ module fwrisc_tracer (
 		input			ivalid,
 		input [31:0]	raddr,
 		input [31:0]	rdata,
-		input			rwrite
+		input			rwrite,
+		input [31:0]	maddr,
+		input [31:0]	mdata,
+		input [3:0]		mstrb,
+		input			mwrite,
+		input 			mvalid
 		);
 	// Empty
 	
-	always @(posedge clock) begin
-		if (rwrite) begin
-			$display("Write: r%0d <= 'h%08h", raddr, rdata);
-		end
-	end
-	
-	always @(posedge clock) begin
-		if (ivalid) begin
-			$display("Exec: 'h%08h @ 'h%08h", instr, addr);
-		end
-	end
+
 endmodule
 
 
