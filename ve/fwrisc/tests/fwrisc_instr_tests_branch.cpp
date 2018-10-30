@@ -181,8 +181,8 @@ TEST_F(fwrisc_instr_tests_branch, bltu_t_neg) {
 	};
 	const char *program = R"(
 		entry:
-			li		x1, -6
-			li		x2, -5
+			li		x1, 0x80000000
+			li		x2, 0x80000001
 			bltu	x1, x2, 1f
 			li		x3, 20
 			j		done
