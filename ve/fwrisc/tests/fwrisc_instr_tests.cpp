@@ -48,8 +48,8 @@ void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
 }
 
 void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
-	if ((addr & 0xF0000000) == 0x40000000) {
-		uint32_t offset = ((addr & 0x0FFFFFFF) >> 2);
+	if ((addr & 0xFFFFF000) == 0x00000000) {
+		uint32_t offset = ((addr & 0x00000FFF) >> 2);
 		m_mem[offset].first = true; // accessed
 
 		if (mask & 1) {
@@ -70,7 +70,7 @@ void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 		}
 	} else {
 		fprintf(stdout, "Error: illegal access to address 0x%08x\n", addr);
-		ASSERT_EQ((addr & 0xF0000000), 0x40000000);
+		ASSERT_EQ((addr & 0xFFFFF000), 0x00000000);
 	}
 }
 
@@ -109,7 +109,7 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 		}
 		ASSERT_EQ(m_regs[regs[i].addr].second, true); // Ensure we wrote the register
 		if (m_regs[regs[i].addr].first != regs[i].val) {
-			fprintf(stdout, "Error: reg %d regs.value=%d expected=%d\n",
+			fprintf(stdout, "Error: reg %d regs.value='h%08x expected='h%08hx\n",
 					regs[i].addr, m_regs[regs[i].addr], regs[i].val);
 		}
 		ASSERT_EQ(m_regs[regs[i].addr].first, regs[i].val);
@@ -142,9 +142,6 @@ extern "C" void fwrisc_tracer_bfm_memwrite(unsigned int id, unsigned int addr, u
 extern "C" void fwrisc_tracer_bfm_exec(unsigned int id, unsigned int addr, unsigned int instr) {
 	fwrisc_instr_tests::test->exec(addr, instr);
 }
-
-
-
 
 
 TEST_F(fwrisc_instr_tests, lui) {

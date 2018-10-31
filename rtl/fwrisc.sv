@@ -194,12 +194,31 @@ module fwrisc #()(
 	assign rb_raddr = rs2;
 	assign rd_waddr = rd;
 	
+	wire[7:0] ld_data_b;
+	wire[15:0] ld_data_h;
+	
 	always @* begin
 		if (op_jal || op_jalr) begin
 			rd_wdata = {pc_plus4, 2'b0};
 		end else if (op_ld) begin
+			case (instr[14:12]) 
+				3'b000,3'b100: begin // LB, LBU
+					case (alu_out[1:0]) 
+						2'b00: ld_data_b = drdata[7:0];
+						2'b01: ld_data_b = drdata[15:8];
+						2'b10: ld_data_b = drdata[23:16];
+						2'b11: ld_data_b = drdata[31:24];
+					endcase
+					rd_wdata = (!instr[14] && ld_data_b[7])?{{24{1'b1}}, ld_data_b}:{{24{1'b0}}, ld_data_b};
+				end
+				3'b001, 3'b101: begin // LH, LHU
+					ld_data_h = (alu_out[1])?drdata[31:16]:drdata[15:0];
+					rd_wdata = (!instr[14] & ld_data_h[15])?{{16{1'b1}}, ld_data_h}:{{16{1'b0}}, ld_data_h};
+				end
+				// LW and default
+				default: rd_wdata = drdata; 
+			endcase
 			// TODO: need to handle byte enables
-			rd_wdata = drdata;
 		end else begin
 			if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
 				// SLT, SLTU, SLTI, SLTUI
@@ -324,9 +343,26 @@ module fwrisc #()(
 	// Handle data-access control signals
 	assign dvalid = (state == MEMR || state == MEMW);
 	assign dwrite = (state == MEMW);
-	assign daddr = alu_out; // Always use the ALU for address
-	assign dwdata = rb_rdata; // Write data is always @ rs2
+	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
 	assign dstrb = 4'hf; // TODO
+	
+	always @* begin
+		case (instr[14:12]) 
+			3'b000: begin // SB
+				dstrb = (1'b1 << alu_out[1:0]);
+				dwdata = {rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0]};
+			end
+			3'b001: begin // SH
+				dstrb = (2'b11 << {alu_out[1], 1'b0});
+				dwdata = {rb_rdata[15:0], rb_rdata[15:0]};
+			end
+			// SW and default
+			default: begin
+				dstrb = 4'hf;
+				dwdata = rb_rdata; // Write data is always @ rs2
+			end
+		endcase		
+	end
 	
 
 	fwrisc_tracer u_tracer (
