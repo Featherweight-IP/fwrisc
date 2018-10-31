@@ -106,10 +106,6 @@ module fwrisc #()(
 	end
 	
 	
-	// RS1, RS2, and RD are always in the same place
-	wire[4:0]		rs1 = instr[19:15];
-	wire[4:0]		rs2 = instr[24:20];
-	wire[4:0]		rd  = instr[11:7];
 
 	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
 	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
@@ -135,6 +131,11 @@ module fwrisc #()(
 		{{19{1'b1}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0}:
 		{{19{1'b0}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
 	wire[31:0]		zero = 32'h00000000;
+	
+	// RS1, RS2, and RD are always in the same place
+	wire[4:0]		rs1 = instr[19:15];
+	wire[4:0]		rs2 = instr[24:20];
+	wire[4:0]		rd  = instr[11:7];
 
 	wire[5:0]		ra_raddr;
 	wire[5:0]		rb_raddr;
@@ -153,7 +154,7 @@ module fwrisc #()(
 	
 	// Comparator signals
 	wire[31:0]					comp_op_a = ra_rdata;
-	wire[31:0]					comp_op_b = rb_rdata;
+	wire[31:0]					comp_op_b;
 	wire[4:0]					comp_op;
 	wire						comp_out;
 	wire						branch_cond;
@@ -167,11 +168,24 @@ module fwrisc #()(
 		.out    (comp_out   ));
 	
 	always @* begin
-		case (instr[14:13]) 
-			2'b00: comp_op = COMPARE_EQ;  // BEQ, BNE
-			2'b10: comp_op = COMPARE_LT;  // BLT, BGE
-			2'b11: comp_op = COMPARE_LTU; // BLTU BGEU
-		endcase
+		if (op_arith_imm) begin
+			assign comp_op_b = imm_11_0;
+		end else begin
+			assign comp_op_b = rb_rdata;
+		end
+		if (op_arith_imm || op_arith_reg) begin
+			if (instr[14:12] == 3'b010) begin
+				comp_op = COMPARE_LT;  // SLT, SLTI
+			end else begin
+				comp_op = COMPARE_LTU; // SLTU, SLTUI
+			end
+		end else begin
+			case (instr[14:13]) 
+				2'b00: comp_op = COMPARE_EQ;  // BEQ, BNE
+				2'b10: comp_op = COMPARE_LT;  // BLT, BGE
+				2'b11: comp_op = COMPARE_LTU; // BLTU BGEU
+			endcase
+		end
 	end
 	assign branch_cond = (instr[12])?!comp_out:comp_out;
 	
@@ -187,7 +201,12 @@ module fwrisc #()(
 			// TODO: need to handle byte enables
 			rd_wdata = drdata;
 		end else begin
-			rd_wdata = alu_out;
+			if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
+				// SLT, SLTU, SLTI, SLTUI
+				rd_wdata = {{31{1'b0}}, comp_out};
+			end else begin
+				rd_wdata = alu_out;
+			end
 		end
 	end
 	
@@ -200,7 +219,7 @@ module fwrisc #()(
 		if (op_ld || op_st) begin
 			rd_wen = (state == MEMR && |rd && dready);
 		end else begin
-			rd_wen = (state == EXECUTE && |rd);
+			rd_wen = (state == EXECUTE && !op_branch && |rd);
 		end
 	end
 	

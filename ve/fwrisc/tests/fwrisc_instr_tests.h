@@ -27,6 +27,8 @@ public:
 
 	void exec(uint32_t addr, uint32_t instr);
 
+	void memwrite(uint32_t addr, uint8_t mask, uint32_t data);
+
 protected:
 
 	void runtest(
@@ -43,6 +45,7 @@ private:
 	uint32_t						m_icount;
 	bool							m_end_of_test;
 	std::pair<uint32_t, bool>		m_regs[64];
+	std::pair<uint32_t, bool>		m_mem[1024];
 };
 
 #endif /* INCLUDED_FWRISC_INSTR_TESTS_H */

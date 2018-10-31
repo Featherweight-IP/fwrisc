@@ -54,9 +54,14 @@ module fwrisc_tracer_bfm(
 		end
 	end
 	
+	import "DPI-C" function void fwrisc_tracer_bfm_memwrite(
+			int unsigned	id,
+			int unsigned	addr,
+			byte unsigned	mask,
+			int unsigned	data);
 	always @(posedge clock) begin
-		if (mvalid) begin
-			$display("%0s: 'h%08h 'h%08h", (mwrite)?"WRITE":"READ", maddr, mdata);
+		if (mvalid && mwrite) begin
+			fwrisc_tracer_bfm_memwrite(m_id, maddr, mstrb, mdata);
 		end
 	end	
 

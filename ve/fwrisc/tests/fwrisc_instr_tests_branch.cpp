@@ -110,6 +110,90 @@ TEST_F(fwrisc_instr_tests_branch, beq_f_back) {
 	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
+TEST_F(fwrisc_instr_tests_branch, bge_eq_t_pos) {
+	reg_val_s exp[] = {
+			{1, 5},
+			{2, 5},
+			{3, 24} // r1==r2
+	};
+	const char *program = R"(
+		entry:
+			li		x1, 5
+			li		x2, 5
+			bge		x1, x2, 1f
+			li		x3, 20
+			j		done
+		1:
+			li		x3, 24
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_branch, bge_gt_t_pos) {
+	reg_val_s exp[] = {
+			{1, 6},
+			{2, 5},
+			{3, 24} // r1==r2
+	};
+	const char *program = R"(
+		entry:
+			li		x1, 6
+			li		x2, 5
+			bge		x1, x2, 1f
+			li		x3, 20
+			j		done
+		1:
+			li		x3, 24
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_branch, bge_gt_t_neg) {
+	reg_val_s exp[] = {
+			{1, -5},
+			{2, -6},
+			{3, 24} // r1==r2
+	};
+	const char *program = R"(
+		entry:
+			li		x1, -5
+			li		x2, -6
+			bge		x1, x2, 1f
+			li		x3, 20
+			j		done
+		1:
+			li		x3, 24
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_branch, bge_eq_t_neg) {
+	reg_val_s exp[] = {
+			{1, -5},
+			{2, -5},
+			{3, 24} // r1==r2
+	};
+	const char *program = R"(
+		entry:
+			li		x1, -5
+			li		x2, -5
+			bge		x1, x2, 1f
+			li		x3, 20
+			j		done
+		1:
+			li		x3, 24
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
 TEST_F(fwrisc_instr_tests_branch, blt_t_pos) {
 	reg_val_s exp[] = {
 			{1, 5},

@@ -33,6 +33,10 @@ void fwrisc_instr_tests::SetUp() {
 		m_regs[i] = std::pair<uint32_t, bool>(0, false);
 	}
 
+	for (uint32_t i=0; i<1024; i++) {
+		m_mem[i] = std::pair<uint32_t, bool>(0, false);
+	}
+
 	raiseObjection(this);
 
 	addClock(top()->clock, 10);
@@ -41,6 +45,33 @@ void fwrisc_instr_tests::SetUp() {
 void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
 	m_regs[raddr].first = rdata;
 	m_regs[raddr].second = true;
+}
+
+void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
+	if ((addr & 0xF0000000) == 0x40000000) {
+		uint32_t offset = ((addr & 0x0FFFFFFF) >> 2);
+		m_mem[offset].first = true; // accessed
+
+		if (mask & 1) {
+			m_mem[offset].second &= ~0x000000FF;
+			m_mem[offset].second |= (data & 0x000000FF);
+		}
+		if (mask & 2) {
+			m_mem[offset].second &= ~0x0000FF00;
+			m_mem[offset].second |= (data & 0x0000FF00);
+		}
+		if (mask & 4) {
+			m_mem[offset].second &= ~0x00FF0000;
+			m_mem[offset].second |= (data & 0x00FF0000);
+		}
+		if (mask & 8) {
+			m_mem[offset].second &= ~0xFF000000;
+			m_mem[offset].second |= (data & 0xFF000000);
+		}
+	} else {
+		fprintf(stdout, "Error: illegal access to address 0x%08x\n", addr);
+		ASSERT_EQ((addr & 0xF0000000), 0x40000000);
+	}
 }
 
 void fwrisc_instr_tests::exec(uint32_t addr, uint32_t instr) {
@@ -66,11 +97,32 @@ void fwrisc_instr_tests::runtest(
 }
 
 void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
+	bool accessed[64];
 	ASSERT_EQ(m_end_of_test, true); // Ensure we actually reached the end of the test
 
+	memset(accessed, 0, sizeof(accessed));
+
+	// Perform the affirmative test
 	for (uint32_t i=0; i<n_regs; i++) {
+		if (!m_regs[regs[i].addr].second) {
+			fprintf(stdout, "Error: reg %d was not written\n", regs[i].addr);
+		}
 		ASSERT_EQ(m_regs[regs[i].addr].second, true); // Ensure we wrote the register
+		if (m_regs[regs[i].addr].first != regs[i].val) {
+			fprintf(stdout, "Error: reg %d regs.value=%d expected=%d\n",
+					regs[i].addr, m_regs[regs[i].addr], regs[i].val);
+		}
 		ASSERT_EQ(m_regs[regs[i].addr].first, regs[i].val);
+		accessed[regs[i].addr] = true;
+	}
+
+	for (uint32_t i=0; i<64; i++) {
+		if (m_regs[i].second != accessed[i]) {
+			fprintf(stdout, "Error: reg %d: regs.accessed=%s accessed=%s\n",
+					i, (m_regs[i].second)?"true":"false",
+					(accessed[i])?"true":"false");
+		}
+		ASSERT_EQ(m_regs[i].second, accessed[i]);
 	}
 }
 
@@ -81,6 +133,10 @@ extern "C" int unsigned fwrisc_tracer_bfm_register(const char *path) {
 
 extern "C" void fwrisc_tracer_bfm_regwrite(unsigned int id, unsigned int raddr, unsigned int rdata) {
 	fwrisc_instr_tests::test->regwrite(raddr, rdata);
+}
+
+extern "C" void fwrisc_tracer_bfm_memwrite(unsigned int id, unsigned int addr, unsigned char mask, unsigned int data) {
+	fwrisc_instr_tests::test->memwrite(addr, mask, data);
 }
 
 extern "C" void fwrisc_tracer_bfm_exec(unsigned int id, unsigned int addr, unsigned int instr) {
@@ -104,4 +160,77 @@ TEST_F(fwrisc_instr_tests, lui) {
 	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
+TEST_F(fwrisc_instr_tests, j) {
+	reg_val_s exp[] = {
+			{3, 4},
+			{4, 5},
+			{5, 6}
+	};
+	const char *program = R"(
+		entry:
+			j		1f
+			lui		x2, 26
+			lui		x2, 26
+		1:
+			li		x3, 4
+			j		2f
+			nop
+			nop
+		1:
+			li		x4, 5
+			j		done
+		2:
+			li		x5, 6
+			j		1b
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests, jal) {
+	reg_val_s exp[] = {
+			{1, 0},
+			{3, 0},
+			{4, 4}
+	};
+	const char *program = R"(
+		entry:
+			jal		x1, 1f
+			lui		x2, 26
+			lui		x2, 26
+		1:
+			la		x3, entry
+			sub		x4, x1, x3
+			li		x1, 0
+			li		x3, 0
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests, jalr) {
+	reg_val_s exp[] = {
+			{1, 0},
+			{2, 0},
+			{3, 0},
+			{4, 12}
+	};
+	const char *program = R"(
+		entry:
+			la		x2, 1f // la is a two-word instruction
+			jalr	x1, x2
+			lui		x2, 26
+			lui		x2, 26
+		1:
+			la		x3, entry
+			sub		x4, x1, x3
+			li		x1, 0
+			li		x2, 0
+			li		x3, 0
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
 
