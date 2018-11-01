@@ -133,7 +133,7 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 		accessed[regs[i].addr] = true;
 	}
 
-	for (uint32_t i=0; i<64; i++) {
+	for (uint32_t i=0; i<63; i++) { // r63 is the CSR temp register
 		if (m_regs[i].second != accessed[i]) {
 			fprintf(stdout, "Error: reg %d: regs.accessed=%s accessed=%s\n",
 					i, (m_regs[i].second)?"true":"false",

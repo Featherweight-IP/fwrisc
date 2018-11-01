@@ -24,7 +24,8 @@ typedef enum {
 	OP_SUB,
 	OP_AND,
 	OP_OR,
-	OP_XOR
+	OP_XOR,
+	OP_CLR
 } fwrisc_alu_op_e;
 
 /**
@@ -47,6 +48,7 @@ module fwrisc_alu (
 			OP_AND: out = op_a & op_b;
 			OP_OR:  out = op_a | op_b;
 			OP_XOR: out = op_a ^ op_b;
+			OP_CLR: out = op_a & ~op_b;
 		endcase
 	end
 

@@ -35,7 +35,7 @@ module fwrisc_regfile(
 		input			rd_wen
 		);
 
-	reg[31:0]			regs[63:0];
+	reg[31:0]			regs['h3f:0];
 
 	assign ra_rdata = regs[ra_raddr];
 	assign rb_rdata = regs[rb_raddr];

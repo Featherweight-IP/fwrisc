@@ -47,6 +47,8 @@ module fwrisc #()(
 		FETCH, // 
 		DECODE,
 		EXECUTE,
+		CSR_1,
+		CSR_2,
 		MEMW,
 		MEMR
 	} state_e;
@@ -81,6 +83,40 @@ module fwrisc #()(
 				
 				DECODE: begin
 					// NOP: wait for decode to occur
+					if (op_csr) begin
+						state <= CSR_1;
+					end else begin
+						state <= EXECUTE;
+					end
+				end
+				
+				// CSR operation is:
+				// - Read CSR and write it to a temp register
+				// - Read temp register, perform operation, and write back to CSR
+				// - Read temp register and write to rd (if !0)
+				//
+				// CSRRW
+				// 1.) rs2==$zero, rs1=<CSR>, op=OR, rd=<CSR_temp> (CSR_1)
+				// 2.) rs2=$zero, rs1=<rs1>, op=OR, rd=<CSR> (CSR_2)
+				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd (EXECUTE)
+				//
+				// CSRRS
+				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>
+				// 2.) rs2=<CSR_temp>, rs1=rs1, op=OR, rd=<CSR>
+				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd (EXECUTE)
+				//
+				// CSRRC
+				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>
+				// 2.) rs2=<CSR_temp>, rs1=rs1, op=CLR, rd=<CSR>
+				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd (EXECUTE)
+				
+			
+				// CSR phase 1 -- Read the target CSR and write it to TMP
+				CSR_1: begin
+					state <= CSR_2;
+				end
+				
+				CSR_2: begin
 					state <= EXECUTE;
 				end
 				
@@ -117,6 +153,31 @@ module fwrisc #()(
 	wire op_jalr      = (instr[6:0] == 7'b1100111);
 	wire op_auipc     = (instr[6:0] == 7'b0010111);
 	wire op_lui       = (instr[6:0] == 7'b0110111);
+	wire op_sys       = (op_branch_ld_st_arith && instr[6:4] == 3'b111);
+	
+	wire op_csr       = (op_sys && |instr[14:12]);
+	wire op_csrr_cs   = (op_csr && instr[13]);
+	wire [11:0]		csr = instr[31:20];
+	wire [5:0]		csr_addr;
+
+	// 0x300-0x306 => 0x20-0x26 (+0x20)
+	// 0x340-0x344 => 0x28-0x2C 
+	// 0xF11-0xF14 => 0x31-0x34 (49-52)
+	// CSR_tmp = 63
+	always @* begin
+		case (csr[11:8])
+			4'h3: begin
+				if (csr[7:4] == 0) begin
+					csr_addr = {2'b10, csr[3:0]};
+				end else begin
+					csr_addr = {3'b101, csr[2:0]};
+				end
+			end
+			default: begin
+				csr_addr = {2'b11, csr[3:0]};
+			end
+		endcase
+	end
 	
 	wire[31:0]      jal_off = (instr[31])?{{21{1'b1}}, instr[31], instr[19:12], instr[20], instr[30:21],1'b0}:
 											{{21{1'b0}}, instr[31], instr[19:12], instr[20], instr[30:21],1'b0};
@@ -136,6 +197,8 @@ module fwrisc #()(
 	wire[4:0]		rs1 = instr[19:15];
 	wire[4:0]		rs2 = instr[24:20];
 	wire[4:0]		rd  = instr[11:7];
+	
+	parameter reg[5:0]		CSR_tmp = 63;
 
 	wire[5:0]		ra_raddr;
 	wire[5:0]		rb_raddr;
@@ -189,10 +252,30 @@ module fwrisc #()(
 	end
 	assign branch_cond = (instr[12])?!comp_out:comp_out;
 	
-	// TEMP: just assign
-	assign ra_raddr = rs1;
-	assign rb_raddr = rs2;
-	assign rd_waddr = rd;
+	always @* begin
+		if (op_csr) begin
+			if (state == CSR_2 /* && CSRRS || CSRRC  */ && 0) begin
+				rb_raddr = CSR_tmp;
+			end else begin
+				rb_raddr = 0;
+			end
+			if (state == CSR_1) begin
+				ra_raddr = csr_addr; // CSR
+				rd_waddr = CSR_tmp;
+			end else if (state == CSR_2) begin
+				ra_raddr = rs1;
+				rd_waddr = csr_addr;
+			end else begin
+				// EXECUTE
+				ra_raddr = CSR_tmp;
+				rd_waddr = rd;
+			end
+		end else begin
+			ra_raddr = rs1;
+			rb_raddr = rs2;
+			rd_waddr = rd;
+		end
+	end
 	
 	wire[7:0] ld_data_b;
 	wire[15:0] ld_data_h;
@@ -218,7 +301,6 @@ module fwrisc #()(
 				// LW and default
 				default: rd_wdata = drdata; 
 			endcase
-			// TODO: need to handle byte enables
 		end else begin
 			if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
 				// SLT, SLTU, SLTI, SLTUI
@@ -237,6 +319,13 @@ module fwrisc #()(
 	always @* begin
 		if (op_ld || op_st) begin
 			rd_wen = (state == MEMR && |rd && dready);
+		end else if (op_csr) begin
+			// TODO:
+			if (op_csrr_cs) begin
+				rd_wen = (state == EXECUTE || state == CSR_1 || (state == CSR_2 && |rs1));
+			end else begin
+				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
+			end
 		end else begin
 			rd_wen = (state == EXECUTE && !op_branch && |rd);
 		end
@@ -267,6 +356,7 @@ module fwrisc #()(
 			alu_op_b = {pc, 2'b0};
 			alu_op_a = jal_off;
 		end else if (op_jalr) begin
+			// TODO: alu_op_a
 			alu_op_b = pc;
 		end else if (op_ld || op_arith_imm) begin
 			alu_op_a = imm_11_0; // sign-extended immediate
@@ -285,6 +375,9 @@ module fwrisc #()(
 			// For branches, we use branch_immediate
 			alu_op_a = imm_branch;
 			alu_op_b = {pc, 2'b0};
+		end else if (op_csr) begin
+			alu_op_a = ra_rdata;
+			alu_op_b = rb_rdata;
 		end else begin
 			alu_op_a = zero;
 			alu_op_b = zero;
@@ -318,6 +411,8 @@ module fwrisc #()(
 					alu_op = OP_AND;
 				end
 			endcase
+		end else if (op_sys) begin
+			alu_op = OP_OR; // TODO: except CSRRC && CSR_2
 		end else begin
 			alu_op = OP_ADD;
 		end
