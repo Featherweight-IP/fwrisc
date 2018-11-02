@@ -50,7 +50,8 @@ module fwrisc #()(
 		CSR_1,
 		CSR_2,
 		MEMW,
-		MEMR
+		MEMR,
+		EXCEPTION_1
 	} state_e;
 	
 	state_e				state;
@@ -121,7 +122,13 @@ module fwrisc #()(
 				end
 				
 				EXECUTE: begin
-					if (op_ld) begin
+					if (exception) begin
+						// Exception Handling:
+						// - Write the address to MTVAL in EXECUTE
+						// - Write the cause to MTCAUSE in EXECEPTION_1
+						// - Jump to FETCH to execute vector address
+						state <= EXCEPTION_1;
+					end else if (op_ld) begin
 						state <= MEMR;
 					end else if (op_st) begin
 						state <= MEMW;
@@ -137,6 +144,12 @@ module fwrisc #()(
 						state <= FETCH;
 					end
 				end
+			
+				// Capture ALU output 
+				EXCEPTION_1: begin
+					pc <= pc_next;
+					state <= FETCH;
+				end
 			endcase
 		end
 	end
@@ -147,6 +160,7 @@ module fwrisc #()(
 	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
 	wire op_arith_imm = (op_branch_ld_st_arith && instr[6:4] == 3'b001);
 	wire op_st        = (op_branch_ld_st_arith && instr[6:4] == 3'b010);
+	wire op_ld_st     = (op_ld || op_st);
 	wire op_arith_reg = (op_branch_ld_st_arith && instr[6:4] == 3'b011);
 	wire op_branch    = (op_branch_ld_st_arith && instr[6:4] == 3'b110);
 	wire op_jal       = (instr[6:0] == 7'b1101111);
@@ -154,12 +168,18 @@ module fwrisc #()(
 	wire op_auipc     = (instr[6:0] == 7'b0010111);
 	wire op_lui       = (instr[6:0] == 7'b0110111);
 	wire op_sys       = (op_branch_ld_st_arith && instr[6:4] == 3'b111);
+	wire op_sys_prv   = !(|instr[14:12]);
+	wire op_ecall     = (op_sys && op_sys_prv && instr[24:20] == 5'b00000);
+	wire op_eret      = (op_sys && op_sys_prv && instr[24:20] == 5'b00010);
 	
 	wire op_csr       = (op_sys && |instr[14:12]);
 	wire op_csrr_cs   = (op_csr && instr[13]);
-	wire [11:0]		csr = instr[31:20];
-	wire [5:0]		csr_addr;
+	wire [11:0]	csr   = instr[31:20];
+	wire [5:0]	csr_addr;
 
+	wire[5:0] CSR_MTVEC  = 6'h25;
+	wire[5:0] CSR_MEPC   = 6'h29;
+	wire[5:0] CSR_MCAUSE = 6'h2A;
 	// 0x300-0x306 => 0x20-0x26 (+0x20)
 	// 0x340-0x344 => 0x28-0x2C 
 	// 0xF11-0xF14 => 0x31-0x34 (49-52)
@@ -222,6 +242,9 @@ module fwrisc #()(
 	wire						comp_out;
 	wire						branch_cond;
 	
+	// Exception signals
+	wire						exception;
+	
 	fwrisc_comparator u_comp (
 		.clock  (clock 		), 
 		.reset  (reset 		), 
@@ -270,6 +293,14 @@ module fwrisc #()(
 				ra_raddr = CSR_tmp;
 				rd_waddr = rd;
 			end
+		end else if (op_eret) begin
+			ra_raddr = CSR_MEPC;
+			rb_raddr = zero;
+			rd_waddr = zero;
+		end else if (exception) begin
+			ra_raddr = CSR_MTVEC;
+			rb_raddr = zero;
+			rd_waddr = zero; // TODO:
 		end else begin
 			ra_raddr = rs1;
 			rb_raddr = rs2;
@@ -327,7 +358,7 @@ module fwrisc #()(
 				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
 			end
 		end else begin
-			rd_wen = (state == EXECUTE && !op_branch && |rd);
+			rd_wen = (state == EXECUTE && !op_branch && |rd); // TODO: deal with exception
 		end
 	end
 	
@@ -430,6 +461,8 @@ module fwrisc #()(
 	always @* begin
 		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
+		end else if (op_eret || exception) begin
+			pc_next = ra_rdata[31:2];
 		end else begin
 			pc_next = pc_plus4;
 		end
@@ -439,26 +472,42 @@ module fwrisc #()(
 	assign dvalid = (state == MEMR || state == MEMW);
 	assign dwrite = (state == MEMW);
 	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
-	assign dstrb = 4'hf; // TODO
+	wire misaligned_addr;
 	
 	always @* begin
-		case (instr[14:12]) 
-			3'b000: begin // SB
+		case (instr[13:12]) 
+			2'b00: begin // SB
 				dstrb = (1'b1 << alu_out[1:0]);
 				dwdata = {rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0]};
+				misaligned_addr = 0;
 			end
-			3'b001: begin // SH
+			2'b01: begin // SH
 				dstrb = (2'b11 << {alu_out[1], 1'b0});
 				dwdata = {rb_rdata[15:0], rb_rdata[15:0]};
+				misaligned_addr = op_ld_st && alu_out[0];
 			end
 			// SW and default
 			default: begin
 				dstrb = 4'hf;
 				dwdata = rb_rdata; // Write data is always @ rs2
+				misaligned_addr = op_ld_st && |alu_out[1:0];
 			end
 		endcase		
 	end
 	
+	always @* begin
+		if (state == EXECUTE) begin
+		if (op_ecall) begin // ECALL||EBREAK
+			exception = 1;
+		end else if ((op_ld || op_st) && misaligned_addr) begin
+			exception = 1;
+		end else begin
+			exception = 0;
+		end
+		end else begin
+			exception = 0;
+		end
+	end
 
 	fwrisc_tracer u_tracer (
 		.clock   (clock  			), 

@@ -150,10 +150,10 @@ TEST_F(fwrisc_instr_tests_ldst, lhu_s) {
 	};
 	const char *program = R"(
 		entry:
-			la		x1, data
-			lhu		x2, 0(x1)
-			lhu		x3, 2(x1)
-			li		x1, 0
+			la		x1, data  // 0x08
+			lhu		x2, 0(x1) // 0x0C
+			lhu		x3, 2(x1) // 0x10
+			li		x1, 0     // 0x14
 			j		done
 		data:
 			.word 0x81828384
