@@ -25,7 +25,10 @@ typedef enum {
 	OP_AND,
 	OP_OR,
 	OP_XOR,
-	OP_CLR
+	OP_CLR,
+	OP_SLL,
+	OP_SRL,
+	OP_SRA
 } fwrisc_alu_op_e;
 
 /**
@@ -39,8 +42,16 @@ module fwrisc_alu (
 		input[31:0]				op_a,
 		input[31:0]				op_b,
 		wire[4:0]				op,
-		output[31:0]			out);
-
+		output[31:0]			out,
+		output					out_valid);
+	
+	reg valid = 0;
+	
+	always @(posedge clock) begin
+		valid <= ~valid;
+	end
+	assign out_valid = 1; // valid;
+	
 	always @* begin
 		case (op) 
 			OP_ADD: out = op_a + op_b;
@@ -49,6 +60,12 @@ module fwrisc_alu (
 			OP_OR:  out = op_a | op_b;
 			OP_XOR: out = op_a ^ op_b;
 			OP_CLR: out = op_a & ~op_b;
+//			OP_SLL: out = op_a << op_b;
+//			OP_SRL: out = op_a >> op_b;
+//			OP_SRA: out = $signed(op_a) >> op_b;
+			OP_SLL: out = op_b << op_a;
+			OP_SRL: out = op_b >> op_a;
+			OP_SRA: out = $signed(op_b) >>> op_a;
 		endcase
 	end
 

@@ -64,6 +64,13 @@ module fwrisc #()(
 	assign iaddr = {pc, 2'b0};
 	assign ivalid = (state == FETCH && !reset);
 	
+	// ALU signals
+	wire[31:0]					alu_op_a;
+	wire[31:0]					alu_op_b;
+	wire [4:0]					alu_op;
+	wire[31:0]					alu_out;
+	wire						alu_out_valid;
+	
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -114,14 +121,19 @@ module fwrisc #()(
 			
 				// CSR phase 1 -- Read the target CSR and write it to TMP
 				CSR_1: begin
+					if (alu_out_valid) begin
 					state <= CSR_2;
+					end
 				end
 				
 				CSR_2: begin
+					if (alu_out_valid) begin
 					state <= EXECUTE;
+					end
 				end
 				
 				EXECUTE: begin
+					if (alu_out_valid) begin
 					if (exception) begin
 						// Exception Handling:
 						// - Write the address to MTVAL in EXECUTE
@@ -135,6 +147,7 @@ module fwrisc #()(
 					end else begin
 						pc <= pc_next;
 						state <= FETCH;
+					end
 					end
 				end
 				
@@ -159,6 +172,7 @@ module fwrisc #()(
 	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
 	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
 	wire op_arith_imm = (op_branch_ld_st_arith && instr[6:4] == 3'b001);
+	wire op_shift_imm = (op_arith_imm && instr[13:12] == 2'b01);
 	wire op_st        = (op_branch_ld_st_arith && instr[6:4] == 3'b010);
 	wire op_ld_st     = (op_ld || op_st);
 	wire op_arith_reg = (op_branch_ld_st_arith && instr[6:4] == 3'b011);
@@ -229,11 +243,6 @@ module fwrisc #()(
 	wire[31:0]		rd_wdata;
 	wire			rd_wen;
 	
-	// ALU signals
-	wire[31:0]					alu_op_a;
-	wire[31:0]					alu_op_b;
-	wire [4:0]					alu_op;
-	wire[31:0]					alu_out;
 	
 	// Comparator signals
 	wire[31:0]					comp_op_a = ra_rdata;
@@ -255,9 +264,9 @@ module fwrisc #()(
 	
 	always @* begin
 		if (op_arith_imm) begin
-			assign comp_op_b = imm_11_0;
+			comp_op_b = imm_11_0;
 		end else begin
-			assign comp_op_b = rb_rdata;
+			comp_op_b = rb_rdata;
 		end
 		if (op_arith_imm || op_arith_reg) begin
 			if (instr[14:12] == 3'b010) begin
@@ -390,7 +399,11 @@ module fwrisc #()(
 			// TODO: alu_op_a
 			alu_op_b = pc;
 		end else if (op_ld || op_arith_imm) begin
-			alu_op_a = imm_11_0; // sign-extended immediate
+			if (op_shift_imm) begin
+				alu_op_a = imm_11_0[4:0]; // Shift immediate
+			end else begin
+				alu_op_a = imm_11_0; // sign-extended immediate
+			end
 			alu_op_b = ra_rdata; // rs1
 		end else if (op_st) begin
 			alu_op_a = st_imm_11_0; // sign-extended immediate
@@ -423,7 +436,7 @@ module fwrisc #()(
 					alu_op = OP_ADD;
 				end
 				3'b001: begin // SLL, SLLI
-					// TODO:
+					alu_op = OP_SLL;
 				end
 				3'b010: begin // SLT
 				end
@@ -432,8 +445,8 @@ module fwrisc #()(
 				3'b100: begin // XOR
 					alu_op = OP_XOR;
 				end
-				3'b101: begin // SRA, SRAI
-					// TODO:
+				3'b101: begin // SRA, SRAI, SRL, SRLI
+					alu_op = (instr[30])?OP_SRA:OP_SRL;
 				end
 				3'b110: begin // OR
 					alu_op = OP_OR;
@@ -450,12 +463,13 @@ module fwrisc #()(
 	end
 	
 	fwrisc_alu u_alu (
-		.clock  (clock ), 
-		.reset  (reset ), 
-		.op_a   (alu_op_a  ), 
-		.op_b   (alu_op_b  ), 
-		.op     (alu_op    ), 
-		.out    (alu_out   ));
+		.clock  	(clock 			), 
+		.reset  	(reset 			), 
+		.op_a   	(alu_op_a  		), 
+		.op_b   	(alu_op_b  		), 
+		.op     	(alu_op    		), 
+		.out    	(alu_out   		),
+		.out_valid 	(alu_out_valid	));
 	
 	
 	always @* begin

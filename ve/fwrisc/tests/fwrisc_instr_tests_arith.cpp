@@ -144,6 +144,38 @@ TEST_F(fwrisc_instr_tests_arith, ori) {
 	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
+TEST_F(fwrisc_instr_tests_arith, sll) {
+	reg_val_s exp[] = {
+			{1, 5},
+			{2, 1},
+			{3, (1 << 5)}
+	};
+	const char *program = R"(
+		entry:
+			li		x1, 5
+			li		x2, 1
+			sll		x3, x2, x1
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_arith, slli) {
+	reg_val_s exp[] = {
+			{1, 1},
+			{3, (1 << 5)}
+	};
+	const char *program = R"(
+		entry:
+			li		x1, 1
+			slli	x3, x1, 5
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
 TEST_F(fwrisc_instr_tests_arith, slt_t_pos) {
 	reg_val_s exp[] = {
 			{1, 5},
@@ -237,6 +269,70 @@ TEST_F(fwrisc_instr_tests_arith, sltu_t) {
 			li		x1, 0x80000000
 			li		x2, 0x80000001
 			sltu	x3, x1, x2
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_arith, sra) {
+	reg_val_s exp[] = {
+			{1, 4},
+			{2, 0x80000000},
+			{3, 0xF8000000}
+	};
+	const char *program = R"(
+		entry:
+			li		x1, 4
+			li		x2, 0x80000000
+			sra		x3, x2, x1
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_arith, srai) {
+	reg_val_s exp[] = {
+			{2, 0x80000000},
+			{3, 0xF8000000}
+	};
+	const char *program = R"(
+		entry:
+			li		x2, 0x80000000
+			srai	x3, x2, 4
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_arith, srl) {
+	reg_val_s exp[] = {
+			{1, 5},
+			{2, 0x80000000},
+			{3, (0x80000000 >> 5)}
+	};
+	const char *program = R"(
+		entry:
+			li		x1, 5
+			li		x2, 0x80000000
+			srl		x3, x2, x1
+			j		done
+			)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
+TEST_F(fwrisc_instr_tests_arith, srli) {
+	reg_val_s exp[] = {
+			{2, 0x80000000},
+			{3, (0x80000000 >> 5)}
+	};
+	const char *program = R"(
+		entry:
+			li		x2, 0x80000000
+			srli	x3, x2, 5
 			j		done
 			)";
 
