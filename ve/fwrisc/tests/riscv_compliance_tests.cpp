@@ -26,14 +26,12 @@
 
 void riscv_compliance_tests::SetUp() {
 	fprintf(stdout, "SetUp\n");
-	BaseT::SetUp();
+	fwrisc_instr_tests::SetUp();
 
-	// Define a 10ns-period clock
-	addClock(&top()->clock, 10);
+	raiseObjection(this);
 }
 
-TEST_F(riscv_compliance_tests, smoke1) {
-	fprintf(stdout, "smoketest1\n");
+TEST_F(riscv_compliance_tests, coretest) {
 	run();
 }
 

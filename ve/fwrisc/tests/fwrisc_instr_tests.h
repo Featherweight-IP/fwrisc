@@ -40,11 +40,11 @@ public:
 
 	virtual void SetUp();
 
-	void regwrite(uint32_t raddr, uint32_t rdata);
+	virtual void regwrite(uint32_t raddr, uint32_t rdata);
 
-	void exec(uint32_t addr, uint32_t instr);
+	virtual void exec(uint32_t addr, uint32_t instr);
 
-	void memwrite(uint32_t addr, uint8_t mask, uint32_t data);
+	virtual void memwrite(uint32_t addr, uint8_t mask, uint32_t data);
 
 protected:
 
@@ -62,7 +62,7 @@ private:
 	uint32_t						m_icount;
 	bool							m_end_of_test;
 	std::pair<uint32_t, bool>		m_regs[64];
-	std::pair<uint32_t, bool>		m_mem[1024];
+	std::pair<uint32_t, bool>		m_mem[4096];
 };
 
 #endif /* INCLUDED_FWRISC_INSTR_TESTS_H */

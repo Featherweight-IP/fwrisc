@@ -23,7 +23,7 @@
  * 
  * TODO: Add module documentation
  */
-module fwrisc #()(
+module fwrisc (
 		input			clock,
 		input			reset,
 		
@@ -49,6 +49,7 @@ module fwrisc #()(
 		EXECUTE,
 		CSR_1,
 		CSR_2,
+		CSR_3,
 		MEMW,
 		MEMR,
 		EXCEPTION_1
@@ -68,7 +69,7 @@ module fwrisc #()(
 	wire[31:0]					alu_op_a;
 	wire[31:0]					alu_op_b;
 	wire [4:0]					alu_op;
-	wire[31:0]					alu_out;
+	wire[32:0]					alu_out;
 	wire						alu_out_valid;
 	
 	
@@ -105,18 +106,18 @@ module fwrisc #()(
 				//
 				// CSRRW
 				// 1.) rs2==$zero, rs1=<CSR>, op=OR, rd=<CSR_temp> (CSR_1)
-				// 2.) rs2=$zero, rs1=<rs1>, op=OR, rd=<CSR> (CSR_2)
-				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd (EXECUTE)
+				// 2.) rs2=$zero, rs1=<rs1>, op=OR, rd=<CSR>       (CSR_2,CSR_3)
+				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
 				//
 				// CSRRS
-				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>
-				// 2.) rs2=<CSR_temp>, rs1=rs1, op=OR, rd=<CSR>
-				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd (EXECUTE)
+				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>  (CSR_1)
+				// 2.) rs2=<CSR_temp>, rs1=rs1, op=OR, rd=<CSR>    (CSR_2, CSR_3)
+				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
 				//
 				// CSRRC
-				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>
-				// 2.) rs2=<CSR_temp>, rs1=rs1, op=CLR, rd=<CSR>
-				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd (EXECUTE)
+				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>  (CSR_1)
+				// 2.) rs2=<CSR_temp>, rs1=rs1, op=CLR, rd=<CSR>   (CSR_2, CSR_3)
+				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
 				
 			
 				// CSR phase 1 -- Read the target CSR and write it to TMP
@@ -127,9 +128,11 @@ module fwrisc #()(
 				end
 				
 				CSR_2: begin
-					if (alu_out_valid) begin
+					state <= CSR_3;
+				end
+				
+				CSR_3: begin
 					state <= EXECUTE;
-					end
 				end
 				
 				EXECUTE: begin
@@ -278,7 +281,7 @@ module fwrisc #()(
 			case (instr[14:13]) 
 				2'b00: comp_op = COMPARE_EQ;  // BEQ, BNE
 				2'b10: comp_op = COMPARE_LT;  // BLT, BGE
-				2'b11: comp_op = COMPARE_LTU; // BLTU BGEU
+				default: /*2'b11: */comp_op = COMPARE_LTU; // BLTU BGEU
 			endcase
 		end
 	end
@@ -286,7 +289,7 @@ module fwrisc #()(
 	
 	always @* begin
 		if (op_csr) begin
-			if (state == CSR_2 /* && CSRRS || CSRRC  */ && 0) begin
+			if (state == CSR_2 ||state == CSR_3 /* && CSRRS || CSRRC  */ && 0) begin
 				rb_raddr = CSR_tmp;
 			end else begin
 				rb_raddr = 0;
@@ -294,7 +297,7 @@ module fwrisc #()(
 			if (state == CSR_1) begin
 				ra_raddr = csr_addr; // CSR
 				rd_waddr = CSR_tmp;
-			end else if (state == CSR_2) begin
+			end else if (state == CSR_2 || state == CSR_3) begin
 				ra_raddr = rs1;
 				rd_waddr = csr_addr;
 			end else begin
@@ -317,9 +320,6 @@ module fwrisc #()(
 		end
 	end
 	
-	wire[7:0] ld_data_b;
-	wire[15:0] ld_data_h;
-	
 	always @* begin
 		if (op_jal || op_jalr) begin
 			rd_wdata = {pc_plus4, 2'b0};
@@ -327,16 +327,18 @@ module fwrisc #()(
 			case (instr[14:12]) 
 				3'b000,3'b100: begin // LB, LBU
 					case (alu_out[1:0]) 
-						2'b00: ld_data_b = drdata[7:0];
-						2'b01: ld_data_b = drdata[15:8];
-						2'b10: ld_data_b = drdata[23:16];
-						2'b11: ld_data_b = drdata[31:24];
+						2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
+						2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
+						2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
+						default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
 					endcase
-					rd_wdata = (!instr[14] && ld_data_b[7])?{{24{1'b1}}, ld_data_b}:{{24{1'b0}}, ld_data_b};
 				end
 				3'b001, 3'b101: begin // LH, LHU
-					ld_data_h = (alu_out[1])?drdata[31:16]:drdata[15:0];
-					rd_wdata = (!instr[14] & ld_data_h[15])?{{16{1'b1}}, ld_data_h}:{{16{1'b0}}, ld_data_h};
+					if (alu_out[1]) begin
+						rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
+					end else begin
+						rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
+					end
 				end
 				// LW and default
 				default: rd_wdata = drdata; 
@@ -362,9 +364,9 @@ module fwrisc #()(
 		end else if (op_csr) begin
 			// TODO:
 			if (op_csrr_cs) begin
-				rd_wen = (state == EXECUTE || state == CSR_1 || (state == CSR_2 && |rs1));
+				rd_wen = (state == EXECUTE || state == CSR_1 || (state == CSR_3 && |rs1));
 			end else begin
-				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
+				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_3) && |rd_waddr);
 			end
 		end else begin
 			rd_wen = (state == EXECUTE && !op_branch && |rd); // TODO: deal with exception
@@ -382,7 +384,23 @@ module fwrisc #()(
 		.rd_wdata  (rd_wdata ), 
 		.rd_wen    (rd_wen   ));
 	
-	assign rb_rdata_neg = -rb_rdata;
+	reg [7:0]			cycle_counter;
+	reg [7:0]			instr_counter;
+	always @(posedge clock) begin
+		if (reset) begin
+			cycle_counter <= 0;
+		end else begin
+			cycle_counter <= cycle_counter + 1;
+		end
+	end
+	
+	always @(posedge clock) begin
+		if (reset) begin
+			instr_counter <= 0;
+		end else if (state == EXECUTE) begin
+			instr_counter <= instr_counter + 1;
+		end
+	end
 	
 
 	always @* begin
@@ -393,10 +411,11 @@ module fwrisc #()(
 			alu_op_a = auipc_imm_31_12;
 			alu_op_b = {pc, 2'b0};
 		end else if (op_jal) begin
-			alu_op_b = {pc, 2'b0};
 			alu_op_a = jal_off;
+			alu_op_b = {pc, 2'b0};
 		end else if (op_jalr) begin
 			// TODO: alu_op_a
+			alu_op_a = zero; // ??
 			alu_op_b = pc;
 		end else if (op_ld || op_arith_imm) begin
 			if (op_shift_imm) begin
@@ -410,7 +429,7 @@ module fwrisc #()(
 			alu_op_b = ra_rdata; // rs1
 		end else if (op_arith_reg) begin
 			if (instr[14:12] == 3'b000 && instr[30]) begin // SUB
-				alu_op_a = rb_rdata_neg;
+				alu_op_a = -$signed(rb_rdata); // rb_rdata_neg;
 			end else begin
 				alu_op_a = rb_rdata; // rs2
 			end
@@ -424,6 +443,9 @@ module fwrisc #()(
 			alu_op_b = rb_rdata;
 		end else begin
 			alu_op_a = zero;
+			/* TMP
+			alu_op_a = {cycle_counter, instr_counter};
+			 */
 			alu_op_b = zero;
 		end
 		
@@ -438,10 +460,12 @@ module fwrisc #()(
 				3'b001: begin // SLL, SLLI
 					alu_op = OP_SLL;
 				end
+				/* We don't need an op for these instructions
 				3'b010: begin // SLT
 				end
 				3'b011: begin // SLTU
 				end
+				 */
 				3'b100: begin // XOR
 					alu_op = OP_XOR;
 				end
@@ -451,7 +475,7 @@ module fwrisc #()(
 				3'b110: begin // OR
 					alu_op = OP_OR;
 				end
-				3'b111: begin // AND
+				default: /*3'b111: */begin // AND
 					alu_op = OP_AND;
 				end
 			endcase
@@ -473,9 +497,9 @@ module fwrisc #()(
 	
 	
 	always @* begin
-		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
+		if (op_jal || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
-		end else if (op_eret || exception) begin
+		end else if (op_eret || exception || op_jalr) begin
 			pc_next = ra_rdata[31:2];
 		end else begin
 			pc_next = pc_plus4;

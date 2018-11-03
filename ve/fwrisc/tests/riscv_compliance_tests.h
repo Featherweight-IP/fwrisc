@@ -23,13 +23,12 @@
  *      Author: ballance
  */
 
-#ifndef VE_FWRISC_TESTS_RISCV_COMPLIANCE_TESTS_H_
-#define VE_FWRISC_TESTS_RISCV_COMPLIANCE_TESTS_H_
-#include "GoogletestVlTest.h"
-#include "Vfwrisc_tb_hdl.h"
+#ifndef INCLUDED_RISCV_COMPLIANCE_TESTS_H
+#define INCLUDED_RISCV_COMPLIANCE_TESTS_H
+#include "fwrisc_instr_tests.h"
 #include <stdint.h>
 
-class riscv_compliance_tests : public GoogletestVlTest<Vfwrisc_tb_hdl> {
+class riscv_compliance_tests : public fwrisc_instr_tests {
 public:
 
 	riscv_compliance_tests() { };
@@ -40,4 +39,4 @@ public:
 
 };
 
-#endif /* VE_FWRISC_TESTS_RISCV_COMPLIANCE_TESTS_H_ */
+#endif /* INCLUDED_RISCV_COMPLIANCE_TESTS_H */

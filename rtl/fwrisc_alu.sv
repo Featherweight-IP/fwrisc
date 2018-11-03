@@ -21,7 +21,6 @@
  
 typedef enum {
 	OP_ADD,
-	OP_SUB,
 	OP_AND,
 	OP_OR,
 	OP_XOR,
@@ -41,8 +40,8 @@ module fwrisc_alu (
 		input					reset,
 		input[31:0]				op_a,
 		input[31:0]				op_b,
-		wire[4:0]				op,
-		output[31:0]			out,
+		input[4:0]				op,
+		output[32:0]			out,
 		output					out_valid);
 	
 	reg valid = 0;
@@ -54,18 +53,16 @@ module fwrisc_alu (
 	
 	always @* begin
 		case (op) 
-			OP_ADD: out = op_a + op_b;
-			OP_SUB: out = op_a - op_b;
 			OP_AND: out = op_a & op_b;
 			OP_OR:  out = op_a | op_b;
 			OP_XOR: out = op_a ^ op_b;
+			/* TMP2 -- Only used for CSR operation. Make into a synthetic operation
 			OP_CLR: out = op_a & ~op_b;
-//			OP_SLL: out = op_a << op_b;
-//			OP_SRL: out = op_a >> op_b;
-//			OP_SRA: out = $signed(op_a) >> op_b;
+			 */
 			OP_SLL: out = op_b << op_a;
 			OP_SRL: out = op_b >> op_a;
 			OP_SRA: out = $signed(op_b) >>> op_a;
+			default: /*OP_ADD:*/ out = op_a + op_b;
 		endcase
 	end
 

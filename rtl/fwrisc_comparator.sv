@@ -44,8 +44,8 @@ module fwrisc_comparator(
 	always @* begin
 		case (op) 
 			COMPARE_EQ: out = (in_a == in_b);
-			COMPARE_LT: out = (in_a_s < in_b_s);
-			COMPARE_LTU: out = (in_a < in_b);
+			COMPARE_LT: out = ($signed(in_a) < $signed(in_b));
+			default: /*COMPARE_LTU:*/ out = (in_a < in_b);
 		endcase
 	end
 

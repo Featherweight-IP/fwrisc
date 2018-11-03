@@ -65,7 +65,8 @@ void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
 }
 
 void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
-	if ((addr & 0xFFFFF000) == 0x00000000) {
+	fprintf(stdout, "memwrite 0x%08x=0x%08x\n", addr, data);
+	if ((addr & 0xFFFF8000) == 0x00000000) {
 		uint32_t offset = ((addr & 0x00000FFF) >> 2);
 		m_mem[offset].first = true; // accessed
 
@@ -118,6 +119,18 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 	ASSERT_EQ(m_end_of_test, true); // Ensure we actually reached the end of the test
 
 	memset(accessed, 0, sizeof(accessed));
+
+	// First, display all registers that were written
+	fprintf(stdout, "Written Registers:\n");
+	for (uint32_t i=0; i<sizeof(m_regs)/sizeof(reg_val_s); i++) {
+		if (m_regs[i].second) {
+			fprintf(stdout, "R[%d] = 0x%08x\n", i, m_regs[i].first);
+		}
+	}
+	fprintf(stdout, "Expected Registers:\n");
+	for (uint32_t i=0; i<n_regs; i++) {
+		fprintf(stdout, "Expect R[%d] = 0x%08x\n", regs[i].addr, regs[i].addr);
+	}
 
 	// Perform the affirmative test
 	for (uint32_t i=0; i<n_regs; i++) {
@@ -232,12 +245,12 @@ TEST_F(fwrisc_instr_tests, jalr) {
 	};
 	const char *program = R"(
 		entry:
-			la		x2, 1f // la is a two-word instruction
-			jalr	x1, x2
+			la		x2, 1f // la is a two-word instruction (0x08, 0x0C)
+			jalr	x1, x2 // 0x10: R[1] <= 0x14
 			lui		x2, 26
 			lui		x2, 26
 		1:
-			la		x3, entry
+			la		x3, entry // 0x1c
 			sub		x4, x1, x3
 			li		x1, 0
 			li		x2, 0
