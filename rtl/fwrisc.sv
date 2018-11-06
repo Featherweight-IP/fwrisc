@@ -49,7 +49,6 @@ module fwrisc (
 		EXECUTE,
 		CSR_1,
 		CSR_2,
-		CSR_3,
 		MEMW,
 		MEMR,
 		EXCEPTION_1
@@ -106,37 +105,34 @@ module fwrisc (
 				//
 				// CSRRW
 				// 1.) rs2==$zero, rs1=<CSR>, op=OR, rd=<CSR_temp> (CSR_1)
-				// 2.) rs2=$zero, rs1=<rs1>, op=OR, rd=<CSR>       (CSR_2,CSR_3)
+				// 2.) rs2=$zero, rs1=<rs1>, op=OR, rd=<CSR>       (CSR_2)
 				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
 				//
 				// CSRRS
 				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>  (CSR_1)
-				// 2.) rs2=<CSR_temp>, rs1=rs1, op=OR, rd=<CSR>    (CSR_2, CSR_3)
+				// 2.) rs2=<CSR_temp>, rs1=rs1, op=OR, rd=<CSR>    (CSR_2)
 				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
 				//
 				// CSRRC
 				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>  (CSR_1)
-				// 2.) rs2=<CSR_temp>, rs1=rs1, op=CLR, rd=<CSR>   (CSR_2, CSR_3)
+				// 2.) rs2=<CSR_temp>, rs1=rs1, op=CLR, rd=<CSR>   (CSR_2)
 				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
 				
 			
 				// CSR phase 1 -- Read the target CSR and write it to TMP
 				CSR_1: begin
-					if (alu_out_valid) begin
-					state <= CSR_2;
+					if (op_csrrc) begin
+						state <= CSR_2;
+					end else begin
+						state <= EXECUTE;
 					end
 				end
 				
 				CSR_2: begin
-					state <= CSR_3;
-				end
-				
-				CSR_3: begin
 					state <= EXECUTE;
 				end
 				
 				EXECUTE: begin
-					if (alu_out_valid) begin
 					if (exception) begin
 						// Exception Handling:
 						// - Write the address to MTVAL in EXECUTE
@@ -150,7 +146,6 @@ module fwrisc (
 					end else begin
 						pc <= pc_next;
 						state <= FETCH;
-					end
 					end
 				end
 				
@@ -191,6 +186,7 @@ module fwrisc (
 	
 	wire op_csr       = (op_sys && |instr[14:12]);
 	wire op_csrr_cs   = (op_csr && instr[13]);
+	wire op_csrrc     = (op_csr && instr[13:12] == 2'b11);
 	wire [11:0]	csr   = instr[31:20];
 	wire [5:0]	csr_addr;
 
@@ -289,21 +285,25 @@ module fwrisc (
 	
 	always @* begin
 		if (op_csr) begin
-			if (state == CSR_2 ||state == CSR_3 /* && CSRRS || CSRRC  */ && 0) begin
-				rb_raddr = CSR_tmp;
+			if (state == CSR_2 || (state == CSR_1 && op_csrr_cs)) begin
+				rb_raddr = csr_addr;
 			end else begin
 				rb_raddr = 0;
 			end
-			if (state == CSR_1) begin
-				ra_raddr = csr_addr; // CSR
+			if (state == DECODE) begin // During decode, setup read of 
+				ra_raddr = csr_addr;
+//				rd_waddr = CSR_tmp;
+				rd_waddr = 0; // TODO
+			end else if (state == CSR_1) begin 
+				ra_raddr = rs1; // RS1
+				rd_waddr = rd;
+			end else if (state == CSR_2) begin
+				ra_raddr = CSR_tmp;
 				rd_waddr = CSR_tmp;
-			end else if (state == CSR_2 || state == CSR_3) begin
-				ra_raddr = rs1;
-				rd_waddr = csr_addr;
 			end else begin
 				// EXECUTE
-				ra_raddr = CSR_tmp;
-				rd_waddr = rd;
+				ra_raddr = 0; // Should really be PC
+				rd_waddr = csr_addr;
 			end
 		end else if (op_eret) begin
 			ra_raddr = CSR_MEPC;
@@ -364,9 +364,9 @@ module fwrisc (
 		end else if (op_csr) begin
 			// TODO:
 			if (op_csrr_cs) begin
-				rd_wen = (state == EXECUTE || state == CSR_1 || (state == CSR_3 && |rs1));
+				rd_wen = ((state == CSR_1 && |rd_waddr) || ((state == EXECUTE || state == CSR_2) && |rs1));
 			end else begin
-				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_3) && |rd_waddr);
+				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
 			end
 		end else begin
 			rd_wen = (state == EXECUTE && !op_branch && |rd); // TODO: deal with exception
@@ -534,14 +534,14 @@ module fwrisc (
 	end
 	
 	always @* begin
-		if (state == EXECUTE) begin
-		if (op_ecall) begin // ECALL||EBREAK
-			exception = 1;
-		end else if ((op_ld || op_st) && misaligned_addr) begin
-			exception = 1;
-		end else begin
-			exception = 0;
-		end
+		if (state == EXECUTE || state == EXCEPTION_1) begin
+			if (op_ecall) begin // ECALL||EBREAK
+				exception = 1;
+			end else if ((op_ld || op_st) && misaligned_addr) begin
+				exception = 1;
+			end else begin
+				exception = 0;
+			end
 		end else begin
 			exception = 0;
 		end

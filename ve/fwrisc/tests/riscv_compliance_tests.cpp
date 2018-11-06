@@ -31,8 +31,25 @@ void riscv_compliance_tests::SetUp() {
 	raiseObjection(this);
 }
 
+void riscv_compliance_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
+	if (addr == 0x80001000) {
+		fprintf(stdout, "Note: end of test\n");
+		dropObjection(this);
+	} else {
+		fwrisc_instr_tests::memwrite((addr&0x0FFFFFFF), mask, data);
+	}
+}
+
 TEST_F(riscv_compliance_tests, coretest) {
 	run();
+	fprintf(stdout, "post-test\n");
+	for (uint32_t line=0; line<11; line++) {
+		for (int32_t word=3; word>=0; word--) {
+			uint32_t offset = (0x2030/4)+(4*line)+word;
+			fprintf(stdout, "%08x", m_mem[offset].first, offset);
+		}
+		fprintf(stdout, "\n");
+	}
 }
 
 TEST_F(riscv_compliance_tests, smoke2) {

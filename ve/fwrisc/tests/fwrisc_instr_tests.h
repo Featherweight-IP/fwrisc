@@ -34,7 +34,7 @@ public:
 		uint32_t	val;
 	};
 public:
-	fwrisc_instr_tests();
+	fwrisc_instr_tests(uint32_t max_instr=100);
 
 	virtual ~fwrisc_instr_tests();
 
@@ -58,8 +58,9 @@ protected:
 public:
 	static fwrisc_instr_tests		*test;
 
-private:
+protected:
 	uint32_t						m_icount;
+	uint32_t						m_max_instr;
 	bool							m_end_of_test;
 	std::pair<uint32_t, bool>		m_regs[64];
 	std::pair<uint32_t, bool>		m_mem[4096];

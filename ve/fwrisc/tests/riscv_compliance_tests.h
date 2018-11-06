@@ -31,11 +31,13 @@
 class riscv_compliance_tests : public fwrisc_instr_tests {
 public:
 
-	riscv_compliance_tests() { };
+	riscv_compliance_tests() : fwrisc_instr_tests(10000) { };
 
 	virtual ~riscv_compliance_tests() { };
 
 	virtual void SetUp();
+
+	virtual void memwrite(uint32_t addr, uint8_t mask, uint32_t data);
 
 };
 

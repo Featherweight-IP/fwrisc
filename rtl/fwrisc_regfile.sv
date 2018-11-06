@@ -27,24 +27,27 @@ module fwrisc_regfile(
 		input				clock,
 		input				reset,
 		input[5:0]			ra_raddr,
-		output reg [31:0]	ra_rdata,
+		output [31:0]		ra_rdata,
 		input[5:0]			rb_raddr,
-		output reg [31:0]	rb_rdata,
+		output [31:0]		rb_rdata,
 		input[5:0]			rd_waddr,
 		input[31:0]			rd_wdata,
 		input				rd_wen
 		);
 
+	reg[31:0]			ra_raddr_r;
+	reg[31:0]			rb_raddr_r;
 	reg[31:0]			regs['h3f:0];
 
-	
 	always @(posedge clock) begin
+		ra_raddr_r <= ra_raddr;
+		rb_raddr_r <= rb_raddr;
 		if (rd_wen) begin
 			regs[rd_waddr] <= rd_wdata;
 		end
-		ra_rdata <= regs[ra_raddr];
-		rb_rdata <= regs[rb_raddr];
 	end
+	assign ra_rdata = regs[ra_raddr_r];
+	assign rb_rdata = regs[rb_raddr_r];
 
 endmodule
 
