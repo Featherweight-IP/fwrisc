@@ -70,7 +70,7 @@ void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
 
 void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 	fprintf(stdout, "memwrite 0x%08x=0x%08x mask=%02x\n", addr, data, mask);
-	if ((addr & 0xFFFF8000) == 0x00000000) {
+	if ((addr & 0xFFFF8000) == 0x80000000) {
 		uint32_t offset = ((addr & 0x0000FFFF) >> 2);
 		fprintf(stdout, "offset=%d\n", offset);
 		m_mem[offset].second = true; // accessed
@@ -100,7 +100,7 @@ void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 
 void fwrisc_instr_tests::exec(uint32_t addr, uint32_t instr) {
 	fprintf(stdout, "EXEC: 0x%08x - 0x%08x\n", addr, instr);
-	if (addr == 0x0000004) {
+	if (addr == 0x80000004) {
 		fprintf(stdout, "hit 0x4\n");
 		m_end_of_test = true;
 		dropObjection(this);

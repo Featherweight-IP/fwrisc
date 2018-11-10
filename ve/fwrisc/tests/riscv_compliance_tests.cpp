@@ -39,7 +39,7 @@ void riscv_compliance_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data
 		fprintf(stdout, "Note: end of test\n");
 		dropObjection(this);
 	} else {
-		fwrisc_instr_tests::memwrite((addr&0x0FFFFFFF), mask, data);
+		fwrisc_instr_tests::memwrite(addr, mask, data);
 	}
 }
 
