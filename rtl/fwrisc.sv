@@ -312,7 +312,11 @@ module fwrisc (
 		end else if (exception) begin
 			ra_raddr = CSR_MTVEC;
 			rb_raddr = zero;
-			rd_waddr = zero; // TODO:
+			if (state == EXECUTE) begin
+				rd_waddr = CSR_MEPC; // Write the PC
+			end else begin
+				rd_waddr = CSR_MCAUSE; // Need to write the cause
+			end
 		end else begin
 			ra_raddr = rs1;
 			rb_raddr = rs2;
@@ -321,7 +325,18 @@ module fwrisc (
 	end
 	
 	always @* begin
-		if (op_jal || op_jalr) begin
+		if (exception) begin
+			if (state == EXECUTE) begin
+				rd_wdata = {pc, 2'b0}; // Exception PC
+			end else begin
+				// Write the cause
+				if (op_ecall) begin
+					rd_wdata = 32'h0000_000b;
+				end else begin
+					rd_wdata = zero; // TODO:
+				end
+			end
+		end else if (op_jal || op_jalr) begin
 			rd_wdata = {pc_plus4, 2'b0};
 		end else if (op_ld) begin
 			case (instr[14:12]) 
@@ -369,7 +384,7 @@ module fwrisc (
 				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
 			end
 		end else begin
-			rd_wen = (state == EXECUTE && !op_branch && |rd); // TODO: deal with exception
+			rd_wen = ((state == EXECUTE && !op_branch && |rd) || exception); // TODO: deal with exception
 		end
 	end
 	
