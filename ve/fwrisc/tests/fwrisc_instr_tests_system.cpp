@@ -106,9 +106,11 @@ TEST_F(fwrisc_instr_tests_system, csrw_csrr) {
 
 TEST_F(fwrisc_instr_tests_system, ecall) {
 	reg_val_s exp[] = {
-		{1, 0},
-		{2, 25},
-		{0x25, 0} // MTVEC
+		{1,    0},
+		{2,    25},
+		{0x25, 0},    // MTVEC
+		{0x29, 0x14}, // MEPC
+		{0x2A, 0x0b}  // MCAUSE
 	};
 
 	const char *program = R"(

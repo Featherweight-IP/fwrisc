@@ -76,6 +76,7 @@ module fwrisc (
 		if (reset) begin
 			state <= FETCH;
 			instr <= 0;
+			pc <= (32'h8000_0000 >> 2);
 		end else begin
 			if (ivalid && iready) begin
 				instr <= idata;
@@ -181,7 +182,7 @@ module fwrisc (
 	wire op_lui       = (instr[6:0] == 7'b0110111);
 	wire op_sys       = (op_branch_ld_st_arith && instr[6:4] == 3'b111);
 	wire op_sys_prv   = !(|instr[14:12]);
-	wire op_ecall     = (op_sys && op_sys_prv && instr[24:20] == 5'b00000);
+	wire op_ecall     = (op_sys && op_sys_prv && instr[24:21] == 4'b0000);
 	wire op_eret      = (op_sys && op_sys_prv && instr[24:20] == 5'b00010);
 	
 	wire op_csr       = (op_sys && |instr[14:12]);
@@ -331,7 +332,8 @@ module fwrisc (
 			end else begin
 				// Write the cause
 				if (op_ecall) begin
-					rd_wdata = 32'h0000_000b;
+					// EBREAK, ECALL
+					rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
 				end else begin
 					rd_wdata = zero; // TODO:
 				end
