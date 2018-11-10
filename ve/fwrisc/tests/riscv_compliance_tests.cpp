@@ -60,13 +60,12 @@ void riscv_compliance_tests::check() {
 	clp.get_plusarg_value("+REF_FILE", ref_file);
 	clp.get_plusarg_value("+SW_IMAGE", elf_file);
 
-	elf_file_fp = fopen(elf_file.c_str(), "rb");
-
 	{
 		Elf32_Ehdr	hdr;
 		Elf32_Phdr	phdr;
 		Elf32_Shdr	shdr;
 
+		elf_file_fp = fopen(elf_file.c_str(), "rb");
 		fread(&hdr, sizeof(Elf32_Ehdr), 1, elf_file_fp);
 
 		for (uint32_t i=0; i<hdr.e_shnum; i++) {
@@ -101,6 +100,7 @@ void riscv_compliance_tests::check() {
 				delete [] str_tmp;
 			}
 		}
+		fclose(elf_file_fp);
 	}
 
 	ASSERT_NE(0, begin_signature);

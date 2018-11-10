@@ -59,9 +59,9 @@ module fwrisc_alu (
 			/* TMP2 -- Only used for CSR operation. Make into a synthetic operation
 			OP_CLR: out = op_a & ~op_b;
 			 */
-			OP_SLL: out = op_b << op_a;
-			OP_SRL: out = op_b >> op_a;
-			OP_SRA: out = $signed(op_b) >>> op_a;
+			OP_SLL: out = op_b << op_a[4:0];
+			OP_SRL: out = op_b >> op_a[4:0];
+			OP_SRA: out = $signed(op_b) >>> op_a[4:0];
 			default: /*OP_ADD:*/ out = op_a + op_b;
 		endcase
 	end

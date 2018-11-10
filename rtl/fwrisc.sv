@@ -254,6 +254,7 @@ module fwrisc (
 	
 	// Exception signals
 	wire						exception;
+	wire 						misaligned_addr;
 	
 	fwrisc_comparator u_comp (
 		.clock  (clock 		), 
@@ -527,9 +528,9 @@ module fwrisc (
 	assign dvalid = (state == MEMR || state == MEMW);
 	assign dwrite = (state == MEMW);
 	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
-	wire misaligned_addr;
 	
 	always @* begin
+		if (op_st || op_ld) begin
 		case (instr[13:12]) 
 			2'b00: begin // SB
 				dstrb = (1'b1 << alu_out[1:0]);
@@ -548,16 +549,19 @@ module fwrisc (
 				misaligned_addr = op_ld_st && |alu_out[1:0];
 			end
 		endcase		
+		end else if (op_jal || op_jalr) begin
+			misaligned_addr = alu_out[1]; // Always clear the low bit on jump
+		end else begin
+			misaligned_addr = 0;
+		end
 	end
 	
 	always @* begin
 		if (state == EXECUTE || state == EXCEPTION_1) begin
 			if (op_ecall) begin // ECALL||EBREAK
 				exception = 1;
-			end else if ((op_ld || op_st) && misaligned_addr) begin
-				exception = 1;
 			end else begin
-				exception = 0;
+				exception = misaligned_addr;
 			end
 		end else begin
 			exception = 0;
