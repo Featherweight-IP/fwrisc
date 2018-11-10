@@ -11,7 +11,7 @@ SRC_DIRS += $(FWRISC)/ve/fwrisc/tb
 
 TB_MODULES_HDL=fwrisc_tb_hdl
 
-SW_IMAGES := $(call get_plusarg,SW_IMAGE,$(PLUSARGS))
+SW_IMAGES := $(notdir $(call get_plusarg,SW_IMAGE,$(PLUSARGS)))
 SW_IMAGE := $(firstword $(SW_IMAGES))
 
 ifneq (,$(SW_IMAGES))
@@ -29,7 +29,6 @@ include $(PACKAGES_DIR)/simscripts/mkfiles/common_sim.mk
 
 ifneq (,$(SW_IMAGE))
 ram.hex : $(BUILD_DIR)/esw/$(SW_IMAGE)
-	$(Q)echo "cwd=`pwd`"
 	$(Q)riscv32-unknown-elf-objcopy $^ -O verilog ram.vlog
 	$(Q)perl $(MEMORY_PRIMITIVES)/bin/objcopyvl2vl.pl \
 		-width 32 -offset 0x80000000 -le ram.vlog ram.hex
