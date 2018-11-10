@@ -414,9 +414,8 @@ module fwrisc (
 			alu_op_a = jal_off;
 			alu_op_b = {pc, 2'b0};
 		end else if (op_jalr) begin
-			// TODO: alu_op_a
-			alu_op_a = zero; // ??
-			alu_op_b = pc;
+			alu_op_a = ra_rdata;
+			alu_op_b = imm_11_0;
 		end else if (op_ld || op_arith_imm) begin
 			if (op_shift_imm) begin
 				alu_op_a = imm_11_0[4:0]; // Shift immediate
@@ -497,9 +496,9 @@ module fwrisc (
 	
 	
 	always @* begin
-		if (op_jal || (op_branch && branch_cond)) begin
+		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
-		end else if (op_eret || exception || op_jalr) begin
+		end else if (op_eret || exception) begin
 			pc_next = ra_rdata[31:2];
 		end else begin
 			pc_next = pc_plus4;
