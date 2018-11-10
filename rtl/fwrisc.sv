@@ -169,6 +169,7 @@ module fwrisc (
 	
 
 	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
+	wire op_fence     = (instr[3:0] == 4'b1111);
 	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
 	wire op_arith_imm = (op_branch_ld_st_arith && instr[6:4] == 3'b001);
 	wire op_shift_imm = (op_arith_imm && instr[13:12] == 2'b01);
