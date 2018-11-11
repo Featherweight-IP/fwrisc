@@ -316,6 +316,7 @@ module fwrisc (
 				ra_raddr = 0; 
 				if (op_csrr_cs && |rs1 == 0) begin
 					// CSRRC and CSRRS don't modify the CSR if RS1==0
+					// Also, shouldn't write if this is an immediate
 					rd_waddr = zero;
 				end else begin
 					rd_waddr = csr_addr;
@@ -465,7 +466,11 @@ module fwrisc (
 			alu_op_a = imm_branch;
 			alu_op_b = {pc, 2'b0};
 		end else if (op_csr) begin
-			alu_op_a = ra_rdata;
+			if (instr[14] && (state == CSR_1)) begin // CSR immediate
+				alu_op_a = rs1; // zimm is the same field as rs1
+			end else begin
+				alu_op_a = ra_rdata;
+			end
 			alu_op_b = rb_rdata;
 		end else begin
 			alu_op_a = zero;

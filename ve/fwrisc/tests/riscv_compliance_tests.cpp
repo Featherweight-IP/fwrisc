@@ -65,6 +65,8 @@ void riscv_compliance_tests::check() {
 		Elf32_Phdr	phdr;
 		Elf32_Shdr	shdr;
 
+		// Read the ELF file symbol table to determine where the
+		// signature (begin_signature) is located
 		elf_file_fp = fopen(elf_file.c_str(), "rb");
 		fread(&hdr, sizeof(Elf32_Ehdr), 1, elf_file_fp);
 
@@ -90,7 +92,7 @@ void riscv_compliance_tests::check() {
 					fseek(elf_file_fp, (shdr.sh_offset+j), 0);
 					fread(&sym, sizeof(Elf32_Sym), 1, elf_file_fp);
 
-					fprintf(stdout, "Symbol: %s\n", &str_tmp[sym.st_name]);
+//					fprintf(stdout, "Symbol: %s\n", &str_tmp[sym.st_name]);
 					if (!strcmp(&str_tmp[sym.st_name], "begin_signature")) {
 						begin_signature = sym.st_value;
 					} else if (!strcmp(&str_tmp[sym.st_name], "end_signature")) {
