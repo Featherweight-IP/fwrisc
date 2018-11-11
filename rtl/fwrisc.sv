@@ -51,7 +51,8 @@ module fwrisc (
 		CSR_2,
 		MEMW,
 		MEMR,
-		EXCEPTION_1
+		EXCEPTION_1,
+		EXCEPTION_2
 	} state_e;
 	
 	state_e				state;
@@ -153,9 +154,15 @@ module fwrisc (
 					end
 				end
 			
-				// Capture ALU output 
+				// Capture the fault address
 				EXCEPTION_1: begin
-					pc <= pc_next;
+					state <= EXCEPTION_2;
+				end
+			
+				// Capture the EPC
+				EXCEPTION_2: begin
+					// Contains MTVEC
+					pc <= ra_rdata[31:2];
 					state <= FETCH;
 				end
 			endcase
@@ -192,6 +199,7 @@ module fwrisc (
 	wire[5:0] CSR_MTVEC  = 6'h25;
 	wire[5:0] CSR_MEPC   = 6'h29;
 	wire[5:0] CSR_MCAUSE = 6'h2A;
+	wire[5:0] CSR_MTVAL  = 6'h2B;
 	// 0x300-0x306 => 0x20-0x26 (+0x20)
 	// 0x340-0x344 => 0x28-0x2C 
 	// 0xF11-0xF14 => 0x31-0x34 (49-52)
@@ -284,7 +292,19 @@ module fwrisc (
 	assign branch_cond = (instr[12])?!comp_out:comp_out;
 	
 	always @* begin
-		if (op_csr) begin
+		if (exception) begin
+			ra_raddr = CSR_MTVEC;
+			rb_raddr = zero;
+			if (state == EXECUTE) begin
+				rd_waddr = CSR_MTVAL; // Save the exception address
+			end else if (state == EXCEPTION_1) begin
+				rd_waddr = CSR_MEPC; // Write the PC
+			end else begin
+				rd_waddr = CSR_MCAUSE; // Need to write the cause
+			end
+		end else if (state == EXCEPTION_2) begin
+			rd_waddr = CSR_MCAUSE; // Need to write the cause
+		end else if (op_csr) begin
 			if (op_csrrc) begin
 				if (state == DECODE || state == CSR_2) begin
 					rb_raddr = csr_addr;
@@ -326,14 +346,6 @@ module fwrisc (
 			ra_raddr = CSR_MEPC;
 			rb_raddr = zero;
 			rd_waddr = zero;
-		end else if (exception) begin
-			ra_raddr = CSR_MTVEC;
-			rb_raddr = zero;
-			if (state == EXECUTE) begin
-				rd_waddr = CSR_MEPC; // Write the PC
-			end else begin
-				rd_waddr = CSR_MCAUSE; // Need to write the cause
-			end
 		end else begin
 			ra_raddr = rs1;
 			rb_raddr = rs2;
@@ -344,15 +356,23 @@ module fwrisc (
 	always @* begin
 		if (exception) begin
 			if (state == EXECUTE) begin
+				// Write the bad address during EXECUTE
+				rd_wdata = alu_out; 
+			end else /*if (state == EXCEPTION_1)*/ begin
+				// Write the exception PC
 				rd_wdata = {pc, 2'b0}; // Exception PC
+			end
+		end else if (state == EXCEPTION_2) begin
+			// Write the cause
+			if (op_ecall) begin
+				// EBREAK, ECALL
+				rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
+			end else if (op_ld) begin
+				rd_wdata = 32'h0000_0004; // misaligned load address
+			end else if (op_st) begin
+				rd_wdata = 32'h0000_0006; // misaligned store address
 			end else begin
-				// Write the cause
-				if (op_ecall) begin
-					// EBREAK, ECALL
-					rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
-				end else begin
-					rd_wdata = zero; // TODO:
-				end
+				rd_wdata = zero; // instruction address misaligned
 			end
 		end else if (op_jal || op_jalr) begin
 			rd_wdata = {pc_plus4, 2'b0};
@@ -396,6 +416,8 @@ module fwrisc (
 			rd_wen = (state == MEMR && |rd && dready);
 		end else if (op_csr) begin
 			rd_wen = ((state == CSR_1 || state == CSR_2 || state == EXECUTE) && |rd_waddr);
+		end else if (state == EXCEPTION_1 || state == EXCEPTION_2) begin
+			rd_wen = 1;
 		end else begin
 			rd_wen = ((state == EXECUTE && !op_branch && |rd) || exception); // TODO: deal with exception
 		end
