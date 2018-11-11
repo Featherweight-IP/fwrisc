@@ -594,7 +594,7 @@ module fwrisc (
 				misaligned_addr = op_ld_st && |alu_out[1:0];
 			end
 		endcase		
-		end else if (op_jal || op_jalr) begin
+		end else if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			misaligned_addr = alu_out[1]; // Always clear the low bit on jump
 		end else begin
 			misaligned_addr = 0;
