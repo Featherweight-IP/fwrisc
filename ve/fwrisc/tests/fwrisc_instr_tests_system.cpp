@@ -88,16 +88,21 @@ TEST_F(fwrisc_instr_tests_system, csrc) {
 
 TEST_F(fwrisc_instr_tests_system, csrs) {
 	reg_val_s exp[] = {
-		{1, 4},
+		{1, 1},
 		{2, 4},
-		{37, 4}
+		{3, 4},
+		{4, 5},
+		{37, 5}
 	};
 
 	const char *program = R"(
 		entry:
 			li			x1, 4
-			csrs		mtvec, x1
+			csrw		mtvec, x1
 			csrr		x2, mtvec
+			li			x1, 1
+			csrrs		x3, mtvec, x1
+			csrr		x4, mtvec
 
 			j			done
 	)";
