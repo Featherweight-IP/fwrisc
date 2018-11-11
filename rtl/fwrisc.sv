@@ -49,6 +49,7 @@ module fwrisc (
 		EXECUTE,
 		CSR_1,
 		CSR_2,
+		CSR_3,
 		MEMW,
 		MEMR,
 		EXCEPTION_1
@@ -122,14 +123,18 @@ module fwrisc (
 			
 				// CSR phase 1 -- Read the target CSR and write it to TMP
 				CSR_1: begin
-					if (op_csrrc) begin
-						state <= CSR_2;
+					state <= CSR_2;
+				end
+				
+				CSR_2: begin
+					if (op_csrr_cs) begin
+						state <= CSR_3;
 					end else begin
 						state <= EXECUTE;
 					end
 				end
 				
-				CSR_2: begin
+				CSR_3: begin
 					state <= EXECUTE;
 				end
 				
@@ -288,23 +293,27 @@ module fwrisc (
 	
 	always @* begin
 		if (op_csr) begin
-			if (state == CSR_2 || (state == CSR_1 && op_csrr_cs)) begin
+			if (state == CSR_2 || state == CSR_3 || state == CSR_1) begin
 				rb_raddr = csr_addr;
 			end else begin
 				rb_raddr = 0;
 			end
 			if (state == DECODE) begin // During decode, setup read of 
-				ra_raddr = csr_addr;
-//				rd_waddr = CSR_tmp;
+				ra_raddr = rs1;
 				rd_waddr = 0; // TODO
 			end else if (state == CSR_1) begin 
-				ra_raddr = rs1; // RS1
-				rd_waddr = rd;
+				ra_raddr = csr_addr; // CSR
+				rd_waddr = CSR_tmp; // write RS1 to CSR_tmp
 			end else if (state == CSR_2) begin
+				ra_raddr = CSR_tmp;
+				rd_waddr = rd;
+			end else if (state == CSR_3) begin
+				// TODO:
 				ra_raddr = CSR_tmp;
 				rd_waddr = CSR_tmp;
 			end else begin
 				// EXECUTE
+				// Always want to end with writing to CSR
 				ra_raddr = 0; // Should really be PC
 				rd_waddr = csr_addr;
 			end
@@ -381,12 +390,13 @@ module fwrisc (
 		if (op_ld || op_st) begin
 			rd_wen = (state == MEMR && |rd && dready);
 		end else if (op_csr) begin
-			// TODO:
-			if (op_csrr_cs) begin
-				rd_wen = ((state == CSR_1 && |rd_waddr) || ((state == EXECUTE || state == CSR_2) && |rs1));
-			end else begin
-				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
-			end
+			rd_wen = ((state == CSR_1 || state == CSR_2 || state == CSR_3 || state == EXECUTE) && |rd_waddr);
+//			// TODO:
+//			if (op_csrr_cs) begin
+//				rd_wen = ((state == CSR_1 && |rd_waddr) || ((state == EXECUTE || state == CSR_2) && |rs1));
+//			end else begin
+//				rd_wen = ((state == EXECUTE || state == CSR_1 || state == CSR_2) && |rd_waddr);
+//			end
 		end else begin
 			rd_wen = ((state == EXECUTE && !op_branch && |rd) || exception); // TODO: deal with exception
 		end
@@ -498,7 +508,13 @@ module fwrisc (
 				end
 			endcase
 		end else if (op_sys) begin
-			alu_op = OP_OR; // TODO: except CSRRC && CSR_2
+			if (state == CSR_3) begin
+				alu_op = OP_AND;
+			end else if (state == EXECUTE && op_csrr_cs) begin
+				alu_op = OP_XOR;
+			end else begin
+				alu_op = OP_OR; // TODO: except CSRRC && CSR_2
+			end
 		end else begin
 			alu_op = OP_ADD;
 		end

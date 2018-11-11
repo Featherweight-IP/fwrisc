@@ -66,6 +66,26 @@ TEST_F(fwrisc_instr_tests_system, csrw) {
 	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
+TEST_F(fwrisc_instr_tests_system, csrc) {
+	reg_val_s exp[] = {
+		{1,  0x0f},
+		{2,  0x01},
+		{37, 0x0e}
+	};
+
+	const char *program = R"(
+		entry:
+			li			x1, 0xf
+			li			x2, 0x1
+			csrw		mtvec, x1
+			csrrc		x1, mtvec, x2
+
+			j			done
+	)";
+
+	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+}
+
 TEST_F(fwrisc_instr_tests_system, csrs) {
 	reg_val_s exp[] = {
 		{1, 4},
