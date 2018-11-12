@@ -1,0 +1,21 @@
+{signal: [
+  {name: 'clock', wave: 'p.....'},
+  {name: 'state', wave: 'x====x.', data: ['dec', 'csr_1', 'csr_2', 'exec']},
+  {name: 'ra_addr', wave: 'x====x.', data: ['rs1','csr','csr_tmp']},
+  {name: 'ra_data', wave: 'x.===x', data: ['rs1','csr','csr_tmp']},
+  {name: 'rb_addr', wave: 'x====x.', data: ['zero','zero','zero']},
+  {name: 'rb_data', wave: 'x.===x', data: ['zero','zero','zero']},
+  {name: 'alu_op_a', wave: 'x.===x', data: ['ra_data (rs1)','ra_data (csr)','ra_data(csr_tmp)']},
+  {name: 'alu_op_b', wave: 'x.===x', data: ['rb_data (zero)','rb_data (zero)','rb_data(zero)']},
+  {name: 'alu_op', wave: 'x.===x', data: ['OR','OR','OR']},
+  
+  {name: 'rd_addr', wave: 'x.===x', data: ['csr_tmp','rd','csr']},
+  {name: 'rd_data', wave: 'x.===x', data: ['alu_out (rs1)','alu_out (csr)','alu_out(csr_tmp)']},
+  {name: 'rd_wen', wave: '0.1..0'},
+  
+],
+  config: {hscale: 4},
+  head: {
+  	text: "CSRRW"
+  }
+}

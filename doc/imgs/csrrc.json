@@ -1,0 +1,21 @@
+{signal: [
+  {name: 'clock', wave: 'p.....'},
+  {name: 'state', wave: 'x====x', data: ['dec', 'csr_1', 'csr_2', 'exec']},
+  {name: 'ra_addr', wave: 'x====x', data: ['csr','rs1','csr_t']},
+  {name: 'ra_data', wave: 'x.===x', data: ['csr','rs1','csr_t']},
+  {name: 'rb_addr', wave: 'x====x', data: ['zero','csr','csr']},
+  {name: 'rb_data', wave: 'x.===x', data: ['zero','csr','csr']},
+  {name: 'alu_op_a', wave: 'x.===x', data: ['ra_data (csr)','ra_data (rs1)','ra_data (csr_t)']},
+  {name: 'alu_op_b', wave: 'x.===x', data: ['rb_data (zero)','rb_data (csr)','rb_data (csr)']},
+  {name: 'alu_op', wave: 'x.===x', data: ['OR','AND', 'XOR']},
+  
+  {name: 'rd_addr', wave: 'x.===x', data: ['rd','csr_t','csr']},
+  {name: 'rd_data', wave: 'x.===x', data: ['alu_out (csr)','alu_out (csr&rs1)','alu_out (csr^csr_t)']},
+  {name: 'rd_wen', wave: '0.1..0'},
+  
+],
+  config: {hscale: 4},
+  head: {
+  	text: "CSRRC"
+  }
+}

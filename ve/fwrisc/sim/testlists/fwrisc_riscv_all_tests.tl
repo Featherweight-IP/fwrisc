@@ -54,3 +54,4 @@ tests/fwrisc_riscv_compliance_rv32i_I-SUB-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-SW-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-XOR-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-XORI-01.f
+
