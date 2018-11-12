@@ -57,6 +57,7 @@ module fwrisc (
 	
 	state_e				state;
 	reg[31:2]			pc;
+	reg[4:0]			shift_amt;
 	wire[31:2]			pc_plus4;
 	wire[31:2]			pc_next;
 	
@@ -296,7 +297,12 @@ module fwrisc (
 			ra_raddr = CSR_MTVEC;
 			rb_raddr = zero;
 			if (state == EXECUTE) begin
-				rd_waddr = CSR_MTVAL; // Save the exception address
+				if (op_ecall) begin
+					// Don't save an exception address on ECALL
+					rd_waddr = zero;
+				end else begin
+					rd_waddr = CSR_MTVAL; // Save the exception address
+				end
 			end else if (state == EXCEPTION_1) begin
 				rd_waddr = CSR_MEPC; // Write the PC
 			end else begin
@@ -413,13 +419,13 @@ module fwrisc (
 	// For load instructions, 
 	always @* begin
 		if (op_ld || op_st) begin
-			rd_wen = (state == MEMR && |rd && dready);
+			rd_wen = (state == MEMR && |rd_waddr && dready);
 		end else if (op_csr) begin
 			rd_wen = ((state == CSR_1 || state == CSR_2 || state == EXECUTE) && |rd_waddr);
 		end else if (state == EXCEPTION_1 || state == EXCEPTION_2) begin
-			rd_wen = 1;
+			rd_wen = |rd_waddr;
 		end else begin
-			rd_wen = ((state == EXECUTE && !op_branch && |rd) || exception); // TODO: deal with exception
+			rd_wen = (((state == EXECUTE && !op_branch) || exception) && |rd_waddr); // TODO: deal with exception
 		end
 	end
 	
