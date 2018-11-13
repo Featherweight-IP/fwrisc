@@ -23,6 +23,7 @@ tests/fwrisc_instr_tests_system_csrsi.f
 tests/fwrisc_instr_tests_system_csrw_csrr.f
 tests/fwrisc_instr_tests_system_ecall.f
 tests/fwrisc_instr_tests_system_eret.f
+tests/fwrisc_instr_tests_exception_lw.f
 tests/fwrisc_instr_tests_exception_j.f
 tests/fwrisc_instr_tests_exception_bne.f
 tests/fwrisc_instr_tests_branch_beq_t_fwd.f
