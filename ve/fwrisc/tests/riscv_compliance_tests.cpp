@@ -68,6 +68,11 @@ void riscv_compliance_tests::check() {
 		// Read the ELF file symbol table to determine where the
 		// signature (begin_signature) is located
 		elf_file_fp = fopen(elf_file.c_str(), "rb");
+
+		if (!elf_file_fp) {
+			fprintf(stdout, "Error: Failed to open file %s\n",
+				elf_file.c_str());
+		}
 		fread(&hdr, sizeof(Elf32_Ehdr), 1, elf_file_fp);
 
 		for (uint32_t i=0; i<hdr.e_shnum; i++) {

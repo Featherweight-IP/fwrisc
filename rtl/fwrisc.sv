@@ -49,7 +49,7 @@ module fwrisc (
 		EXECUTE,
 		CSR_1,
 		CSR_2,
-		MEMW,
+		MEMW, // 5
 		MEMR,
 		EXCEPTION_1,
 		EXCEPTION_2
@@ -291,73 +291,214 @@ module fwrisc (
 		end
 	end
 	assign branch_cond = (instr[12])?!comp_out:comp_out;
-	
+
 	always @* begin
-		if (exception) begin
-			ra_raddr = CSR_MTVEC;
-			rb_raddr = zero;
-			if (state == EXECUTE) begin
-				if (op_ecall) begin
-					// Don't save an exception address on ECALL
-					rd_waddr = zero;
-				end else begin
-					rd_waddr = CSR_MTVAL; // Save the exception address
-				end
-			end else if (state == EXCEPTION_1) begin
-				rd_waddr = CSR_MEPC; // Write the PC
-			end else begin
-				rd_waddr = CSR_MCAUSE; // Need to write the cause
-			end
-		end else if (state == EXCEPTION_2) begin
-			rd_waddr = CSR_MCAUSE; // Need to write the cause
-		end else if (op_csr) begin
-			if (op_csrrc) begin
-				if (state == DECODE || state == CSR_2) begin
-					rb_raddr = csr_addr;
-				end else begin
+		case (state)
+			DECODE: begin
+				if (op_csr) begin
+					ra_raddr = rs1;
+					if (op_csrrc) begin
+						rb_raddr = csr_addr;
+					end else begin
+						rb_raddr = zero;
+					end
+					rd_waddr = 0;
+				end else if (op_eret) begin
+					// ERET sets up 
+					ra_raddr = CSR_MEPC;
 					rb_raddr = zero;
-				end
-			end else if (op_csrrs) begin
-				if (state == CSR_2) begin
-					rb_raddr = csr_addr;
+					rd_waddr = zero;					
 				end else begin
-					rb_raddr = zero;
+					// Normal instructions setup read during DECODE
+					ra_raddr = rs1;
+					rb_raddr = rs2;
+					rd_waddr = rd;					
 				end
-			end else begin
-				rb_raddr = zero;
 			end
 				
-			if (state == DECODE) begin // During decode, setup read of rs1
-				ra_raddr = rs1;
-				rd_waddr = 0; // TODO
-			end else if (state == CSR_1) begin 
+			CSR_1: begin
 				ra_raddr = csr_addr; // CSR
+				rb_raddr = zero;
 				rd_waddr = CSR_tmp; // write RS1 to CSR_tmp
-			end else if (state == CSR_2) begin
-				ra_raddr = CSR_tmp;
-				rd_waddr = rd;
-			end else begin
-				// EXECUTE
-				// Always want to end with writing to CSR
-				ra_raddr = 0; 
-				if (op_csrr_cs && |rs1 == 0) begin
-					// CSRRC and CSRRS don't modify the CSR if RS1==0
-					// Also, shouldn't write if this is an immediate
-					rd_waddr = zero;
-				end else begin
-					rd_waddr = csr_addr;
-				end
 			end
-		end else if (op_eret) begin
-			ra_raddr = CSR_MEPC;
-			rb_raddr = zero;
-			rd_waddr = zero;
-		end else begin
-			ra_raddr = rs1;
-			rb_raddr = rs2;
-			rd_waddr = rd;
-		end
+				
+			CSR_2: begin
+				ra_raddr = CSR_tmp;
+				if (op_csrrc || op_csrrs) begin
+					rb_raddr = csr_addr;
+				end else begin
+					rb_raddr = zero;
+				end				
+				rd_waddr = rd;
+			end
+			
+			EXCEPTION_1: begin
+				ra_raddr = CSR_MTVEC;
+				rb_raddr = zero;
+				rd_waddr = CSR_MEPC;
+			end
+			
+			EXCEPTION_2: begin
+				ra_raddr = zero;
+				rb_raddr = zero;
+				rd_waddr = CSR_MCAUSE; // Need to write the cause
+			end
+			
+			default: /* EXECUTE, MEMR, MEMW */
+				if (exception) begin
+					ra_raddr = 0; // Future: PC
+					rb_raddr = 0; 
+					if (op_ecall) begin
+						rd_waddr = zero; // Don't save an exception address on ECALL
+					end else begin
+						rd_waddr = CSR_MTVAL; 
+					end
+				end else if (op_csr) begin
+					ra_raddr = 0;
+					rb_raddr = 0;
+					if (op_csrr_cs && |rs1 == 0) begin
+						// CSRRC and CSRRS don't modify the CSR is RS1==0
+						rd_waddr = zero;
+					end else begin
+						rd_waddr = csr_addr;
+					end
+				end else begin
+					ra_raddr = rs1; 
+					rb_raddr = rs2; 
+					rd_waddr = rd;
+				end
+		endcase
 	end
+		
+//		if (exception) begin
+////			end else if (state == EXCEPTION_1) begin
+////				rd_waddr = CSR_MEPC; // Write the PC
+////			end else begin
+////				rd_waddr = CSR_MCAUSE; // Need to write the cause
+////			end
+////		end else if (state == EXCEPTION_1) begin
+////			ra_raddr = CSR_MTVEC;
+////			rb_raddr = zero;
+////		end else if (state == EXCEPTION_2) begin
+////			rd_waddr = CSR_MCAUSE; // Need to write the cause
+//		end else if (op_csr) begin
+//			if (op_csrrc) begin
+//				if (state == DECODE || state == CSR_2) begin
+//					rb_raddr = csr_addr;
+//				end else begin
+//					rb_raddr = zero;
+//				end
+//			end else if (op_csrrs) begin
+//				if (state == CSR_2) begin
+//					rb_raddr = csr_addr;
+//				end else begin
+//					rb_raddr = zero;
+//				end
+//			end else begin
+//				rb_raddr = zero;
+//			end
+//					
+//			if (state == DECODE) begin // During decode, setup read of rs1
+//				ra_raddr = rs1;
+//				rd_waddr = 0; // TODO
+//			end else if (state == CSR_1) begin 
+//				ra_raddr = csr_addr; // CSR
+//				rd_waddr = CSR_tmp; // write RS1 to CSR_tmp
+//			end else if (state == CSR_2) begin
+//				ra_raddr = CSR_tmp;
+//				rd_waddr = rd;
+//			end else begin
+//				// EXECUTE
+//				// Always want to end with writing to CSR
+//				ra_raddr = 0; 
+//				if (op_csrr_cs && |rs1 == 0) begin
+//					// CSRRC and CSRRS don't modify the CSR if RS1==0
+//					// Also, shouldn't write if this is an immediate
+//					rd_waddr = zero;
+//				end else begin
+//					rd_waddr = csr_addr;
+//				end
+//			end
+//		end else if (op_eret) begin
+//			ra_raddr = CSR_MEPC;
+//			rb_raddr = zero;
+//			rd_waddr = zero;
+//		end else begin
+//			ra_raddr = rs1;
+//			rb_raddr = rs2;
+//			rd_waddr = rd;
+//		end
+//	end
+	
+//	always @* begin
+//		if (exception) begin
+//			ra_raddr = CSR_MTVEC;
+//			rb_raddr = zero;
+//			if (state == EXECUTE) begin
+//				if (op_ecall) begin
+//					// Don't save an exception address on ECALL
+//					rd_waddr = zero;
+//				end else begin
+//					rd_waddr = CSR_MTVAL; // Save the exception address
+//				end
+//			end else if (state == EXCEPTION_1) begin
+//				rd_waddr = CSR_MEPC; // Write the PC
+//			end else begin
+//				rd_waddr = CSR_MCAUSE; // Need to write the cause
+//			end
+//		end else if (state == EXCEPTION_1) begin
+//			ra_raddr = CSR_MTVEC;
+//			rb_raddr = zero;
+//		end else if (state == EXCEPTION_2) begin
+//			rd_waddr = CSR_MCAUSE; // Need to write the cause
+//		end else if (op_csr) begin
+//			if (op_csrrc) begin
+//				if (state == DECODE || state == CSR_2) begin
+//					rb_raddr = csr_addr;
+//				end else begin
+//					rb_raddr = zero;
+//				end
+//			end else if (op_csrrs) begin
+//				if (state == CSR_2) begin
+//					rb_raddr = csr_addr;
+//				end else begin
+//					rb_raddr = zero;
+//				end
+//			end else begin
+//				rb_raddr = zero;
+//			end
+//				
+//			if (state == DECODE) begin // During decode, setup read of rs1
+//				ra_raddr = rs1;
+//				rd_waddr = 0; // TODO
+//			end else if (state == CSR_1) begin 
+//				ra_raddr = csr_addr; // CSR
+//				rd_waddr = CSR_tmp; // write RS1 to CSR_tmp
+//			end else if (state == CSR_2) begin
+//				ra_raddr = CSR_tmp;
+//				rd_waddr = rd;
+//			end else begin
+//				// EXECUTE
+//				// Always want to end with writing to CSR
+//				ra_raddr = 0; 
+//				if (op_csrr_cs && |rs1 == 0) begin
+//					// CSRRC and CSRRS don't modify the CSR if RS1==0
+//					// Also, shouldn't write if this is an immediate
+//					rd_waddr = zero;
+//				end else begin
+//					rd_waddr = csr_addr;
+//				end
+//			end
+//		end else if (op_eret) begin
+//			ra_raddr = CSR_MEPC;
+//			rb_raddr = zero;
+//			rd_waddr = zero;
+//		end else begin
+//			ra_raddr = rs1;
+//			rb_raddr = rs2;
+//			rd_waddr = rd;
+//		end
+//	end
 	
 	always @* begin
 		if (exception) begin
@@ -368,6 +509,8 @@ module fwrisc (
 				// Write the exception PC
 				rd_wdata = {pc, 2'b0}; // Exception PC
 			end
+		end else if (state == EXCEPTION_1) begin
+			rd_wdata = {pc, 2'b0}; // Exception PC
 		end else if (state == EXCEPTION_2) begin
 			// Write the cause
 			if (op_ecall) begin

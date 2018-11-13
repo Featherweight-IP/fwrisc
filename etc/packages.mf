@@ -3,5 +3,6 @@ simscripts@http://github.com/mballance/simscripts.git
 memory_primitives@http://github.com/mballance/memory_primitives.git
 googletest-ivpm@http://github.com/mballance/googletest-ivpm.git
 googletest-vl@http://github.com/mballance/googletest-vl.git
+fwrisc-zephyr@http://github.com/mballance/fwrisc-zephyr.git
 
 
