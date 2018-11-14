@@ -52,7 +52,9 @@ module fwrisc (
 		MEMW, // 5
 		MEMR,
 		EXCEPTION_1,
-		EXCEPTION_2
+		EXCEPTION_2,
+		SHIFT_1,
+		SHIFT_2
 	} state_e;
 	
 	state_e				state;
@@ -96,33 +98,13 @@ module fwrisc (
 					// NOP: wait for decode to occur
 					if (op_csr) begin
 						state <= CSR_1;
+//					end else if (op_shift) begin
+//						state <= SHIFT_1;
 					end else begin
 						state <= EXECUTE;
 					end
 				end
 				
-				// CSR operation is:
-				// - Read CSR and write it to a temp register
-				// - Read temp register, perform operation, and write back to CSR
-				// - Read temp register and write to rd (if !0)
-				//
-				// CSRRW
-				// 1.) rs2==$zero, rs1=<CSR>, op=OR, rd=<CSR_temp> (CSR_1)
-				// 2.) rs2=$zero, rs1=<rs1>, op=OR, rd=<CSR>       (CSR_2)
-				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
-				//
-				// CSRRS
-				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>  (CSR_1)
-				// 2.) rs2=<CSR_temp>, rs1=rs1, op=OR, rd=<CSR>    (CSR_2)
-				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
-				//
-				// CSRRC
-				// 1.) rs2=$zero, rs1=<CSR>, op=OR, rd=<CSR_temp>  (CSR_1)
-				// 2.) rs2=<CSR_temp>, rs1=rs1, op=CLR, rd=<CSR>   (CSR_2)
-				// 3.) rs2=$zero, rs1=<CSR_temp>, op=OR, rd=rd     (EXECUTE)
-				
-			
-				// CSR phase 1 -- Read the target CSR and write it to TMP
 				CSR_1: begin
 					state <= CSR_2;
 				end
@@ -166,6 +148,11 @@ module fwrisc (
 					pc <= ra_rdata[31:2];
 					state <= FETCH;
 				end
+			
+				// Latch the shift amount into the shift_amt register
+				SHIFT_1: begin
+					state <= SHIFT_2;
+				end
 			endcase
 		end
 	end
@@ -177,6 +164,8 @@ module fwrisc (
 	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
 	wire op_arith_imm = (op_branch_ld_st_arith && instr[6:4] == 3'b001);
 	wire op_shift_imm = (op_arith_imm && instr[13:12] == 2'b01);
+	wire op_shift_reg = (op_arith_reg && instr[13:12] == 2'b01);
+	wire op_shift     = (op_shift_imm || op_shift_reg);
 	wire op_st        = (op_branch_ld_st_arith && instr[6:4] == 3'b010);
 	wire op_ld_st     = (op_ld || op_st);
 	wire op_arith_reg = (op_branch_ld_st_arith && instr[6:4] == 3'b011);
@@ -292,6 +281,9 @@ module fwrisc (
 	end
 	assign branch_cond = (instr[12])?!comp_out:comp_out;
 
+	/****************************************************************
+	 * Selection of ra_raddr, rb_raddr, and rd_waddr
+	 ****************************************************************/
 	always @* begin
 		case (state)
 			DECODE: begin
@@ -369,71 +361,133 @@ module fwrisc (
 				end
 		endcase
 	end
-		
-	always @* begin
-		if (exception) begin
-			if (state == EXECUTE) begin
-				// Write the bad address during EXECUTE
-				if (op_jal || op_jalr || op_branch) begin
-					rd_wdata = {alu_out[31:1], 1'b0}; 
-				end else begin
-					rd_wdata = alu_out[31:0]; 
-				end
-			end else /*if (state == EXCEPTION_1)*/ begin
-				// Write the exception PC
-				rd_wdata = {pc, 2'b0}; // Exception PC
-			end
-		end else if (state == EXCEPTION_1) begin
-			rd_wdata = {pc, 2'b0}; // Exception PC
-		end else if (state == EXCEPTION_2) begin
-			// Write the cause
-			if (op_ecall) begin
-				// EBREAK, ECALL
-				rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
-			end else if (op_ld) begin
-				rd_wdata = 32'h0000_0004; // misaligned load address
-			end else if (op_st) begin
-				rd_wdata = 32'h0000_0006; // misaligned store address
-			end else begin
-				rd_wdata = zero; // instruction address misaligned
-			end
-		end else if (op_jal || op_jalr) begin
-			rd_wdata = {pc_plus4, 2'b0};
-		end else if (op_ld) begin
-			case (instr[14:12]) 
-				3'b000,3'b100: begin // LB, LBU
-					case (alu_out[1:0]) 
-						2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
-						2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
-						2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
-						default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
-					endcase
-				end
-				3'b001, 3'b101: begin // LH, LHU
-					if (alu_out[1]) begin
-						rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
-					end else begin
-						rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
-					end
-				end
-				// LW and default
-				default: rd_wdata = drdata; 
-			endcase
-		end else begin
-			if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
-				// SLT, SLTU, SLTI, SLTUI
-				rd_wdata = {{31{1'b0}}, comp_out};
-			end else begin
-				rd_wdata = alu_out;
-			end
-		end
-	end
-	
 
-	// Write at the end of the execute state 
-	// when the destination isn't $zero
-	//
-	// For load instructions, 
+	// Selection of rd_wdata
+	always @* begin
+		case (state)
+			
+			EXCEPTION_1: 
+				rd_wdata = {pc, 2'b0}; // Exception PC
+				
+			EXCEPTION_2: begin
+				// Write the cause
+				if (op_ecall) begin
+					// EBREAK, ECALL
+					rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
+				end else if (op_ld) begin
+					rd_wdata = 32'h0000_0004; // misaligned load address
+				end else if (op_st) begin
+					rd_wdata = 32'h0000_0006; // misaligned store address
+				end else begin
+					rd_wdata = zero; // instruction address misaligned
+				end				
+			end
+			
+
+			
+			MEMR: begin
+				case (instr[14:12]) 
+					3'b000,3'b100: begin // LB, LBU
+						case (alu_out[1:0]) 
+							2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
+							2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
+							2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
+							default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
+						endcase
+					end
+					3'b001, 3'b101: begin // LH, LHU
+						if (alu_out[1]) begin
+							rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
+						end else begin
+							rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
+						end
+					end
+					// LW and default
+					default: rd_wdata = drdata; 
+				endcase				
+			end
+			
+			default: /*EXECUTE: */ begin
+				if (exception) begin
+					if (op_jal || op_jalr || op_branch) begin
+						rd_wdata = {alu_out[31:1], 1'b0}; 
+					end else begin
+						rd_wdata = alu_out[31:0]; 
+					end
+				end else if (op_jal || op_jalr) begin
+					rd_wdata = {pc_plus4, 2'b0};
+				end else if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
+					// SLT, SLTU, SLTI, SLTUI
+					rd_wdata = {{31{1'b0}}, comp_out};
+				end else begin
+					rd_wdata = alu_out;
+				end				
+			end			
+		endcase
+	end
+		
+//	always @* begin
+//		if (exception) begin
+//			if (state == EXECUTE) begin
+//				// Write the bad address during EXECUTE
+//				if (op_jal || op_jalr || op_branch) begin
+//					rd_wdata = {alu_out[31:1], 1'b0}; 
+//				end else begin
+//					rd_wdata = alu_out[31:0]; 
+//				end
+//			end else /*if (state == EXCEPTION_1)*/ begin
+//				// Write the exception PC
+//				rd_wdata = {pc, 2'b0}; // Exception PC
+//			end
+//		end else if (state == EXCEPTION_1) begin
+//			rd_wdata = {pc, 2'b0}; // Exception PC
+//		end else if (state == EXCEPTION_2) begin
+//			// Write the cause
+//			if (op_ecall) begin
+//				// EBREAK, ECALL
+//				rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
+//			end else if (op_ld) begin
+//				rd_wdata = 32'h0000_0004; // misaligned load address
+//			end else if (op_st) begin
+//				rd_wdata = 32'h0000_0006; // misaligned store address
+//			end else begin
+//				rd_wdata = zero; // instruction address misaligned
+//			end
+//		end else if (op_jal || op_jalr) begin
+//			rd_wdata = {pc_plus4, 2'b0};
+//		end else if (op_ld) begin
+//			case (instr[14:12]) 
+//				3'b000,3'b100: begin // LB, LBU
+//					case (alu_out[1:0]) 
+//						2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
+//						2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
+//						2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
+//						default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
+//					endcase
+//				end
+//				3'b001, 3'b101: begin // LH, LHU
+//					if (alu_out[1]) begin
+//						rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
+//					end else begin
+//						rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
+//					end
+//				end
+//				// LW and default
+//				default: rd_wdata = drdata; 
+//			endcase
+//		end else begin
+//			if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
+//				// SLT, SLTU, SLTI, SLTUI
+//				rd_wdata = {{31{1'b0}}, comp_out};
+//			end else begin
+//				rd_wdata = alu_out;
+//			end
+//		end
+//	end
+	
+	/****************************************************************
+	 * Selection of wd_wen
+	 ****************************************************************/
 	always @* begin
 		case (state)
 			FETCH, DECODE:
@@ -452,15 +506,6 @@ module fwrisc (
 				rd_wen = |rd_waddr;
 				
 		endcase
-//		if (op_ld || op_st) begin
-//			rd_wen = (state == MEMR && |rd_waddr && dready);
-//		end else if (op_csr) begin
-//			rd_wen = ((state == CSR_1 || state == CSR_2 || state == EXECUTE) && |rd_waddr);
-//		end else if (state == EXCEPTION_1 || state == EXCEPTION_2) begin
-//			rd_wen = |rd_waddr;
-//		end else begin
-//			rd_wen = (((state == EXECUTE && !op_branch) || exception) && |rd_waddr); // TODO: deal with exception
-//		end
 	end
 	
 	fwrisc_regfile u_regfile (
@@ -598,7 +643,10 @@ module fwrisc (
 		.out    	(alu_out   		),
 		.out_valid 	(alu_out_valid	));
 	
-	
+
+	/****************************************************************
+	 * pc_next selection
+	 ****************************************************************/
 	always @* begin
 		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
@@ -635,23 +683,13 @@ module fwrisc (
 			end
 		endcase		
 		end else if (op_jal || op_jalr || (op_branch && branch_cond)) begin
-			misaligned_addr = alu_out[1]; // Always clear the low bit on jump
+			misaligned_addr = alu_out[1]; // the low-bit is always cleared on jump
 		end else begin
 			misaligned_addr = 0;
 		end
 	end
-	
-	always @* begin
-		if (state == EXECUTE /*|| state == EXCEPTION_1 */) begin
-			if (op_ecall) begin // ECALL||EBREAK
-				exception = 1;
-			end else begin
-				exception = misaligned_addr;
-			end
-		end else begin
-			exception = 0;
-		end
-	end
+
+	assign exception = (state == EXECUTE && (op_ecall || misaligned_addr));
 
 	fwrisc_tracer u_tracer (
 		.clock   (clock  			), 
