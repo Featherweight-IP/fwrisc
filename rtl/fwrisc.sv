@@ -98,8 +98,8 @@ module fwrisc (
 					// NOP: wait for decode to occur
 					if (op_csr) begin
 						state <= CSR_1;
-//					end else if (op_shift) begin
-//						state <= SHIFT_1;
+					end else if (op_shift) begin
+						state <= SHIFT_1;
 					end else begin
 						state <= EXECUTE;
 					end
@@ -386,6 +386,10 @@ module fwrisc (
 					end else begin
 						rd_waddr = csr_addr;
 					end
+				end else if (op_shift) begin
+					ra_raddr = CSR_tmp;
+					rb_raddr = zero;
+					rd_waddr = rd;
 				end else begin
 					ra_raddr = rs1; 
 					rb_raddr = rs2; 
@@ -508,7 +512,6 @@ module fwrisc (
 		end
 	end
 	
-
 	always @* begin
 		if (op_lui) begin
 			alu_op_a = imm_lui;
@@ -522,6 +525,14 @@ module fwrisc (
 		end else if (op_jalr) begin
 			alu_op_a = ra_rdata;
 			alu_op_b = imm_11_0;
+		end else if (op_shift) begin
+//			if (state == SHIFT_1) begin
+				alu_op_a = ra_rdata;
+				alu_op_b = zero;
+//			end else begin
+//				alu_op_a = rb_rdata;
+//				alu_op_b = zero;
+//			end
 		end else if (op_ld || op_arith_imm) begin
 			if (op_shift_imm) begin
 				alu_op_a = imm_11_0[4:0]; // Shift immediate
@@ -550,9 +561,6 @@ module fwrisc (
 				alu_op_a = ra_rdata;
 			end
 			alu_op_b = rb_rdata;
-		end else if (op_shift) begin
-			alu_op_a = rb_raddr;
-			alu_op_b = zero;
 		end else begin
 			alu_op_a = zero;
 			/* TMP
@@ -562,33 +570,21 @@ module fwrisc (
 		end
 		
 		case (state)
-			DECODE: alu_op = OP_OR;
-			
 			EXECUTE: begin
-				/* if (op_lui || op_auipc || op_jal || op_jalr || op_ld || op_st || op_branch) begin
-					alu_op = OP_ADD;
-				end else */ if (op_arith_imm || op_arith_reg) begin
+				if (op_arith_imm || op_arith_reg) begin
 					case (instr[14:12]) 
 						3'b000: begin // ADDI, ADD, SUB
 							// TODO: handle register subtract
 							alu_op = OP_ADD;
 						end
-						3'b001: begin // SLL, SLLI
-							alu_op = OP_SLL;
-						end
-						/* We don't need an op for these instructions
-				3'b010: begin // SLT
-				end
-				3'b011: begin // SLTU
-				end
-						 */
 						3'b100: begin // XOR
 							alu_op = OP_XOR;
 						end
-						3'b101: begin // SRA, SRAI, SRL, SRLI
-							alu_op = (instr[30])?OP_SRA:OP_SRL;
-						end
-						3'b110: begin // OR
+//						3'b001, 3'b101: begin // SLL, SLLI, SRA, SRAI, SRL, SRLI
+//							alu_op = OP_OR
+//							alu_op = (instr[30])?OP_SRA:OP_SRL;
+//						end
+						3'b001, 3'b101, 3'b110: begin // SLL, SRA, SRL, OR
 							alu_op = OP_OR;
 						end
 						default: /*3'b111: */begin // AND
@@ -603,6 +599,11 @@ module fwrisc (
 					alu_op = OP_ADD;
 				end
 			end
+			
+			SHIFT_2:
+				alu_op = (instr[14])?
+					(instr[30])?OP_SRA:OP_SRL:
+					OP_SLL;
 			
 			CSR_1: begin
 				if (op_csrrc) begin
