@@ -57,6 +57,17 @@ module fwrisc (
 		SHIFT_2
 	} state_e;
 	
+	typedef enum {
+		OP_ADD,
+		OP_AND,
+		OP_OR,
+		OP_XOR,
+		OP_CLR,
+		OP_SLL,
+		OP_SRL,
+		OP_SRA
+	} fwrisc_alu_op_e;
+	
 	state_e				state;
 	reg[31:2]			pc;
 	reg[4:0]			shift_amt;
@@ -73,8 +84,6 @@ module fwrisc (
 	wire[31:0]					alu_op_b;
 	wire [4:0]					alu_op;
 	wire[32:0]					alu_out;
-	wire						alu_out_valid;
-	
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -665,15 +674,19 @@ module fwrisc (
 //			alu_op = OP_ADD;
 //		end
 	end
-	
-	fwrisc_alu u_alu (
-		.clock  	(clock 			), 
-		.reset  	(reset 			), 
-		.op_a   	(alu_op_a  		), 
-		.op_b   	(alu_op_b  		), 
-		.op     	(alu_op    		), 
-		.out    	(alu_out   		),
-		.out_valid 	(alu_out_valid	));
+
+	// ALU
+	always @* begin
+		case (alu_op) 
+			OP_AND: alu_out = alu_op_a & alu_op_b;
+			OP_OR:  alu_out = alu_op_a | alu_op_b;
+			OP_XOR: alu_out = alu_op_a ^ alu_op_b;
+			OP_SLL: alu_out = alu_op_a << 1;
+			OP_SRL: alu_out = alu_op_a >> 1;
+			OP_SRA: alu_out = $signed(alu_op_a) >>> 1;
+			default: /*OP_ADD:*/ alu_out = alu_op_a + alu_op_b;
+		endcase
+	end
 	
 
 	/****************************************************************
