@@ -151,8 +151,32 @@ module fwrisc (
 			
 				// Latch the shift amount into the shift_amt register
 				SHIFT_1: begin
-					state <= SHIFT_2;
+					if (op_shift_reg) begin
+						shift_amt <= (rb_rdata[4:0] - 1'b1);
+						if (|rb_rdata[4:0]) begin
+							state <= SHIFT_2;
+						end else begin
+							state <= EXECUTE;
+						end
+					end else begin
+						shift_amt <= (rs2 - 1'b1);
+						if (|rs2) begin
+							state <= SHIFT_2;
+						end else begin
+							state <= EXECUTE;
+						end
+					end
 				end
+				
+				SHIFT_2: begin
+					// Shift 
+					if (|shift_amt) begin
+						shift_amt <= shift_amt - 1;
+					end else begin
+						state <= EXECUTE;
+					end
+				end
+				
 			endcase
 		end
 	end
@@ -336,6 +360,14 @@ module fwrisc (
 				rd_waddr = CSR_MCAUSE; // Need to write the cause
 			end
 			
+			SHIFT_1, SHIFT_2: begin
+				// rs1 has been read as ra_rdata
+				// write to CSR_tmp
+				ra_raddr = CSR_tmp;
+				rb_raddr = zero;
+				rd_waddr = CSR_tmp;
+			end
+			
 			default: /* EXECUTE, MEMR, MEMW */
 				if (exception) begin
 					ra_raddr = 0; // Future: PC
@@ -383,8 +415,6 @@ module fwrisc (
 				end				
 			end
 			
-
-			
 			MEMR: begin
 				case (instr[14:12]) 
 					3'b000,3'b100: begin // LB, LBU
@@ -425,66 +455,7 @@ module fwrisc (
 			end			
 		endcase
 	end
-		
-//	always @* begin
-//		if (exception) begin
-//			if (state == EXECUTE) begin
-//				// Write the bad address during EXECUTE
-//				if (op_jal || op_jalr || op_branch) begin
-//					rd_wdata = {alu_out[31:1], 1'b0}; 
-//				end else begin
-//					rd_wdata = alu_out[31:0]; 
-//				end
-//			end else /*if (state == EXCEPTION_1)*/ begin
-//				// Write the exception PC
-//				rd_wdata = {pc, 2'b0}; // Exception PC
-//			end
-//		end else if (state == EXCEPTION_1) begin
-//			rd_wdata = {pc, 2'b0}; // Exception PC
-//		end else if (state == EXCEPTION_2) begin
-//			// Write the cause
-//			if (op_ecall) begin
-//				// EBREAK, ECALL
-//				rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
-//			end else if (op_ld) begin
-//				rd_wdata = 32'h0000_0004; // misaligned load address
-//			end else if (op_st) begin
-//				rd_wdata = 32'h0000_0006; // misaligned store address
-//			end else begin
-//				rd_wdata = zero; // instruction address misaligned
-//			end
-//		end else if (op_jal || op_jalr) begin
-//			rd_wdata = {pc_plus4, 2'b0};
-//		end else if (op_ld) begin
-//			case (instr[14:12]) 
-//				3'b000,3'b100: begin // LB, LBU
-//					case (alu_out[1:0]) 
-//						2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
-//						2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
-//						2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
-//						default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
-//					endcase
-//				end
-//				3'b001, 3'b101: begin // LH, LHU
-//					if (alu_out[1]) begin
-//						rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
-//					end else begin
-//						rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
-//					end
-//				end
-//				// LW and default
-//				default: rd_wdata = drdata; 
-//			endcase
-//		end else begin
-//			if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
-//				// SLT, SLTU, SLTI, SLTUI
-//				rd_wdata = {{31{1'b0}}, comp_out};
-//			end else begin
-//				rd_wdata = alu_out;
-//			end
-//		end
-//	end
-	
+
 	/****************************************************************
 	 * Selection of wd_wen
 	 ****************************************************************/
@@ -494,7 +465,7 @@ module fwrisc (
 				rd_wen = 0; // TODO:
 				
 			EXECUTE:
-				rd_wen = ((!op_branch && !op_ld_st) || exception) && |rd_waddr;
+				rd_wen = ((!op_branch && !op_ld_st) || exception || op_shift) && |rd_waddr;
 				
 			MEMR: 
 				rd_wen = (|rd_waddr && dready);
@@ -579,6 +550,9 @@ module fwrisc (
 				alu_op_a = ra_rdata;
 			end
 			alu_op_b = rb_rdata;
+		end else if (op_shift) begin
+			alu_op_a = rb_raddr;
+			alu_op_b = zero;
 		end else begin
 			alu_op_a = zero;
 			/* TMP
@@ -587,51 +561,108 @@ module fwrisc (
 			alu_op_b = zero;
 		end
 		
-		if (op_lui || op_auipc || op_jal || op_jalr || op_ld || op_st || op_branch) begin
-			alu_op = OP_ADD;
-		end else if (op_arith_imm || op_arith_reg) begin
-			case (instr[14:12]) 
-				3'b000: begin // ADDI, ADD, SUB
-					// TODO: handle register subtract
+		case (state)
+			DECODE: alu_op = OP_OR;
+			
+			EXECUTE: begin
+				/* if (op_lui || op_auipc || op_jal || op_jalr || op_ld || op_st || op_branch) begin
 					alu_op = OP_ADD;
-				end
-				3'b001: begin // SLL, SLLI
-					alu_op = OP_SLL;
-				end
-				/* We don't need an op for these instructions
+				end else */ if (op_arith_imm || op_arith_reg) begin
+					case (instr[14:12]) 
+						3'b000: begin // ADDI, ADD, SUB
+							// TODO: handle register subtract
+							alu_op = OP_ADD;
+						end
+						3'b001: begin // SLL, SLLI
+							alu_op = OP_SLL;
+						end
+						/* We don't need an op for these instructions
 				3'b010: begin // SLT
 				end
 				3'b011: begin // SLTU
 				end
-				 */
-				3'b100: begin // XOR
+						 */
+						3'b100: begin // XOR
+							alu_op = OP_XOR;
+						end
+						3'b101: begin // SRA, SRAI, SRL, SRLI
+							alu_op = (instr[30])?OP_SRA:OP_SRL;
+						end
+						3'b110: begin // OR
+							alu_op = OP_OR;
+						end
+						default: /*3'b111: */begin // AND
+							alu_op = OP_AND;
+						end
+					endcase
+				end else if (op_csrrc) begin
 					alu_op = OP_XOR;
-				end
-				3'b101: begin // SRA, SRAI, SRL, SRLI
-					alu_op = (instr[30])?OP_SRA:OP_SRL;
-				end
-				3'b110: begin // OR
+				end else if (op_sys) begin
 					alu_op = OP_OR;
+				end else begin
+					alu_op = OP_ADD;
 				end
-				default: /*3'b111: */begin // AND
+			end
+			
+			CSR_1: begin
+				if (op_csrrc) begin
 					alu_op = OP_AND;
-				end
-			endcase
-		end else if (op_sys) begin
-			if (op_csrrc) begin
-				if (state == CSR_1) begin
-					alu_op = OP_AND;
-				end else if (state == EXECUTE) begin
-					alu_op = OP_XOR;
 				end else begin
 					alu_op = OP_OR;
 				end
-			end else begin
-				alu_op = OP_OR; 
 			end
-		end else begin
-			alu_op = OP_ADD;
-		end
+			
+			MEMR, MEMW: alu_op = OP_ADD;
+			
+			default: /* DECODE */
+				alu_op = OP_OR;
+		endcase
+		
+//		if (op_lui || op_auipc || op_jal || op_jalr || op_ld || op_st || op_branch) begin
+//			alu_op = OP_ADD;
+//		end else if (op_arith_imm || op_arith_reg) begin
+//			case (instr[14:12]) 
+//				3'b000: begin // ADDI, ADD, SUB
+//					// TODO: handle register subtract
+//					alu_op = OP_ADD;
+//				end
+//				3'b001: begin // SLL, SLLI
+//					alu_op = OP_SLL;
+//				end
+//				/* We don't need an op for these instructions
+//				3'b010: begin // SLT
+//				end
+//				3'b011: begin // SLTU
+//				end
+//				 */
+//				3'b100: begin // XOR
+//					alu_op = OP_XOR;
+//				end
+//				3'b101: begin // SRA, SRAI, SRL, SRLI
+//					alu_op = (instr[30])?OP_SRA:OP_SRL;
+//				end
+//				3'b110: begin // OR
+//					alu_op = OP_OR;
+//				end
+//				default: /*3'b111: */begin // AND
+//					alu_op = OP_AND;
+//				end
+//			endcase
+//		end else if (op_sys) begin
+//			if (op_csrrc) begin
+//				if (state == CSR_1) begin
+//					alu_op = OP_AND;
+//				end else if (state == EXECUTE) begin
+//					alu_op = OP_XOR;
+//				end else begin
+//					alu_op = OP_OR;
+//				end
+//			end else begin
+//				alu_op = OP_OR; 
+//			end
+//		end else begin
+//			alu_op = OP_ADD;
+//		end
 	end
 	
 	fwrisc_alu u_alu (
