@@ -3,5 +3,7 @@ simscripts@http://github.com/mballance/simscripts.git
 memory_primitives@http://github.com/mballance/memory_primitives.git
 googletest-ivpm@http://github.com/mballance/googletest-ivpm.git
 googletest-vl@http://github.com/mballance/googletest-vl.git
+zephyr-ivpm@http://github.com/mballance/zephyr-ivpm.git
+
 
 
