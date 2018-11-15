@@ -1,3 +1,3 @@
 
---gtest_filter=fwrisc_instr_tests*.*
+--gtest_filter=fwrisc_instr_tests_*.*
 
