@@ -34,7 +34,7 @@ module fwrisc (
 		
 		output[31:0]	daddr,
 		output[31:0]	dwdata,
-		output[31:0]	drdata,
+		input[31:0]		drdata,
 		output[3:0]		dstrb,
 		output			dwrite,
 		output			dvalid,
@@ -627,52 +627,6 @@ module fwrisc (
 			default: /* DECODE */
 				alu_op = OP_OR;
 		endcase
-		
-//		if (op_lui || op_auipc || op_jal || op_jalr || op_ld || op_st || op_branch) begin
-//			alu_op = OP_ADD;
-//		end else if (op_arith_imm || op_arith_reg) begin
-//			case (instr[14:12]) 
-//				3'b000: begin // ADDI, ADD, SUB
-//					// TODO: handle register subtract
-//					alu_op = OP_ADD;
-//				end
-//				3'b001: begin // SLL, SLLI
-//					alu_op = OP_SLL;
-//				end
-//				/* We don't need an op for these instructions
-//				3'b010: begin // SLT
-//				end
-//				3'b011: begin // SLTU
-//				end
-//				 */
-//				3'b100: begin // XOR
-//					alu_op = OP_XOR;
-//				end
-//				3'b101: begin // SRA, SRAI, SRL, SRLI
-//					alu_op = (instr[30])?OP_SRA:OP_SRL;
-//				end
-//				3'b110: begin // OR
-//					alu_op = OP_OR;
-//				end
-//				default: /*3'b111: */begin // AND
-//					alu_op = OP_AND;
-//				end
-//			endcase
-//		end else if (op_sys) begin
-//			if (op_csrrc) begin
-//				if (state == CSR_1) begin
-//					alu_op = OP_AND;
-//				end else if (state == EXECUTE) begin
-//					alu_op = OP_XOR;
-//				end else begin
-//					alu_op = OP_OR;
-//				end
-//			end else begin
-//				alu_op = OP_OR; 
-//			end
-//		end else begin
-//			alu_op = OP_ADD;
-//		end
 	end
 
 	// ALU
@@ -692,7 +646,15 @@ module fwrisc (
 	/****************************************************************
 	 * pc_next selection
 	 ****************************************************************/
-	always @* begin
+	always @* begin : pc_next_sel
+//		case ({
+//			(op_jal || op_jalr || (op_branch && branch_cond)),
+//			(op_eret || exception)})
+//			2'b10: pc_next = alu_out[31:2];
+//			2'b01: pc_next = ra_rdata[31:2];
+//			default: pc_next = pc_plus4;
+//		endcase
+		
 		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
 		end else if (op_eret || exception) begin
@@ -708,25 +670,42 @@ module fwrisc (
 	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
 	
 	always @* begin
-		if (op_st || op_ld) begin
 		case (instr[13:12]) 
 			2'b00: begin // SB
 				dstrb = (1'b1 << alu_out[1:0]);
 				dwdata = {rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0]};
-				misaligned_addr = 0;
 			end
 			2'b01: begin // SH
 				dstrb = (2'b11 << {alu_out[1], 1'b0});
 				dwdata = {rb_rdata[15:0], rb_rdata[15:0]};
-				misaligned_addr = op_ld_st && alu_out[0];
 			end
 			// SW and default
 			default: begin
 				dstrb = 4'hf;
 				dwdata = rb_rdata; // Write data is always @ rs2
-				misaligned_addr = op_ld_st && |alu_out[1:0];
 			end
 		endcase		
+	
+//		misaligned_addr = (
+//				// Check address alignment for loads and stores
+//				(op_ld_st && (
+//						(instr[13:12] == 2'b01 && alu_out[0]) || (instr[13:12] == 2'b10 && |alu_out[1:0]))) ||
+//				// Check address alignment for jumps and branches
+//				((op_jal || op_jalr || (op_branch && branch_cond)) && alu_out[1])
+//			);
+		if (op_st || op_ld) begin
+			case (instr[13:12]) 
+				2'b00: begin // SB
+					misaligned_addr = 0;
+				end
+				2'b01: begin // SH
+					misaligned_addr = op_ld_st && alu_out[0];
+				end
+				// SW and default
+				default: begin
+					misaligned_addr = op_ld_st && |alu_out[1:0];
+				end
+			endcase		
 		end else if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			misaligned_addr = alu_out[1]; // the low-bit is always cleared on jump
 		end else begin
