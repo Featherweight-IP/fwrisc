@@ -24,6 +24,7 @@
 
 #include "riscv_compliance_tests.h"
 #include "GoogletestVlCmdlineProcessor.h"
+#include "ElfSymtabReader.h"
 #include <stdlib.h>
 #include <elf.h>
 
@@ -60,55 +61,15 @@ void riscv_compliance_tests::check() {
 	clp.get_plusarg_value("+REF_FILE", ref_file);
 	clp.get_plusarg_value("+SW_IMAGE", elf_file);
 
-	{
-		Elf32_Ehdr	hdr;
-		Elf32_Phdr	phdr;
-		Elf32_Shdr	shdr;
+	ElfSymtabReader symtab;
 
-		// Read the ELF file symbol table to determine where the
-		// signature (begin_signature) is located
-		elf_file_fp = fopen(elf_file.c_str(), "rb");
-
-		if (!elf_file_fp) {
-			fprintf(stdout, "Error: Failed to open file %s\n",
-				elf_file.c_str());
-		}
-		fread(&hdr, sizeof(Elf32_Ehdr), 1, elf_file_fp);
-
-		for (uint32_t i=0; i<hdr.e_shnum; i++) {
-			fseek(elf_file_fp, hdr.e_shoff+hdr.e_shentsize*i, 0);
-
-			fread(&shdr, sizeof(Elf32_Shdr), 1, elf_file_fp);
-
-			if (shdr.sh_type == SHT_SYMTAB) {
-				Elf32_Shdr str_shdr;
-
-				fseek(elf_file_fp, hdr.e_shoff+hdr.e_shentsize*shdr.sh_link, 0);
-				fread(&str_shdr, sizeof(Elf32_Shdr), 1, elf_file_fp);
-
-				fprintf(stdout, "String table: %d\n", str_shdr.sh_size);
-				char *str_tmp = new char[str_shdr.sh_size];
-				fseek(elf_file_fp, str_shdr.sh_offset, 0);
-				fread(str_tmp, str_shdr.sh_size, 1, elf_file_fp);
-
-				for (uint32_t j=0; j<shdr.sh_size; j+=sizeof(Elf32_Sym)) {
-					Elf32_Sym sym;
-
-					fseek(elf_file_fp, (shdr.sh_offset+j), 0);
-					fread(&sym, sizeof(Elf32_Sym), 1, elf_file_fp);
-
-//					fprintf(stdout, "Symbol: %s\n", &str_tmp[sym.st_name]);
-					if (!strcmp(&str_tmp[sym.st_name], "begin_signature")) {
-						begin_signature = sym.st_value;
-					} else if (!strcmp(&str_tmp[sym.st_name], "end_signature")) {
-						end_signature = sym.st_value;
-					}
-				}
-				delete [] str_tmp;
-			}
-		}
-		fclose(elf_file_fp);
+	if (!symtab.read(elf_file)) {
+		fprintf(stdout, "Error: failed to read ELF symbol table\n");
 	}
+
+	begin_signature = symtab.find_sym("begin_signature").st_value;
+	end_signature = symtab.find_sym("end_signature").st_value;
+
 
 	ASSERT_NE(0, begin_signature);
 	ASSERT_NE(0, end_signature);

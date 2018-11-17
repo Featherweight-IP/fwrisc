@@ -38,6 +38,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="packages/fwrisc-zephyr/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -46,8 +49,19 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="fwrisc.null.1163377541" name="fwrisc"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/fwrisc"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1444150239;cdt.managedbuild.toolchain.gnu.base.1444150239.1768449627;cdt.managedbuild.tool.gnu.cpp.compiler.base.2013570252;cdt.managedbuild.tool.gnu.cpp.compiler.input.598308825">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1444150239;cdt.managedbuild.toolchain.gnu.base.1444150239.1768449627;cdt.managedbuild.tool.gnu.c.compiler.base.1390143226;cdt.managedbuild.tool.gnu.c.compiler.input.1962215580">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 </cproject>

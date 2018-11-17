@@ -120,3 +120,9 @@ tests/fwrisc_instr_tests_arith_sub.f
 tests/fwrisc_instr_tests_arith_xor.f
 tests/fwrisc_instr_tests_arith_xori.f
 
+
+tests/fwrisc_zephyr_hello_world.f
+tests/fwrisc_zephyr_synchronization.f
+tests/fwrisc_zephyr_philosophers.f
+
+

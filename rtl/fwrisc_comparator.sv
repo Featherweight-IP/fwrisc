@@ -38,9 +38,6 @@ module fwrisc_comparator(
 		output			out
 		);
 	
-	wire signed [31:0] in_a_s = in_a;
-	wire signed [31:0] in_b_s = in_b;
-	
 	always @* begin
 		case (op) 
 			COMPARE_EQ: out = (in_a == in_b);

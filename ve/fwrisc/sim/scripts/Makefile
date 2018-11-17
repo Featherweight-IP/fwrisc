@@ -11,8 +11,14 @@ SRC_DIRS += $(FWRISC)/ve/fwrisc/tb
 
 TB_MODULES_HDL=fwrisc_tb_hdl
 
-SW_IMAGES := $(notdir $(call get_plusarg,SW_IMAGE,$(PLUSARGS)))
+SW_IMAGES := $(foreach img,$(call get_plusarg,SW_IMAGE,$(PLUSARGS)),$(subst $(BUILD_DIR)/esw/,,$(img)))
 SW_IMAGE := $(firstword $(SW_IMAGES))
+
+ifeq (zephyr.elf,$(notdir $(SW_IMAGE))) 
+  SW_IMAGE := $(subst $(BUILD_DIR)/esw/,,$(SW_IMAGE))
+else
+  SW_IMAGE := $(notdir $(SW_IMAGE))
+endif
 
 ifneq (,$(SW_IMAGES))
   BUILD_PRECOMPILE_TARGETS += embedded_sw
@@ -45,7 +51,7 @@ ram.hex :
 endif
 
 embedded_sw :
-	$(Q)echo SW_IMAGES=$(SW_IMAGES)
+	$(Q)echo SW_IMAGES=$(SW_IMAGES) SW_IMAGE=$(SW_IMAGE)
 	$(Q)if test ! -d esw; then mkdir -p esw; fi
 	$(Q)$(MAKE) -C esw VERBOSE=$(VERBOSE) \
 		-f $(SIM_DIR)/scripts/embedded.mk $(SW_IMAGES)

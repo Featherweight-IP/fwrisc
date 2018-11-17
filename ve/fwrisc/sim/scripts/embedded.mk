@@ -16,5 +16,11 @@ RULES := 1
 	$(Q)$(CC) -o $@ $^ \
 		-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
 		-T$(FWRISC_TESTS_DIR)/riscv-compliance/riscv-test-env/p/link.ld
+		
+zephyr/%/zephyr/zephyr.elf : $(ZEPHYR_BASE)/samples/%/CMakeLists.txt $(wildcard $(ZEPHYR_BASE)/samples/%/src/%.c)
+	$(Q)rm -rf zephyr/$*
+	$(Q)mkdir -p zephyr/$*
+	$(Q)cd zephyr/$* ; cmake -DBOARD=fwrisc_sim $(ZEPHYR_BASE)/samples/$*
+	$(Q)cd zephyr/$* ; $(MAKE)
 
 include $(MK_INCLUDES)

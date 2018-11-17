@@ -26,8 +26,7 @@
 #include "AsmTestCompiler.h"
 
 fwrisc_instr_tests::fwrisc_instr_tests(uint32_t max_instr) : m_max_instr(max_instr) {
-	// TODO Auto-generated constructor stub
-
+	m_halt_addr = 0x80000004;
 }
 
 fwrisc_instr_tests::~fwrisc_instr_tests() {
@@ -100,8 +99,8 @@ void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 
 void fwrisc_instr_tests::exec(uint32_t addr, uint32_t instr) {
 	fprintf(stdout, "EXEC: 0x%08x - 0x%08x\n", addr, instr);
-	if (addr == 0x80000004) {
-		fprintf(stdout, "hit 0x4\n");
+	if (m_halt_addr != 0 && addr == m_halt_addr) {
+		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
 		m_end_of_test = true;
 		dropObjection(this);
 	}

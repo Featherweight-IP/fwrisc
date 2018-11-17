@@ -46,7 +46,7 @@ module fwrisc_tb_hdl(input clock);
 
 	generic_sram_byte_en_dualport #(
 		.DATA_WIDTH        (32       ), 
-		.ADDRESS_WIDTH     (14       ),
+		.ADDRESS_WIDTH     (14       ), // 64k (4x16k)
 		.INIT_FILE         ("ram.hex")
 		) u_sram (
 		.i_clk             (clock            		), 

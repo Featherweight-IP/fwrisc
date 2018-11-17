@@ -1,6 +1,5 @@
 /*
- * fwrisc_instr_tests.h
- *
+ * fwrisc_zephyr_tests.h
  *
  * Copyright 2018 Matthew Ballance
  *
@@ -18,25 +17,21 @@
  * the License for the specific language governing
  * permissions and limitations under the License.
  *
- *  Created on: Oct 28, 2018
+ *
+ *  Created on: Nov 16, 2018
  *      Author: ballance
  */
 
-#ifndef INCLUDED_FWRISC_INSTR_TESTS_H
-#define INCLUDED_FWRISC_INSTR_TESTS_H
-#include "Vfwrisc_tb_hdl.h"
-#include "GoogletestVlTest.h"
+#ifndef INCLUDED_FWRISC_ZEPHYR_TESTS_H
+#define INCLUDED_FWRISC_ZEPHYR_TESTS_H
+#include "fwrisc_instr_tests.h"
+#include "ElfSymtabReader.h"
 
-class fwrisc_instr_tests : public GoogletestVlTest<Vfwrisc_tb_hdl> {
+class fwrisc_zephyr_tests : public fwrisc_instr_tests {
 public:
-	struct reg_val_s {
-		uint32_t	addr;
-		uint32_t	val;
-	};
-public:
-	fwrisc_instr_tests(uint32_t max_instr=100);
+	fwrisc_zephyr_tests();
 
-	virtual ~fwrisc_instr_tests();
+	virtual ~fwrisc_zephyr_tests();
 
 	virtual void SetUp();
 
@@ -48,23 +43,15 @@ public:
 
 protected:
 
-	void runtest(
-			const std::string 	&program,
-			reg_val_s			*regs,
-			uint32_t			n_regs);
-
-	void check(reg_val_s *regs, uint32_t n_regs);
-
-public:
-	static fwrisc_instr_tests		*test;
+	void check(const char *exp[], uint32_t exp_sz);
 
 protected:
-	uint32_t						m_icount;
-	uint32_t						m_max_instr;
-	uint32_t						m_halt_addr;
-	bool							m_end_of_test;
-	std::pair<uint32_t, bool>		m_regs[64];
-	std::pair<uint32_t, bool>		m_mem[4096];
+	ElfSymtabReader				m_symtab;
+	uint32_t					m_ram_console;
+	std::string					m_buffer;
+	std::vector<std::string>	m_console_out;
+	bool						m_trace_funcs;
+	bool						m_trace_instr;
 };
 
-#endif /* INCLUDED_FWRISC_INSTR_TESTS_H */
+#endif /* INCLUDED_FWRISC_ZEPHYR_TESTS_H */
