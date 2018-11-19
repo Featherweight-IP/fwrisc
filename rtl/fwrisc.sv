@@ -17,6 +17,8 @@
  * the License for the specific language governing
  * permissions and limitations under the License.
  ****************************************************************************/
+`include "fwrisc_defines.vh"
+
 
 /**
  * Module: fwrisc
@@ -43,40 +45,51 @@ module fwrisc (
 
 	reg[31:0]			instr;
 	
-	typedef enum bit[3:0] {
-		FETCH, // 
-		DECODE,
-		EXECUTE,
-		CSR_1,
-		CSR_2,
-		MEMW, // 5
-		MEMR,
-		EXCEPTION_1,
-		EXCEPTION_2,
-		SHIFT_1,
-		SHIFT_2
-	} state_e;
 	
-	state_e				state;
+	reg[3:0]			state;
 	reg[31:2]			pc;
 	reg[4:0]			shift_amt;
 	wire[31:2]			pc_plus4;
-	wire[31:2]			pc_next;
+	reg[31:2]			pc_next;
 	
 	assign pc_plus4 = (pc + 1'b1);
 
 	assign iaddr = {pc, 2'b0};
-	assign ivalid = (state == FETCH && !reset);
+	assign ivalid = (state == `FETCH && !reset);
+
+	/****************************************************************
+	 * Instruction and Cycle counters
+	 ****************************************************************/
+	reg [7:0]			cycle_counter;
+	wire				cycle_counter_ovf = cycle_counter[7];
+	reg [7:0]			instr_counter;
+	always @(posedge clock) begin
+		if (reset || state == `CYCLE_COUNT_UPDATE_1) begin
+			cycle_counter <= 1;
+		end else begin
+			cycle_counter <= cycle_counter + 1;
+		end
+	end
+	
+	always @(posedge clock) begin
+		if (reset || state == `INSTR_COUNT_UPDATE_1) begin
+			instr_counter <= 0;
+		end else if (state == `EXECUTE) begin
+			instr_counter <= instr_counter + 1;
+		end
+	end
 	
 	// ALU signals
-	wire[31:0]					alu_op_a;
-	wire[31:0]					alu_op_b;
-	wire [4:0]					alu_op;
-	wire[32:0]					alu_out;
+	reg[31:0]					alu_op_a;
+	reg[31:0]					alu_op_b;
+	reg[4:0]					alu_op;
+	wire[31:0]					alu_out;
+	wire						alu_carry;
+	wire						alu_eqz;
 	
 	always @(posedge clock) begin
 		if (reset) begin
-			state <= FETCH;
+			state <= `FETCH;
 			instr <= 0;
 			pc <= (32'h8000_0000 >> 2);
 		end else begin
@@ -85,100 +98,126 @@ module fwrisc (
 			end
 			
 			case (state)
-				FETCH: begin
+				`FETCH: begin
 					if (ivalid && iready) begin
-						state <= DECODE;
+						state <= `DECODE;
 						instr <= idata;
 					end
 				end
 				
-				DECODE: begin
+				`DECODE: begin
 					// NOP: wait for decode to occur
 					if (op_csr) begin
-						state <= CSR_1;
+						state <= `CSR_1;
 					end else if (op_shift) begin
-						state <= SHIFT_1;
+						state <= `SHIFT_1;
 					end else begin
-						state <= EXECUTE;
+						state <= `EXECUTE;
 					end
 				end
 				
-				CSR_1: begin
-					state <= CSR_2;
+				`CSR_1: begin
+					state <= `CSR_2;
 				end
 				
-				CSR_2: begin
-					state <= EXECUTE;
+				`CSR_2: begin
+					state <= `EXECUTE;
 				end
 				
-				EXECUTE: begin
+				`EXECUTE: begin
 					if (exception) begin
 						// Exception Handling:
 						// - Write the address to MTVAL in EXECUTE
 						// - Write the cause to MTCAUSE in EXECEPTION_1
 						// - Jump to FETCH to execute vector address
-						state <= EXCEPTION_1;
+						state <= `EXCEPTION_1;
 					end else if (op_ld) begin
-						state <= MEMR;
+						state <= `MEMR;
 					end else if (op_st) begin
-						state <= MEMW;
+						state <= `MEMW;
+					end else if (cycle_counter_ovf) begin
+						pc <= pc_next;
+						state <= `CYCLE_COUNT_UPDATE_1;
 					end else begin
 						pc <= pc_next;
-						state <= FETCH;
+						state <= `FETCH;
 					end
 				end
 				
-				MEMW, MEMR: begin
+				`MEMW, `MEMR: begin
 					if (dvalid && dready) begin
 						pc <= pc_next;
-						state <= FETCH;
+						// Steal a few cycles to update the cycle counter
+						if (cycle_counter[7]) begin
+							state <= `CYCLE_COUNT_UPDATE_1;
+						end else begin
+							state <= `FETCH;
+						end
 					end
 				end
 			
 				// Capture the fault address
-				EXCEPTION_1: begin
-					state <= EXCEPTION_2;
+				`EXCEPTION_1: begin
+					state <= `EXCEPTION_2;
 				end
 			
 				// Capture the EPC
-				EXCEPTION_2: begin
+				`EXCEPTION_2: begin
 					// Contains MTVEC
 					pc <= ra_rdata[31:2];
-					state <= FETCH;
+					state <= `FETCH;
 				end
 			
 				// Latch the shift amount into the shift_amt register
-				SHIFT_1: begin
+				`SHIFT_1: begin
 					if (op_shift_reg) begin
 						shift_amt <= (rb_rdata[4:0] - 1'b1);
 						if (|rb_rdata[4:0]) begin
-							state <= SHIFT_2;
+							state <= `SHIFT_2;
 						end else begin
-							state <= EXECUTE;
+							state <= `EXECUTE;
 						end
 					end else begin
 						shift_amt <= (rs2 - 1'b1);
 						if (|rs2) begin
-							state <= SHIFT_2;
+							state <= `SHIFT_2;
 						end else begin
-							state <= EXECUTE;
+							state <= `EXECUTE;
 						end
 					end
 				end
 				
-				SHIFT_2: begin
+				`SHIFT_2: begin
 					// Shift 
 					if (|shift_amt) begin
 						shift_amt <= shift_amt - 1;
 					end else begin
-						state <= EXECUTE;
+						state <= `EXECUTE;
 					end
+				end
+			
+				/**
+				 * Write the cycle count to CSR_tmp. 
+				 * Setup a read of CSR_tmp and the counter CSR
+				 */
+				`CYCLE_COUNT_UPDATE_1: begin
+					state <= `CYCLE_COUNT_UPDATE_2;
+				end
+			
+				/**
+				 * Add CSR_tmp and the counter CSR
+				 */
+				`CYCLE_COUNT_UPDATE_2: begin
+					state <= `INSTR_COUNT_UPDATE_1;
+				end
+				
+				`INSTR_COUNT_UPDATE_1: begin
+					state <= `FETCH;
 				end
 				
 			endcase
 		end
 	end
-	
 	
 
 	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
@@ -209,16 +248,25 @@ module fwrisc (
 	wire op_csrrc     = (op_csr && instr[13:12] == 2'b11);
 	wire op_csrrs     = (op_csr && instr[13:12] == 2'b10);
 	wire [11:0]	csr   = instr[31:20];
-	wire [5:0]	csr_addr;
+	reg [5:0]	csr_addr;
 
-	wire[5:0] CSR_MTVEC  = 6'h25;
-	wire[5:0] CSR_MEPC   = 6'h29;
-	wire[5:0] CSR_MCAUSE = 6'h2A;
-	wire[5:0] CSR_MTVAL  = 6'h2B;
-	// 0x300-0x306 => 0x20-0x26 (+0x20)
-	// 0x340-0x344 => 0x28-0x2C 
+	wire[5:0] CSR_MTVEC   = 6'h25;
+	wire[5:0] CSR_MEPC    = 6'h29;
+	wire[5:0] CSR_MCAUSE  = 6'h2A;
+	wire[5:0] CSR_MTVAL   = 6'h2B;
+	wire[5:0] CSR_MCYCLE  = 6'h36;
+	wire[5:0] CSR_MINSTR  = 6'h37;
+	wire[5:0] CSR_MCYCLEH = 6'h38;
+	wire[5:0] CSR_MINSTRH = 6'h39;
+	wire[5:0] CSR_tmp     = 6'h3F;
+	// 0x300-0x306 => 0x20-0x26 (32-38)
+	// 0x340-0x344 => 0x28-0x2C (40-44)
 	// 0xF11-0xF14 => 0x31-0x34 (49-52)
-	// CSR_tmp = 63
+	// 0xB00       => 0x36
+	// 0xB02       => 0x37
+	// 0xB80       => 0x38
+	// 0xB82       => 0x39
+	// CSR_tmp     => 0x3F (63)
 	always @* begin
 		case (csr[11:8])
 			4'h3: begin
@@ -228,7 +276,14 @@ module fwrisc (
 					csr_addr = {3'b101, csr[2:0]};
 				end
 			end
-			default: begin
+			4'hb: begin // counters
+				if (csr[7]) begin // 0xB8x
+					csr_addr = {2'd3, 3'b100, csr[1]};
+				end else begin
+					csr_addr = {2'd3, 3'b011, csr[1]};
+				end
+			end
+			default: begin // 4'hf
 				csr_addr = {2'b11, csr[3:0]};
 			end
 		endcase
@@ -253,28 +308,26 @@ module fwrisc (
 	wire[4:0]		rs2 = instr[24:20];
 	wire[4:0]		rd  = instr[11:7];
 	
-	parameter reg[5:0]		CSR_tmp = 63;
 
-	wire[5:0]		ra_raddr;
-	wire[5:0]		rb_raddr;
+	reg[5:0]		ra_raddr;
+	reg[5:0]		rb_raddr;
 	wire[31:0]		ra_rdata;
 	wire[31:0]		rb_rdata;
-	wire[31:0]		rb_rdata_neg;
-	wire[5:0]		rd_waddr;
-	wire[31:0]		rd_wdata;
-	wire			rd_wen;
+	reg[5:0]		rd_waddr;
+	reg[31:0]		rd_wdata;
+	reg				rd_wen;
 	
 	
 	// Comparator signals
 	wire[31:0]					comp_op_a = ra_rdata;
-	wire[31:0]					comp_op_b;
-	wire[4:0]					comp_op;
+	reg[31:0]					comp_op_b;
+	reg[4:0]					comp_op;
 	wire						comp_out;
 	wire						branch_cond;
 	
 	// Exception signals
-	wire						exception;
-	wire 						misaligned_addr;
+	reg							exception;
+	reg 						misaligned_addr;
 	
 	fwrisc_comparator u_comp (
 		.clock  (clock 		), 
@@ -292,15 +345,15 @@ module fwrisc (
 		end
 		if (op_arith_imm || op_arith_reg) begin
 			if (instr[14:12] == 3'b010) begin
-				comp_op = COMPARE_LT;  // SLT, SLTI
+				comp_op = `COMPARE_LT;  // SLT, SLTI
 			end else begin
-				comp_op = COMPARE_LTU; // SLTU, SLTUI
+				comp_op = `COMPARE_LTU; // SLTU, SLTUI
 			end
 		end else begin
 			case (instr[14:13]) 
-				2'b00: comp_op = COMPARE_EQ;  // BEQ, BNE
-				2'b10: comp_op = COMPARE_LT;  // BLT, BGE
-				default: /*2'b11: */comp_op = COMPARE_LTU; // BLTU BGEU
+				2'b00: comp_op = `COMPARE_EQ;  // BEQ, BNE
+				2'b10: comp_op = `COMPARE_LT;  // BLT, BGE
+				default: /*2'b11: */comp_op = `COMPARE_LTU; // BLTU BGEU
 			endcase
 		end
 	end
@@ -311,7 +364,7 @@ module fwrisc (
 	 ****************************************************************/
 	always @* begin
 		case (state)
-			DECODE: begin
+			`DECODE: begin
 				if (op_csr) begin
 					ra_raddr = rs1;
 					if (op_csrrc) begin
@@ -324,7 +377,7 @@ module fwrisc (
 					// ERET sets up 
 					ra_raddr = CSR_MEPC;
 					rb_raddr = zero;
-					rd_waddr = zero;					
+					rd_waddr = zero;
 				end else begin
 					// Normal instructions setup read during DECODE
 					ra_raddr = rs1;
@@ -333,13 +386,13 @@ module fwrisc (
 				end
 			end
 				
-			CSR_1: begin
+			`CSR_1: begin
 				ra_raddr = csr_addr; // CSR
 				rb_raddr = zero;
 				rd_waddr = CSR_tmp; // write RS1 to CSR_tmp
 			end
 				
-			CSR_2: begin
+			`CSR_2: begin
 				ra_raddr = CSR_tmp;
 				if (op_csrrc || op_csrrs) begin
 					rb_raddr = csr_addr;
@@ -349,24 +402,42 @@ module fwrisc (
 				rd_waddr = rd;
 			end
 			
-			EXCEPTION_1: begin
+			`EXCEPTION_1: begin
 				ra_raddr = CSR_MTVEC;
 				rb_raddr = zero;
 				rd_waddr = CSR_MEPC;
 			end
 			
-			EXCEPTION_2: begin
+			`EXCEPTION_2: begin
 				ra_raddr = zero;
 				rb_raddr = zero;
 				rd_waddr = CSR_MCAUSE; // Need to write the cause
 			end
 			
-			SHIFT_1, SHIFT_2: begin
+			`SHIFT_1, `SHIFT_2: begin
 				// rs1 has been read as ra_rdata
 				// write to CSR_tmp
 				ra_raddr = CSR_tmp;
 				rb_raddr = zero;
 				rd_waddr = CSR_tmp;
+			end
+			
+			`CYCLE_COUNT_UPDATE_1: begin
+				ra_raddr = CSR_tmp;    // Read CSR_tmp in the next cycle
+				rb_raddr = CSR_MCYCLE; // Read MCYCLE in the next cycle
+				rd_waddr = CSR_tmp;    // Write the current count to CSR_tmp
+			end
+			
+			`CYCLE_COUNT_UPDATE_2: begin
+				ra_raddr = zero;  // Temp
+				rb_raddr = CSR_MINSTR;  // Setup a read for the next cycle
+				rd_waddr = CSR_MCYCLE; // Write back the new count
+			end
+			
+			`INSTR_COUNT_UPDATE_1: begin
+				ra_raddr = zero;  // Temp
+				rb_raddr = zero;  // Temp
+				rd_waddr = CSR_MINSTR; // Write back the new count
 			end
 			
 			default: /* EXECUTE, MEMR, MEMW */
@@ -403,10 +474,10 @@ module fwrisc (
 	always @* begin
 		case (state)
 			
-			EXCEPTION_1: 
+			`EXCEPTION_1: 
 				rd_wdata = {pc, 2'b0}; // Exception PC
 				
-			EXCEPTION_2: begin
+			`EXCEPTION_2: begin
 				// Write the cause
 				if (op_ecall) begin
 					// EBREAK, ECALL
@@ -420,7 +491,7 @@ module fwrisc (
 				end				
 			end
 			
-			MEMR: begin
+			`MEMR: begin
 				case (instr[14:12]) 
 					3'b000,3'b100: begin // LB, LBU
 						case (alu_out[1:0]) 
@@ -440,6 +511,18 @@ module fwrisc (
 					// LW and default
 					default: rd_wdata = drdata; 
 				endcase				
+			end
+			
+			`CYCLE_COUNT_UPDATE_1: begin
+				rd_wdata = {24'b0, cycle_counter};
+			end
+			
+			`CYCLE_COUNT_UPDATE_2: begin
+				rd_wdata = alu_out;
+			end
+			
+			`SHIFT_1: begin
+				rd_wdata = ra_rdata;
 			end
 			
 			default: /*EXECUTE: */ begin
@@ -466,16 +549,16 @@ module fwrisc (
 	 ****************************************************************/
 	always @* begin
 		case (state)
-			FETCH, DECODE:
+			`FETCH, `DECODE:
 				rd_wen = 0; // TODO:
 				
-			EXECUTE:
+			`EXECUTE:
 				rd_wen = ((!op_branch && !op_ld_st) || exception || op_shift) && |rd_waddr;
 				
-			MEMR: 
+			`MEMR: 
 				rd_wen = (|rd_waddr && dready);
 				
-			MEMW:
+			`MEMW:
 				rd_wen = 0;
 				
 			default:
@@ -495,129 +578,178 @@ module fwrisc (
 		.rd_wdata  (rd_wdata ), 
 		.rd_wen    (rd_wen   ));
 	
-	reg [7:0]			cycle_counter;
-	reg [7:0]			instr_counter;
-	always @(posedge clock) begin
-		if (reset) begin
-			cycle_counter <= 0;
-		end else begin
-			cycle_counter <= cycle_counter + 1;
-		end
-	end
-	
-	always @(posedge clock) begin
-		if (reset) begin
-			instr_counter <= 0;
-		end else if (state == EXECUTE) begin
-			instr_counter <= instr_counter + 1;
-		end
-	end
 	
 	always @* begin
-		if (op_lui) begin
-			alu_op_a = imm_lui;
-			alu_op_b = zero;
-		end else if (op_auipc) begin
-			alu_op_a = auipc_imm_31_12;
-			alu_op_b = {pc, 2'b0};
-		end else if (op_jal) begin
-			alu_op_a = jal_off;
-			alu_op_b = {pc, 2'b0};
-		end else if (op_jalr) begin
-			alu_op_a = ra_rdata;
-			alu_op_b = imm_11_0;
-		end else if (op_shift) begin
-//			if (state == SHIFT_1) begin
-				alu_op_a = ra_rdata;
-				alu_op_b = zero;
-//			end else begin
-//				alu_op_a = rb_rdata;
-//				alu_op_b = zero;
-//			end
-		end else if (op_ld || op_arith_imm) begin
-			if (op_shift_imm) begin
-				alu_op_a = imm_11_0[4:0]; // Shift immediate
-			end else begin
-				alu_op_a = imm_11_0; // sign-extended immediate
+//		if (op_lui) begin
+//			alu_op_a = imm_lui;
+//		end else if (op_auipc) begin
+//			alu_op_a = auipc_imm_31_12;
+//		end else if (op_jal) begin
+//			alu_op_a = jal_off;
+//		end else if (op_branch) begin
+//			alu_op_a = imm_branch;
+//		end else if (op_csr && instr[14] && (state == CSR_1)) begin // CSR immediate
+//			alu_op_a = rs1; // zimm is the same field as rs1
+//		end else begin
+//			alu_op_a = ra_rdata;
+//		end
+//		
+//		if (op_auipc || op_jal || op_branch) begin
+//			alu_op_b = {pc, 2'b0};
+//		end else if (op_jalr || op_ld || op_arith_imm) begin
+//			alu_op_b = imm_11_0;
+//		end else if (op_st) begin
+//			alu_op_b = st_imm_11_0; // sign-extended immediate
+//		end else if (op_lui || op_shift) begin
+//			alu_op_b = zero;
+//		end else begin
+//			alu_op_b = rb_rdata;
+//		end
+	
+		case (state) 
+			`CSR_1: begin
+				if (instr[14]) begin
+					alu_op_a = rs1;
+				end else begin
+					alu_op_a = ra_rdata;
+				end
 			end
-			alu_op_b = ra_rdata; // rs1
-		end else if (op_st) begin
-			alu_op_a = st_imm_11_0; // sign-extended immediate
-			alu_op_b = ra_rdata; // rs1
-		end else if (op_arith_reg) begin
-			if (instr[14:12] == 3'b000 && instr[30]) begin // SUB
-				alu_op_a = -$signed(rb_rdata); // rb_rdata_neg;
-			end else begin
-				alu_op_a = rb_rdata; // rs2
+			
+			`CYCLE_COUNT_UPDATE_2: alu_op_a = ra_rdata;
+			
+			`INSTR_COUNT_UPDATE_1: alu_op_a = {24'b0, instr_counter};
+				
+			default: begin
+				if (op_lui) begin
+					alu_op_a = imm_lui;
+				end else if (op_auipc) begin
+					alu_op_a = auipc_imm_31_12;
+				end else if (op_jal) begin
+					alu_op_a = jal_off;
+				end else if (op_branch) begin
+					alu_op_a = imm_branch;
+				end else begin
+					alu_op_a = ra_rdata;
+				end
 			end
-			alu_op_b = ra_rdata; // rs1
-		end else if (op_branch) begin
-			// For branches, we use branch_immediate
-			alu_op_a = imm_branch;
-			alu_op_b = {pc, 2'b0};
-		end else if (op_csr) begin
-			if (instr[14] && (state == CSR_1)) begin // CSR immediate
-				alu_op_a = rs1; // zimm is the same field as rs1
-			end else begin
-				alu_op_a = ra_rdata;
-			end
-			alu_op_b = rb_rdata;
-		end else begin
-			alu_op_a = zero;
-			/* TMP
-			alu_op_a = {cycle_counter, instr_counter};
-			 */
-			alu_op_b = zero;
-		end
+		endcase
 		
 		case (state)
-			EXECUTE: begin
+			/* TODO:
+			`CYCLE_COUNT_UPDATE_1: begin
+				alu_op_b = {24'b0, cycle_counter};
+			end
+			 */
+			
+			`CYCLE_COUNT_UPDATE_2, `INSTR_COUNT_UPDATE_1: begin
+				alu_op_b = rb_rdata;
+			end
+			
+			default: begin
+				if (op_lui) begin
+					alu_op_b = zero;
+				end else if (op_auipc || op_jal || op_branch) begin
+					alu_op_b = {pc, 2'b0};
+				end else if (op_jalr || op_ld || (op_arith_imm && !op_shift)) begin
+					alu_op_b = imm_11_0;
+				end else if (op_st) begin
+					alu_op_b = st_imm_11_0;
+				end else begin
+					alu_op_b = rb_rdata;
+				end
+			end
+		endcase
+		
+//		if (op_lui) begin
+//			alu_op_a = imm_lui;
+//			alu_op_b = zero;
+//		end else if (op_auipc) begin
+//			alu_op_a = auipc_imm_31_12;
+//			alu_op_b = {pc, 2'b0};
+//		end else if (op_jal) begin
+//			alu_op_a = jal_off;
+//			alu_op_b = {pc, 2'b0};
+//		end else if (op_jalr) begin
+//			alu_op_a = ra_rdata;
+//			alu_op_b = imm_11_0;
+//		end else if (op_shift) begin
+//			alu_op_a = ra_rdata;
+//			alu_op_b = zero;
+//		end else if (op_ld || op_arith_imm) begin
+//			alu_op_a = ra_rdata; // rs1
+//			alu_op_b = imm_11_0; // sign-extended immediate
+//		end else if (op_st) begin
+//			alu_op_a = ra_rdata; // rs1
+//			alu_op_b = st_imm_11_0; // sign-extended immediate
+//		end else if (op_arith_reg) begin
+//			alu_op_a = ra_rdata; // rs2
+//			alu_op_b = rb_rdata; // rs1
+//		end else if (op_branch) begin
+//			// For branches, we use branch_immediate
+//			alu_op_a = imm_branch;
+//			alu_op_b = {pc, 2'b0};
+//		end else if (op_csr) begin
+//			if (instr[14] && (state == `CSR_1)) begin // CSR immediate
+//				alu_op_a = rs1; // zimm is the same field as rs1
+//			end else begin
+//				alu_op_a = ra_rdata;
+//			end
+//			alu_op_b = rb_rdata;
+//		end else begin
+//			alu_op_a = zero;
+//			alu_op_b = zero;
+//		end
+		
+		case (state)
+			`EXECUTE: begin
 				if (op_arith_imm || op_arith_reg) begin
 					case (instr[14:12]) 
 						3'b000: begin // ADDI, ADD, SUB
-							// TODO: handle register subtract
-							alu_op = OP_ADD;
+							if (op_arith_reg) begin
+								alu_op = (instr[30])?`OP_SUB:`OP_ADD;
+							end else begin
+								alu_op = `OP_ADD;
+							end
 						end
 						3'b100: begin // XOR
-							alu_op = OP_XOR;
+							alu_op = `OP_XOR;
 						end
-//						3'b001, 3'b101: begin // SLL, SLLI, SRA, SRAI, SRL, SRLI
-//							alu_op = OP_OR
-//							alu_op = (instr[30])?OP_SRA:OP_SRL;
-//						end
 						3'b001, 3'b101, 3'b110: begin // SLL, SRA, SRL, OR
-							alu_op = OP_OR;
+							alu_op = `OP_OR;
 						end
 						default: /*3'b111: */begin // AND
-							alu_op = OP_AND;
+							alu_op = `OP_AND;
 						end
 					endcase
 				end else if (op_csrrc) begin
-					alu_op = OP_XOR;
+					alu_op = `OP_XOR;
 				end else if (op_sys) begin
-					alu_op = OP_OR;
+					alu_op = `OP_OR;
 				end else begin
-					alu_op = OP_ADD;
+					alu_op = `OP_ADD;
 				end
 			end
 			
-			SHIFT_2:
+			`CYCLE_COUNT_UPDATE_2, `INSTR_COUNT_UPDATE_1: 
+				alu_op = `OP_ADD;
+			
+			`SHIFT_2:
 				alu_op = (instr[14])?
-					(instr[30])?OP_SRA:OP_SRL:
-					OP_SLL;
+					(instr[30])?`OP_SRA:`OP_SRL:
+					`OP_SLL;
 			
-			CSR_1: begin
+			`CSR_1: begin
 				if (op_csrrc) begin
-					alu_op = OP_AND;
+					alu_op = `OP_AND;
 				end else begin
-					alu_op = OP_OR;
+					alu_op = `OP_OR;
 				end
 			end
 			
-			MEMR, MEMW: alu_op = OP_ADD;
+			`MEMR, `MEMW: alu_op = `OP_ADD;
 			
 			default: /* DECODE */
-				alu_op = OP_OR;
+				alu_op = `OP_OR;
 		endcase
 	end
 	
@@ -627,7 +759,9 @@ module fwrisc (
 		.op_a   (alu_op_a  ), 
 		.op_b   (alu_op_b  ), 
 		.op     (alu_op    ), 
-		.out    (alu_out   ));
+		.out    (alu_out   ),
+		.carry	(alu_carry ),
+		.eqz	(alu_eqz   ));
 
 	/****************************************************************
 	 * pc_next selection
@@ -651,26 +785,39 @@ module fwrisc (
 	end
 	
 	// Handle data-access control signals
-	assign dvalid = (state == MEMR || state == MEMW);
-	assign dwrite = (state == MEMW);
-	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
+	fwrisc_dbus_if u_dbus_if (
+		.clock     (clock    ), 
+		.instr     (instr    ),
+		.rb_rdata  (rb_rdata ), 
+		.alu_out   (alu_out  ), 
+		.state     (state    ), 
+		.daddr     (daddr    ), 
+		.dvalid    (dvalid   ), 
+		.dwrite    (dwrite   ), 
+		.dwdata    (dwdata   ), 
+		.dstrb     (dstrb    ), 
+		.dready    (dready   ));
+	
+//	assign dvalid = (state == MEMR || state == MEMW);
+//	assign dwrite = (state == MEMW);
+//	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
 	
 	always @* begin
-		case (instr[13:12]) 
-			2'b00: begin // SB
-				dstrb = (1'b1 << alu_out[1:0]);
-				dwdata = {rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0]};
-			end
-			2'b01: begin // SH
-				dstrb = (2'b11 << {alu_out[1], 1'b0});
-				dwdata = {rb_rdata[15:0], rb_rdata[15:0]};
-			end
-			// SW and default
-			default: begin
-				dstrb = 4'hf;
-				dwdata = rb_rdata; // Write data is always @ rs2
-			end
-		endcase		
+//		case (instr[13:12]) 
+//			2'b00: begin // SB
+//				dstrb = (1'b1 << alu_out[1:0]);
+//				dwdata = {rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0]};
+//			end
+//			2'b01: begin // SH
+//				dstrb = (2'b11 << {alu_out[1], 1'b0});
+//				dwdata = {rb_rdata[15:0], rb_rdata[15:0]};
+//			end
+//			// SW and default
+//			default: begin
+//				dstrb = 4'hf;
+//				dwdata = rb_rdata; // Write data is always @ rs2
+//			end
+//		endcase		
 	
 //		misaligned_addr = (
 //				// Check address alignment for loads and stores
@@ -699,14 +846,17 @@ module fwrisc (
 		end
 	end
 
-	assign exception = (state == EXECUTE && (op_ecall || misaligned_addr));
+	assign exception = (state == `EXECUTE && (op_ecall || misaligned_addr));
 
+	/**
+	 * The tracer is used during simulation to inspect operation of the core
+	 */
 	fwrisc_tracer u_tracer (
 		.clock   (clock  			), 
 		.reset   (reset  			), 
 		.addr    ({pc, 2'b0}		), 
 		.instr   (instr  			), 
-		.ivalid  ((state == EXECUTE)), 
+		.ivalid  ((state == `EXECUTE)), 
 		.raddr   (rd_waddr			), 
 		.rdata   (rd_wdata			), 
 		.rwrite  (rd_wen 			),
@@ -718,5 +868,4 @@ module fwrisc (
 		);
 	
 endmodule
-
 

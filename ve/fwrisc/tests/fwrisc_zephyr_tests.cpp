@@ -144,7 +144,7 @@ TEST_F(fwrisc_zephyr_tests, synchronization) {
 			"Hello World! fwrisc_sim"
 	};
 
-	run(1000000);
+	run(100000000);
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }

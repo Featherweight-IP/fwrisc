@@ -79,8 +79,8 @@ TEST_F(fwrisc_instr_tests_jump, jalr) {
 			lui		x2, 26
 			lui		x2, 26
 		1:
-			la		x3, entry // 0x1c
-			sub		x4, x1, x3
+			la		x3, entry  // 0x1c
+			sub		x4, x1, x3 //0x24
 			li		x1, 0
 			li		x2, 0
 			li		x3, 0

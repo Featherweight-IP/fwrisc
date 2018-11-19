@@ -17,5 +17,6 @@ $(FWRISC_TESTS_SRC:.cpp=.o) : vl_translate.d
 
 libfwrisc_tests.o : $(FWRISC_TESTS_SRC:.cpp=.o)
 	$(Q)$(LD) -r -o $@ $(FWRISC_TESTS_SRC:.cpp=.o)
+	
 
 endif

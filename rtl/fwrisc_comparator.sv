@@ -17,12 +17,8 @@
  * the License for the specific language governing
  * permissions and limitations under the License.
  ****************************************************************************/
- 
-typedef enum {
-	COMPARE_EQ,
-	COMPARE_LT,
-	COMPARE_LTU
-} compare_op_e;
+
+`include "fwrisc_defines.vh"
 
 /**
  * Module: fwrisc_comparator
@@ -35,13 +31,13 @@ module fwrisc_comparator(
 		input[31:0]		in_a,
 		input[31:0]		in_b,
 		input[1:0]		op,
-		output			out
+		output reg		out
 		);
 	
 	always @* begin
 		case (op) 
-			COMPARE_EQ: out = (in_a == in_b);
-			COMPARE_LT: out = ($signed(in_a) < $signed(in_b));
+			`COMPARE_EQ: out = (in_a == in_b);
+			`COMPARE_LT: out = ($signed(in_a) < $signed(in_b));
 			default: /*COMPARE_LTU:*/ out = (in_a < in_b);
 		endcase
 	end
