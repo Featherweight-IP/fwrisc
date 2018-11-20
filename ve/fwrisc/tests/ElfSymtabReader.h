@@ -24,8 +24,10 @@
 #ifndef INCLUDED_ELF_SYMTAB_READER_H
 #define INCLUDED_ELF_SYMTAB_READER_H
 #include "ElfFileReader.h"
+#include <stdint.h>
 #include <string>
 #include <map>
+#include <vector>
 
 class ElfSymtabReader : public ElfFileReader {
 public:
@@ -37,14 +39,23 @@ public:
 
 	bool find_sym(Elf32_Addr addr, std::string &name);
 
+	int32_t find_sym(Elf32_Addr addr);
+
+	const Elf32_Sym &get_sym(int32_t idx);
+
+	const std::string &get_sym_name(int32_t idx);
+
+	uint32_t n_syms() const { return m_symlist.size(); }
+
 protected:
 
 	virtual void visit_shdr(const Elf32_Shdr &shdr);
 
 
 private:
-	std::map<std::string, Elf32_Sym> 			m_symtab;
-	std::map<Elf32_Addr, std::string>			m_addrtab;
+	std::map<std::string, Elf32_Sym> 					m_symtab;
+	std::map<Elf32_Addr, uint32_t>						m_addrtab;
+	std::vector<std::pair<Elf32_Sym, std::string>>		m_symlist;
 
 };
 

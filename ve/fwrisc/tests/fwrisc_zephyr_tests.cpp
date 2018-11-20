@@ -27,7 +27,7 @@
 #include "GoogletestVlCmdlineProcessor.h"
 #include <stdio.h>
 
-fwrisc_zephyr_tests::fwrisc_zephyr_tests() : fwrisc_instr_tests(10000000) {
+fwrisc_zephyr_tests::fwrisc_zephyr_tests() : fwrisc_ctest_base(10000000) {
 	m_ram_console = 0;
 	m_halt_addr = 0; // Don't halt
 }
@@ -37,23 +37,16 @@ fwrisc_zephyr_tests::~fwrisc_zephyr_tests() {
 }
 
 void fwrisc_zephyr_tests::SetUp() {
-	const GoogletestVlCmdlineProcessor &clp = GoogletestVlCmdlineProcessor::instance();
-	std::string elf_file, v;
-	fwrisc_instr_tests::SetUp();
-
-	m_trace_funcs = clp.has_plusarg("+TRACE_FUNCS");
-	m_trace_instr = clp.has_plusarg("+TRACE_INSTR");
-
-
-	clp.get_plusarg_value("+SW_IMAGE", elf_file);
-
-	if (!m_symtab.read(elf_file)) {
-		fprintf(stdout, "Error: failed to read elf file\n");
-	}
+	fwrisc_ctest_base::SetUp();
 
 	m_ram_console = m_symtab.find_sym("ram_console").st_value;
 	// _Fault is called when the main function returns
 	m_halt_addr = m_symtab.find_sym("_Fault").st_value;
+	filter_func("char_out");
+	filter_func("ram_console_out");
+	filter_func("__udivsi3");
+	filter_func("__umodsi3");
+	filter_func("__mulsi3");
 	fprintf(stdout, "Ram Console: 0x%08x\n", m_ram_console);
 }
 
@@ -62,21 +55,22 @@ void fwrisc_zephyr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
 }
 
 void fwrisc_zephyr_tests::exec(uint32_t addr, uint32_t instr) {
-	std::string sym;
-	if (m_trace_funcs) {
-		if (m_symtab.find_sym(addr, sym)) {
-			fprintf(stdout, "EXEC: %s (0x%08x)\n", sym.c_str(), addr);
-		}
-	}
-	if (m_trace_instr) {
-		fprintf(stdout, "EXEC: 0x%08x\n", addr);
-	}
-
-	if (addr == m_halt_addr) {
-		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
-		m_end_of_test = true;
-		dropObjection(this);
-	}
+	fwrisc_ctest_base::exec(addr, instr);
+//	std::string sym;
+//	if (m_trace_funcs) {
+//		if (m_symtab.find_sym(addr, sym)) {
+//			fprintf(stdout, "EXEC: %s (0x%08x)\n", sym.c_str(), addr);
+//		}
+//	}
+//	if (m_trace_instr) {
+//		fprintf(stdout, "EXEC: 0x%08x\n", addr);
+//	}
+//
+//	if (addr == m_halt_addr) {
+//		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
+//		m_end_of_test = true;
+//		dropObjection(this);
+//	}
 }
 
 void fwrisc_zephyr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
