@@ -41,6 +41,7 @@ void fwrisc_ctest_base::SetUp() {
 
 void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 //	fprintf(stdout, "exec: 0x%08x\n", addr);
+	if (m_trace_funcs) {
 	if (m_call_stack.size() == 0) {
 		// Look for an entry symbol
 		int32_t sym_idx;
@@ -53,10 +54,11 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 			const Elf32_Sym &next = m_symtab.get_sym(sym_idx+1);
 			const std::string &func = m_symtab.get_sym_name(sym_idx);
 			if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
-				fprintf(stdout, "==> %s\n", func.c_str());
+				fprintf(stdout, "%s==> %s\n", m_indent.c_str(), func.c_str());
 				fflush(stdout);
 			}
 			m_call_stack.push(std::pair<Elf32_Addr,Elf32_Addr>(addr,next.st_value-4));
+			m_indent.append("  ");
 		}
 	} else {
 		// We should be in a function
@@ -76,10 +78,11 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 				const Elf32_Sym &next = m_symtab.get_sym(sym_idx+1);
 				const std::string &func = m_symtab.get_sym_name(sym_idx);
 				if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
-					fprintf(stdout, "==> %s\n", func.c_str());
+					fprintf(stdout, "%s==> %s\n", m_indent.c_str(), func.c_str());
 					fflush(stdout);
 				}
 				m_call_stack.push(std::pair<Elf32_Addr,Elf32_Addr>(addr,next.st_value-4));
+				m_indent.append("  ");
 			} else {
 				sym_idx = m_symtab.find_sym(func.first);
 				// Consider this exiting the current scope
@@ -87,10 +90,11 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 
 				const std::pair<Elf32_Addr,Elf32_Addr> &new_func = m_call_stack.top();
 
+				m_indent = m_indent.substr(0, m_indent.size()-2);
 				if (addr >= new_func.first && addr <= new_func.second) {
 					const std::string &func = m_symtab.get_sym_name(sym_idx);
 					if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
-						fprintf(stdout, "<== %s\n", func.c_str());
+						fprintf(stdout, "%s<== %s\n", m_indent.c_str(), func.c_str());
 						fflush(stdout);
 					}
 				} else {
@@ -100,6 +104,7 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 				}
 			}
 		}
+	}
 	}
 
 //	std::string sym;

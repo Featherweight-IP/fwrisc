@@ -31,6 +31,7 @@ protected:
 
 	std::stack<std::pair<Elf32_Addr,Elf32_Addr>>		m_call_stack;
 	std::set<std::string>								m_filter_funcs;
+	std::string											m_indent;
 
 };
 
