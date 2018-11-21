@@ -29,7 +29,9 @@
 
 fwrisc_zephyr_tests::fwrisc_zephyr_tests() : fwrisc_ctest_base(10000000) {
 	m_ram_console = 0;
+	m_raw_console = false;
 	m_halt_addr = 0; // Don't halt
+	m_msg_listener = [&](const std::string &msg) { }; // Empty
 }
 
 fwrisc_zephyr_tests::~fwrisc_zephyr_tests() {
@@ -85,14 +87,23 @@ void fwrisc_zephyr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 		}
 
 		if (ch) {
-			m_buffer.push_back(ch);
-			if (ch == '\n') {
-				m_buffer.push_back(0);
-				fputs("# ", stdout);
-				fputs(m_buffer.c_str(), stdout);
+			if (m_raw_console) {
+				fputc(ch, stdout);
 				fflush(stdout);
+			}
+			if (ch == '\n') {
+				if (!m_raw_console) {
+					fputs("# ", stdout);
+					fputs(m_buffer.c_str(), stdout);
+					fputs("\n", stdout);
+					fflush(stdout);
+				}
+
+				m_msg_listener(m_buffer);
 				m_console_out.push_back(m_buffer);
 				m_buffer.clear();
+			} else {
+				m_buffer.push_back(ch);
 			}
 		}
 	}
@@ -108,7 +119,6 @@ void fwrisc_zephyr_tests::check(const char *exp[], uint32_t exp_sz) {
 		for (std::vector<std::string>::const_iterator it=m_console_out.begin();
 				it!=m_console_out.end(); it++) {
 			std::string line = (*it);
-			line = line.substr(0, line.size()-2); // Trim the CR
 
 			if (line == msg) {
 				found = true;
@@ -128,14 +138,34 @@ TEST_F(fwrisc_zephyr_tests, hello_world) {
 			"Hello World! fwrisc_sim"
 	};
 
+	m_msg_listener = [&](const std::string &msg) {
+		if (msg == "Hello World! fwrisc_sim") {
+			m_end_of_test = true;
+			dropObjection(this);
+		}
+	};
+
 	run(100000);
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }
 
 TEST_F(fwrisc_zephyr_tests, synchronization) {
+	int threadB_count = 0;
 	const char *exp[] = {
-			"Hello World! fwrisc_sim"
+			"threadA: Hello World from fwrisc_sim!",
+			"threadB: Hello World from fwrisc_sim!"
+	};
+
+	m_msg_listener = [&](const std::string &msg) {
+		if (msg.substr(0, strlen("threadB")) == "threadB") {
+			threadB_count++;
+		}
+
+		if (threadB_count >= 2) {
+			m_end_of_test = true;
+			dropObjection(this);
+		}
 	};
 
 	run(100000000);
@@ -148,7 +178,9 @@ TEST_F(fwrisc_zephyr_tests, philosophers) {
 			"An implementation of a solution to the Dining Philosophers"
 	};
 
-	run(1000000);
+	m_raw_console = true;
+
+	run(100000000);
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }

@@ -26,6 +26,7 @@
 #define INCLUDED_FWRISC_ZEPHYR_TESTS_H
 #include "fwrisc_ctest_base.h"
 #include "ElfSymtabReader.h"
+#include <functional>
 
 class fwrisc_zephyr_tests : public fwrisc_ctest_base {
 public:
@@ -46,9 +47,11 @@ protected:
 	void check(const char *exp[], uint32_t exp_sz);
 
 protected:
-	uint32_t					m_ram_console;
-	std::string					m_buffer;
-	std::vector<std::string>	m_console_out;
+	uint32_t									m_ram_console;
+	bool										m_raw_console;
+	std::string									m_buffer;
+	std::vector<std::string>					m_console_out;
+	std::function<void(const std::string &)>	m_msg_listener;
 };
 
 #endif /* INCLUDED_FWRISC_ZEPHYR_TESTS_H */
