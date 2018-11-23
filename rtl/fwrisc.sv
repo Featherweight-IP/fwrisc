@@ -43,11 +43,11 @@ module fwrisc (
 		input			dready
 		);
 
-	reg[31:0]			instr;
+	reg[31:0]			instr = 0;
 	
 	
-	reg[3:0]			state;
-	reg[31:2]			pc;
+	reg[3:0]			state = `FETCH;
+	reg[31:2]			pc = (32'h8000_0000 >> 2);
 	reg[4:0]			shift_amt;
 	wire[31:2]			pc_plus4;
 	reg[31:2]			pc_next;
@@ -60,11 +60,11 @@ module fwrisc (
 	/****************************************************************
 	 * Instruction and Cycle counters
 	 ****************************************************************/
-	reg [7:0]			cycle_counter;
+	reg [7:0]			cycle_counter = 1;
 	wire				cycle_counter_ovf = cycle_counter[7];
-	reg [7:0]			instr_counter;
+	reg [7:0]			instr_counter = 0;
 	always @(posedge clock) begin
-		if (reset || state == `CYCLE_COUNT_UPDATE_1) begin
+		if (/*reset || */state == `CYCLE_COUNT_UPDATE_1) begin
 			cycle_counter <= 1;
 		end else begin
 			cycle_counter <= cycle_counter + 1;
@@ -72,7 +72,7 @@ module fwrisc (
 	end
 	
 	always @(posedge clock) begin
-		if (reset || state == `INSTR_COUNT_UPDATE_1) begin
+		if (/*reset || */state == `INSTR_COUNT_UPDATE_1) begin
 			instr_counter <= 0;
 		end else if (state == `EXECUTE) begin
 			instr_counter <= instr_counter + 1;
@@ -88,17 +88,17 @@ module fwrisc (
 	wire						alu_eqz;
 	
 	always @(posedge clock) begin
-		if (reset) begin
+		/* if (reset) begin
 			state <= `FETCH;
 			instr <= 0;
 			pc <= (32'h8000_0000 >> 2);
-		end else begin
+		end else */ begin
 			if (ivalid && iready) begin
 				instr <= idata;
 			end
 			
 			case (state)
-				`FETCH: begin
+				default /*`FETCH*/: begin
 					if (ivalid && iready) begin
 						state <= `DECODE;
 						instr <= idata;
@@ -270,7 +270,7 @@ module fwrisc (
 	always @* begin
 		case (csr[11:8])
 			4'h3: begin
-				if (csr[7:4] == 0) begin
+				if (csr[7:4] == 3'b0) begin
 					csr_addr = {2'b10, csr[3:0]};
 				end else begin
 					csr_addr = {3'b101, csr[2:0]};
@@ -326,7 +326,7 @@ module fwrisc (
 	wire						branch_cond;
 	
 	// Exception signals
-	reg							exception;
+	wire						exception;
 	reg 						misaligned_addr;
 	
 	fwrisc_comparator u_comp (
@@ -469,8 +469,81 @@ module fwrisc (
 				end
 		endcase
 	end
+
+	reg[31:0]			read_data_wb;
+	always @* begin
+	case (instr[13:12]) 
+		2'b00: begin // LB, LBU
+			case (alu_out[1:0]) 
+				2'b00: begin
+					if (!instr[14] && drdata[7]) begin
+						read_data_wb = {{24{1'b1}}, drdata[7:0]};
+					end else begin
+						read_data_wb = {{24{1'b0}}, drdata[7:0]};
+					end
+				end
+				2'b01: begin
+					if (!instr[14] && drdata[15]) begin
+						read_data_wb = {{24{1'b1}}, drdata[15:8]};
+					end else begin
+						read_data_wb = {{24{1'b0}}, drdata[15:8]};
+					end
+				end 
+				2'b10: begin
+					if (!instr[14] && drdata[23]) begin
+						read_data_wb = {{24{1'b1}}, drdata[23:16]};
+					end else begin
+						read_data_wb = {{24{1'b0}}, drdata[23:16]};
+					end
+				end 
+				default: /*2'b11*/ begin
+					if (!instr[14] && drdata[31]) begin
+						read_data_wb = {{24{1'b1}}, drdata[31:24]};
+					end else begin
+						read_data_wb = {{24{1'b0}}, drdata[31:24]};
+					end
+				end 
+			endcase
+		end
+		2'b01: begin // LH, LHU
+			if (alu_out[1]) begin
+				if (!instr[14] && drdata[31]) begin
+					read_data_wb = {{16{1'b1}}, drdata[31:16]};
+				end else begin
+					read_data_wb = {{16{1'b0}}, drdata[31:16]};
+				end
+			end else begin
+				if (!instr[14] && drdata[15]) begin
+					read_data_wb = {{16{1'b1}}, drdata[15:0]};
+				end else begin
+					read_data_wb = {{16{1'b0}}, drdata[15:0]};
+				end
+			end
+		end
+		// LW and default
+		default: read_data_wb = drdata; 
+	endcase	
+	end
+
+	reg[3:0] exc_code;
+	always @* begin
+		if (op_ecall) begin
+			exc_code = (instr[20])?4'h3:4'hb;
+		end else if (op_ld) begin
+			exc_code = 4'h4;
+		end else if (op_st) begin
+			exc_code = 4'h6;
+		end else begin
+			exc_code = 4'h0;
+		end
+			
+	end
 	
 	// Selection of rd_wdata
+	// 1+4+7+1+1+1+5 => 20 taps
+	// {pc, 2'b0} (EXCEPTION_1)
+	// MCAUSE (EXCEPTION_2)
+	// 
 	always @* begin
 		case (state)
 			
@@ -479,38 +552,40 @@ module fwrisc (
 				
 			`EXCEPTION_2: begin
 				// Write the cause
-				if (op_ecall) begin
-					// EBREAK, ECALL
-					rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
-				end else if (op_ld) begin
-					rd_wdata = 32'h0000_0004; // misaligned load address
-				end else if (op_st) begin
-					rd_wdata = 32'h0000_0006; // misaligned store address
-				end else begin
-					rd_wdata = zero; // instruction address misaligned
-				end				
+				rd_wdata = {{24{1'b0}}, exc_code};
+//				if (op_ecall) begin
+//					// EBREAK, ECALL
+//					rd_wdata = (instr[20])?32'h0000_0003:32'h0000_000b;
+//				end else if (op_ld) begin
+//					rd_wdata = 32'h0000_0004; // misaligned load address
+//				end else if (op_st) begin
+//					rd_wdata = 32'h0000_0006; // misaligned store address
+//				end else begin
+//					rd_wdata = zero; // instruction address misaligned
+//				end				
 			end
 			
 			`MEMR: begin
-				case (instr[14:12]) 
-					3'b000,3'b100: begin // LB, LBU
-						case (alu_out[1:0]) 
-							2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
-							2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
-							2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
-							default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
-						endcase
-					end
-					3'b001, 3'b101: begin // LH, LHU
-						if (alu_out[1]) begin
-							rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
-						end else begin
-							rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
-						end
-					end
-					// LW and default
-					default: rd_wdata = drdata; 
-				endcase				
+				rd_wdata = read_data_wb;
+//				case (instr[14:12]) 
+//					3'b000,3'b100: begin // LB, LBU
+//						case (alu_out[1:0]) 
+//							2'b00: rd_wdata = (!instr[14] && drdata[7])?{{24{1'b1}}, drdata[7:0]}:{{24{1'b0}}, drdata[7:0]};
+//							2'b01: rd_wdata = (!instr[14] && drdata[15])?{{24{1'b1}}, drdata[15:8]}:{{24{1'b0}}, drdata[15:8]};
+//							2'b10: rd_wdata = (!instr[14] && drdata[23])?{{24{1'b1}}, drdata[23:16]}:{{24{1'b0}}, drdata[23:16]};
+//							default: /*2'b11:*/ rd_wdata = (!instr[14] && drdata[31])?{{24{1'b1}}, drdata[31:24]}:{{24{1'b0}}, drdata[31:24]};
+//						endcase
+//					end
+//					3'b001, 3'b101: begin // LH, LHU
+//						if (alu_out[1]) begin
+//							rd_wdata = (!instr[14] & drdata[31])?{{16{1'b1}}, drdata[31:16]}:{{16{1'b0}}, drdata[31:16]};
+//						end else begin
+//							rd_wdata = (!instr[14] & drdata[15])?{{16{1'b1}}, drdata[15:0]}:{{16{1'b0}}, drdata[15:0]};
+//						end
+//					end
+//					// LW and default
+//					default: rd_wdata = drdata; 
+//				endcase				
 			end
 			
 			`CYCLE_COUNT_UPDATE_1: begin
@@ -527,14 +602,15 @@ module fwrisc (
 			
 			default: /*EXECUTE: */ begin
 				if (exception) begin
-					if (op_jal || op_jalr || op_branch) begin
+					// Write badaddr
+					if (instr[6:5] == 3'b11 /*op_jal || op_jalr || op_branch*/) begin
 						rd_wdata = {alu_out[31:1], 1'b0}; 
 					end else begin
-						rd_wdata = alu_out[31:0]; 
+						rd_wdata = alu_out; 
 					end
 				end else if (op_jal || op_jalr) begin
 					rd_wdata = {pc_plus4, 2'b0};
-				end else if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01 /* 010,011 */) begin
+				end else if ((op_arith_imm || op_arith_reg) && instr[14:13] == 2'b01) begin
 					// SLT, SLTU, SLTI, SLTUI
 					rd_wdata = {{31{1'b0}}, comp_out};
 				end else begin
@@ -578,33 +654,18 @@ module fwrisc (
 		.rd_wdata  (rd_wdata ), 
 		.rd_wen    (rd_wen   ));
 	
+//	reg[31:0]		imm;
+//	always @* begin
+//		if (op_ui) begin
+//			imm_a = imm_lui;
+//		end else if (op_auipc) begin
+//			imm_a = auipc_imm_31_12;
+//		end else if (op_branch) begin
+//			
+//	end
+//	
 	
 	always @* begin
-//		if (op_lui) begin
-//			alu_op_a = imm_lui;
-//		end else if (op_auipc) begin
-//			alu_op_a = auipc_imm_31_12;
-//		end else if (op_jal) begin
-//			alu_op_a = jal_off;
-//		end else if (op_branch) begin
-//			alu_op_a = imm_branch;
-//		end else if (op_csr && instr[14] && (state == CSR_1)) begin // CSR immediate
-//			alu_op_a = rs1; // zimm is the same field as rs1
-//		end else begin
-//			alu_op_a = ra_rdata;
-//		end
-//		
-//		if (op_auipc || op_jal || op_branch) begin
-//			alu_op_b = {pc, 2'b0};
-//		end else if (op_jalr || op_ld || op_arith_imm) begin
-//			alu_op_b = imm_11_0;
-//		end else if (op_st) begin
-//			alu_op_b = st_imm_11_0; // sign-extended immediate
-//		end else if (op_lui || op_shift) begin
-//			alu_op_b = zero;
-//		end else begin
-//			alu_op_b = rb_rdata;
-//		end
 	
 		case (state) 
 			`CSR_1: begin
@@ -635,12 +696,6 @@ module fwrisc (
 		endcase
 		
 		case (state)
-			/* TODO:
-			`CYCLE_COUNT_UPDATE_1: begin
-				alu_op_b = {24'b0, cycle_counter};
-			end
-			 */
-			
 			`CYCLE_COUNT_UPDATE_2, `INSTR_COUNT_UPDATE_1: begin
 				alu_op_b = rb_rdata;
 			end
@@ -659,46 +714,6 @@ module fwrisc (
 				end
 			end
 		endcase
-		
-//		if (op_lui) begin
-//			alu_op_a = imm_lui;
-//			alu_op_b = zero;
-//		end else if (op_auipc) begin
-//			alu_op_a = auipc_imm_31_12;
-//			alu_op_b = {pc, 2'b0};
-//		end else if (op_jal) begin
-//			alu_op_a = jal_off;
-//			alu_op_b = {pc, 2'b0};
-//		end else if (op_jalr) begin
-//			alu_op_a = ra_rdata;
-//			alu_op_b = imm_11_0;
-//		end else if (op_shift) begin
-//			alu_op_a = ra_rdata;
-//			alu_op_b = zero;
-//		end else if (op_ld || op_arith_imm) begin
-//			alu_op_a = ra_rdata; // rs1
-//			alu_op_b = imm_11_0; // sign-extended immediate
-//		end else if (op_st) begin
-//			alu_op_a = ra_rdata; // rs1
-//			alu_op_b = st_imm_11_0; // sign-extended immediate
-//		end else if (op_arith_reg) begin
-//			alu_op_a = ra_rdata; // rs2
-//			alu_op_b = rb_rdata; // rs1
-//		end else if (op_branch) begin
-//			// For branches, we use branch_immediate
-//			alu_op_a = imm_branch;
-//			alu_op_b = {pc, 2'b0};
-//		end else if (op_csr) begin
-//			if (instr[14] && (state == `CSR_1)) begin // CSR immediate
-//				alu_op_a = rs1; // zimm is the same field as rs1
-//			end else begin
-//				alu_op_a = ra_rdata;
-//			end
-//			alu_op_b = rb_rdata;
-//		end else begin
-//			alu_op_a = zero;
-//			alu_op_b = zero;
-//		end
 		
 		case (state)
 			`EXECUTE: begin
@@ -767,14 +782,6 @@ module fwrisc (
 	 * pc_next selection
 	 ****************************************************************/
 	always @* begin : pc_next_sel
-//		case ({
-//			(op_jal || op_jalr || (op_branch && branch_cond)),
-//			(op_eret || exception)})
-//			2'b10: pc_next = alu_out[31:2];
-//			2'b01: pc_next = ra_rdata[31:2];
-//			default: pc_next = pc_plus4;
-//		endcase
-		
 		if (op_jal || op_jalr || (op_branch && branch_cond)) begin
 			pc_next = alu_out[31:2];
 		end else if (op_eret || exception) begin
@@ -798,34 +805,8 @@ module fwrisc (
 		.dstrb     (dstrb    ), 
 		.dready    (dready   ));
 	
-//	assign dvalid = (state == MEMR || state == MEMW);
-//	assign dwrite = (state == MEMW);
-//	assign daddr = {alu_out[31:2], 2'b0}; // Always use the ALU for address
 	
 	always @* begin
-//		case (instr[13:12]) 
-//			2'b00: begin // SB
-//				dstrb = (1'b1 << alu_out[1:0]);
-//				dwdata = {rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0], rb_rdata[7:0]};
-//			end
-//			2'b01: begin // SH
-//				dstrb = (2'b11 << {alu_out[1], 1'b0});
-//				dwdata = {rb_rdata[15:0], rb_rdata[15:0]};
-//			end
-//			// SW and default
-//			default: begin
-//				dstrb = 4'hf;
-//				dwdata = rb_rdata; // Write data is always @ rs2
-//			end
-//		endcase		
-	
-//		misaligned_addr = (
-//				// Check address alignment for loads and stores
-//				(op_ld_st && (
-//						(instr[13:12] == 2'b01 && alu_out[0]) || (instr[13:12] == 2'b10 && |alu_out[1:0]))) ||
-//				// Check address alignment for jumps and branches
-//				((op_jal || op_jalr || (op_branch && branch_cond)) && alu_out[1])
-//			);
 		if (op_st || op_ld) begin
 			case (instr[13:12]) 
 				2'b00: begin // SB

@@ -2,6 +2,8 @@
  * fwrisc_dbus_if.sv
  ****************************************************************************/
 
+ `include "fwrisc_defines.vh"
+ 
 /**
  * Module: fwrisc_dbus_if
  * 

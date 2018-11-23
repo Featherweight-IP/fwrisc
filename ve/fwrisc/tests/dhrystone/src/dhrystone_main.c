@@ -15,7 +15,7 @@ void debug_printf(const char* str, ...);
 
 #include "util.h"
 
-#include <alloca.h>
+// #include <alloca.h>
 
 /* Global Variables: */
 
@@ -68,13 +68,18 @@ int main (int argc, char** argv)
   REG   int             Run_Index;
   REG   int             Number_Of_Runs;
 
+  // MSB: instead of calling alloca
+  Rec_Type				Rec_Type_alloc1, Rec_Type_alloc2;
+
   /* Arguments */
   Number_Of_Runs = NUMBER_OF_RUNS;
 
   /* Initializations */
 
-  Next_Ptr_Glob = (Rec_Pointer) alloca (sizeof (Rec_Type));
-  Ptr_Glob = (Rec_Pointer) alloca (sizeof (Rec_Type));
+//  Next_Ptr_Glob = (Rec_Pointer) alloca (sizeof (Rec_Type));
+//  Ptr_Glob = (Rec_Pointer) alloca (sizeof (Rec_Type));
+  Next_Ptr_Glob = &Rec_Type_alloc1;
+  Ptr_Glob = &Rec_Type_alloc2;
 
   Ptr_Glob->Ptr_Comp                    = Next_Ptr_Glob;
   Ptr_Glob->Discr                       = Ident_1;
@@ -111,7 +116,7 @@ int main (int argc, char** argv)
     /* Start timer */
     /***************/
 
-    setStats(1);
+//MSB:    setStats(1);
     Start_Timer();
 
     for (Run_Index = 1; Run_Index <= Number_Of_Runs; ++Run_Index)
@@ -165,7 +170,7 @@ int main (int argc, char** argv)
     /**************/
 
     Stop_Timer();
-    setStats(0);
+//MSB:    setStats(0);
 
     User_Time = End_Time - Begin_Time;
 
@@ -230,8 +235,10 @@ int main (int argc, char** argv)
 
 
   Microseconds = ((User_Time / Number_Of_Runs) * Mic_secs_Per_Second) / HZ;
-  Dhrystones_Per_Second = (HZ * Number_Of_Runs) / User_Time;
+//  Dhrystones_Per_Second = (HZ * Number_Of_Runs) / User_Time;
+  Dhrystones_Per_Second = Number_Of_Runs * (HZ / User_Time);
 
+  printf("start=%ld ; end=%ld\n", Begin_Time, End_Time);
   printf("Microseconds for one run through Dhrystone: %ld\n", Microseconds);
   printf("Dhrystones per Second:                      %ld\n", Dhrystones_Per_Second);
 
@@ -239,10 +246,7 @@ int main (int argc, char** argv)
 }
 
 
-Proc_1 (Ptr_Val_Par)
-/******************/
-
-REG Rec_Pointer Ptr_Val_Par;
+void Proc_1 (REG Rec_Pointer Ptr_Val_Par)
     /* executed once */
 {
   REG Rec_Pointer Next_Record = Ptr_Val_Par->Ptr_Comp;  
@@ -273,12 +277,10 @@ REG Rec_Pointer Ptr_Val_Par;
 } /* Proc_1 */
 
 
-Proc_2 (Int_Par_Ref)
+void Proc_2 (One_Fifty   *Int_Par_Ref)
 /******************/
     /* executed once */
     /* *Int_Par_Ref == 1, becomes 4 */
-
-One_Fifty   *Int_Par_Ref;
 {
   One_Fifty  Int_Loc;  
   Enumeration   Enum_Loc;
@@ -296,12 +298,7 @@ One_Fifty   *Int_Par_Ref;
 } /* Proc_2 */
 
 
-Proc_3 (Ptr_Ref_Par)
-/******************/
-    /* executed once */
-    /* Ptr_Ref_Par becomes Ptr_Glob */
-
-Rec_Pointer *Ptr_Ref_Par;
+void Proc_3 (Rec_Pointer *Ptr_Ref_Par)
 
 {
   if (Ptr_Glob != Null)
@@ -311,7 +308,7 @@ Rec_Pointer *Ptr_Ref_Par;
 } /* Proc_3 */
 
 
-Proc_4 () /* without parameters */
+void Proc_4 () /* without parameters */
 /*******/
     /* executed once */
 {
@@ -323,7 +320,7 @@ Proc_4 () /* without parameters */
 } /* Proc_4 */
 
 
-Proc_5 () /* without parameters */
+void Proc_5 () /* without parameters */
 /*******/
     /* executed once */
 {

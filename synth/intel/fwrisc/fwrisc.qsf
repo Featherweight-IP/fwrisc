@@ -59,4 +59,5 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../../rtl/fwrisc_tracer.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../rtl/fwrisc_regfile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../rtl/fwrisc_comparator.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../../../rtl/fwrisc.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../../rtl/fwrisc_dbus_if.sv
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -35,9 +35,15 @@ module fwrisc_regfile(
 		input				rd_wen
 		);
 
-	reg[31:0]			ra_raddr_r;
-	reg[31:0]			rb_raddr_r;
+	reg[5:0]			ra_raddr_r;
+	reg[5:0]			rb_raddr_r;
 	reg[31:0]			regs['h3f:0];
+	
+	initial begin
+		for (integer i=0; i<64; i=i+1) begin
+			regs[i] = 32'h0000_0000;
+		end
+	end
 
 	always @(posedge clock) begin
 		ra_raddr_r <= ra_raddr;

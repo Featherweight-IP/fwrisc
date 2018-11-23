@@ -52,6 +52,8 @@ protected:
 	std::string									m_buffer;
 	std::vector<std::string>					m_console_out;
 	std::function<void(const std::string &)>	m_msg_listener;
+
+//	std::function<void(const std::)
 };
 
 #endif /* INCLUDED_FWRISC_ZEPHYR_TESTS_H */

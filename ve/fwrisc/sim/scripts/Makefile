@@ -26,7 +26,7 @@ endif
 
 
 ifeq (vl,$(SIM))
-  VL_TB_OBJS_LIBS += libfwrisc_tb.o libfwrisc_tests.o libgoogletest-vl.o libgoogletest.o
+  VL_TB_OBJS_LIBS += libfwrisc_tests.o libgoogletest-vl.o libgoogletest.o
   CXXFLAGS += -I$(BUILDDIR)/obj_dir
 endif
 

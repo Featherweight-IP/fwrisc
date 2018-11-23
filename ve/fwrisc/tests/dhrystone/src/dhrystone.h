@@ -381,11 +381,14 @@ extern clock_t	clock();
 
 #elif defined(__riscv)
 
-#define HZ 1000000
+// #define HZ 1000000
+#define HZ 50000000
 #define Too_Small_Time 1
 #define CLOCK_TYPE "rdcycle()"
-#define Start_Timer() Begin_Time = read_csr(mcycle)
-#define Stop_Timer() End_Time = read_csr(mcycle)
+// #define Start_Timer() Begin_Time = read_csr(mcycle)
+// #define Stop_Timer() End_Time = read_csr(mcycle)
+#define Start_Timer() __asm__ volatile ("csrr %0, mcycle": "=r"(Begin_Time))
+#define Stop_Timer() __asm__ volatile ("csrr %0, mcycle": "=r"(End_Time))
 
 #else
                 /* Use times(2) time function unless    */

@@ -133,6 +133,23 @@ void fwrisc_zephyr_tests::check(const char *exp[], uint32_t exp_sz) {
 	}
 }
 
+TEST_F(fwrisc_zephyr_tests, dhrystone) {
+	const char *exp[] = {
+			"Hello World! fwrisc_sim"
+	};
+
+	m_msg_listener = [&](const std::string &msg) {
+		if (msg == "Hello World! fwrisc_sim") {
+			m_end_of_test = true;
+			dropObjection(this);
+		}
+	};
+
+	run(100000000);
+
+	check(exp, sizeof(exp)/sizeof(const char *));
+}
+
 TEST_F(fwrisc_zephyr_tests, hello_world) {
 	const char *exp[] = {
 			"Hello World! fwrisc_sim"

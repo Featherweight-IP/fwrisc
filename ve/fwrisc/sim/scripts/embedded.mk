@@ -22,5 +22,11 @@ zephyr/%/zephyr/zephyr.elf : $(ZEPHYR_BASE)/samples/%/CMakeLists.txt $(wildcard 
 	$(Q)mkdir -p zephyr/$*
 	$(Q)cd zephyr/$* ; cmake -DBOARD=fwrisc_sim $(ZEPHYR_BASE)/samples/$*
 	$(Q)cd zephyr/$* ; $(MAKE)
+	
+zephyr_tests/%/zephyr/zephyr.elf : $(FWRISC_TESTS_DIR)/%/CMakeLists.txt $(wildcard $(FWRISC_TESTS_DIR)/%/src/%.c)
+	$(Q)rm -rf zephyr_tests/$*
+	$(Q)mkdir -p zephyr_tests/$*
+	$(Q)cd zephyr_tests/$* ; cmake -DBOARD=fwrisc_sim $(FWRISC_TESTS_DIR)/$*
+	$(Q)cd zephyr_tests/$* ; $(MAKE)
 
 include $(MK_INCLUDES)
