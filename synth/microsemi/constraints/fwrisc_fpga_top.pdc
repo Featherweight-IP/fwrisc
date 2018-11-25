@@ -1,0 +1,37 @@
+
+
+set_io clock \
+  -pinname H16 \
+  -fixed yes \
+  -DIRECTION INPUT \
+
+set_io led0 \
+  -pinname N16 \
+  -fixed yes \
+  -DIRECTION OUTPUT 
+
+set_io led1 \
+  -pinname M16 \
+  -fixed yes \
+  -DIRECTION OUTPUT 
+
+set_io d0_p \
+  -pinname T12 \
+  -fixed yes \
+  -DIRECTION OUTPUT 
+
+set_io d0_n \
+  -pinname R12 \
+  -fixed yes \
+  -DIRECTION OUTPUT 
+
+set_io clk_o \
+  -pinname T8 \
+  -fixed yes \
+  -DIRECTION OUTPUT 
+
+set_io tx \
+  -pinname T13 \
+  -fixed yes \
+  -DIRECTION OUTPUT 
+

@@ -27,9 +27,9 @@ module fwrisc_regfile(
 		input				clock,
 		input				reset,
 		input[5:0]			ra_raddr,
-		output [31:0]		ra_rdata,
+		output [31:0]			ra_rdata,
 		input[5:0]			rb_raddr,
-		output [31:0]		rb_rdata,
+		output [31:0]			rb_rdata,
 		input[5:0]			rd_waddr,
 		input[31:0]			rd_wdata,
 		input				rd_wen
@@ -40,9 +40,7 @@ module fwrisc_regfile(
 	reg[31:0]			regs['h3f:0];
 	
 	initial begin
-		for (integer i=0; i<64; i=i+1) begin
-			regs[i] = 32'h0000_0000;
-		end
+		$readmemh("regs.hex", regs);
 	end
 
 	always @(posedge clock) begin

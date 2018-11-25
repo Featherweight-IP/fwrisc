@@ -23,6 +23,6 @@ void fwrisc_fpga_tests::SetUp() {
 
 TEST_F(fwrisc_fpga_tests, led_flash) {
 	raiseObjection(this);
-	run(5000000);
+	run(10000);
 }
 

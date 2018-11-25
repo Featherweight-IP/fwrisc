@@ -4,7 +4,7 @@ include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_fpga/tests/fwrisc_fpga_tests.mk
 
-RUN_PRE_TARGETS += rom.hex
+RUN_PRE_TARGETS += rom.hex regs.hex
 
 TB_MODULES_HDL=fwrisc_fpga_tb_hdl
 
@@ -29,6 +29,8 @@ endif
 
 include $(PACKAGES_DIR)/simscripts/mkfiles/common_sim.mk
 
+regs.hex : $(FWRISC)/rtl/regs.hex
+	$(Q)cp $(FWRISC)/rtl/regs.hex .
 
 ifneq (,$(SW_IMAGE))
 rom.hex : $(BUILD_DIR)/esw/$(SW_IMAGE)

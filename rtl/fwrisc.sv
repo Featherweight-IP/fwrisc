@@ -43,11 +43,11 @@ module fwrisc (
 		input			dready
 		);
 
-	reg[31:0]			instr = 0;
+	reg[31:0]			instr;
 	
 	
-	reg[3:0]			state = `FETCH;
-	reg[31:2]			pc = (32'h8000_0000 >> 2);
+	reg[3:0]			state;
+	reg[31:2]			pc;
 	reg[4:0]			shift_amt;
 	wire[31:2]			pc_plus4;
 	reg[31:2]			pc_next;
@@ -64,7 +64,7 @@ module fwrisc (
 	wire				cycle_counter_ovf = cycle_counter[7];
 	reg [7:0]			instr_counter = 0;
 	always @(posedge clock) begin
-		if (/*reset || */state == `CYCLE_COUNT_UPDATE_1) begin
+		if (reset || state == `CYCLE_COUNT_UPDATE_1) begin
 			cycle_counter <= 1;
 		end else begin
 			cycle_counter <= cycle_counter + 1;
@@ -72,7 +72,7 @@ module fwrisc (
 	end
 	
 	always @(posedge clock) begin
-		if (/*reset || */state == `INSTR_COUNT_UPDATE_1) begin
+		if (reset || state == `INSTR_COUNT_UPDATE_1) begin
 			instr_counter <= 0;
 		end else if (state == `EXECUTE) begin
 			instr_counter <= instr_counter + 1;
@@ -82,17 +82,17 @@ module fwrisc (
 	// ALU signals
 	reg[31:0]					alu_op_a;
 	reg[31:0]					alu_op_b;
-	reg[4:0]					alu_op;
+	reg[2:0]					alu_op;
 	wire[31:0]					alu_out;
 	wire						alu_carry;
 	wire						alu_eqz;
 	
 	always @(posedge clock) begin
-		/* if (reset) begin
+		if (reset) begin
 			state <= `FETCH;
 			instr <= 0;
 			pc <= (32'h8000_0000 >> 2);
-		end else */ begin
+		end else begin
 			if (ivalid && iready) begin
 				instr <= idata;
 			end
@@ -321,7 +321,7 @@ module fwrisc (
 	// Comparator signals
 	wire[31:0]					comp_op_a = ra_rdata;
 	reg[31:0]					comp_op_b;
-	reg[4:0]					comp_op;
+	reg[1:0]					comp_op;
 	wire						comp_out;
 	wire						branch_cond;
 	
