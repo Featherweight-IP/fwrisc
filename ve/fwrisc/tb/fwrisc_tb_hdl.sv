@@ -5,7 +5,7 @@
 /**
  * Module: fwrisc_tb_hdl
  * 
- * TODO: Add module documentation
+ * Unit-level testbench for the FWRISC core
  */
 module fwrisc_tb_hdl(input clock);
 	

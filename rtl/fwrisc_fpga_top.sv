@@ -2,16 +2,6 @@
  * fwrisc_fpga_top.sv
  ****************************************************************************/
 
-module clockdiv(
-		input			clk_i,
-		output			clk_o);
-	reg[1:0]			clk_cnt;
-
-	always @(posedge clk_i)
-		clk_cnt <= clk_cnt + 1;
-
-	assign clk_o = clk_cnt[1];	
-endmodule
 /**
  * Module: fwrisc_fpga_top
  * 
@@ -31,14 +21,15 @@ module fwrisc_fpga_top (
 	wire				iaddr_ok;
 	wire				idata_ok;
 
+	reg[1:0]			clk_cnt;
 
+	// /4 clock divider
+	always @(posedge clock)
+		clk_cnt <= clk_cnt + 1;
 
-	wire	clock4;
+	wire	clock4 = clk_cnt[1];
 	assign clock_o = clock4;
 
-	clockdiv	u_div(
-		.clk_i(clock),
-		.clk_o(clock4));
 	
 	reg[15:0]			reset_cnt;
 	reg[15:0]			reset_key;
@@ -66,9 +57,6 @@ module fwrisc_fpga_top (
 	wire				dvalid;
 	wire				dready;
 
-	assign iaddr_ok = (iaddr >= 32'h8000_0000 && iaddr <= 32'h8000_0018);
-	
-	
 	fwrisc u_core (
 		.clock   (clock4  ), 
 		.reset   (reset  ), 
@@ -91,8 +79,9 @@ module fwrisc_fpga_top (
 	reg[31:0]			ram_1[1023:0]; // 16k ram
 	reg[31:0]			ram_2[1023:0]; // 16k ram
 	reg[31:0]			ram_3[1023:0]; // 16k ram
-	reg[31:0]			rom[2047:0]; // 8k rom
+	reg[31:0]			rom[4095:0];   // 16k rom
 	reg[31:0]			led;
+	reg[31:0]			tx_r;
 	reg					iready_r, dready_r;
 	
 	assign iready = iready_r;
@@ -100,7 +89,7 @@ module fwrisc_fpga_top (
 
 	assign d0_p = iaddr_ok; // iaddr[4]; // clk_cnt[0]; // iaddr[2]; // led[1];
 	assign d0_n = led[3]; //data_ok; // clk_cnt[1]; // iaddr[3]; // led[2];
-	assign tx   = dvalid && dwrite && (daddr[31:28] == 4'hc); // led[0];
+	assign tx   = tx_r[0];
 	assign led0 = led[0];
 	assign led1 = led[1];
 
@@ -125,7 +114,11 @@ module fwrisc_fpga_top (
 				if (dstrb[2]) ram_2[daddr[13:2]]<=dwdata[23:16];
 				if (dstrb[3]) ram_3[daddr[13:2]]<=dwdata[31:24];
 			end else if (daddr[31:28] == 4'hc) begin
-				led <= dwdata;
+				if (daddr[3:2] == 4'h0) begin
+					led <= dwdata;
+				end else if (daddr[3:2] == 4'h1) begin
+					tx_r <= dwdata;
+				end
 			end
 		end
 	end
@@ -147,38 +140,26 @@ module fwrisc_fpga_top (
 	always @* begin
 		if (addr_d[31:28] == 4'h8 && addr_d[15:12] == 4'h2) begin 
 			drdata = {
-				ram_3[addr_d[12:2]],
-				ram_2[addr_d[12:2]],
-				ram_1[addr_d[12:2]],
-				ram_0[addr_d[12:2]]
+				ram_3[addr_d[13:2]],
+				ram_2[addr_d[13:2]],
+				ram_1[addr_d[13:2]],
+				ram_0[addr_d[13:2]]
 				};
 		end else begin
-			drdata = rom[addr_d[12:2]];
+			drdata = rom[addr_d[13:2]];
 		end
 		
 		if (addr_i[31:28] == 4'h8 && addr_i[15:12] == 4'h2) begin
 			idata = {
-				ram_3[addr_d[12:2]],
-				ram_2[addr_d[12:2]],
-				ram_1[addr_d[12:2]],
-				ram_0[addr_d[12:2]]
+				ram_3[addr_d[13:2]],
+				ram_2[addr_d[13:2]],
+				ram_1[addr_d[13:2]],
+				ram_0[addr_d[13:2]]
 				};
 		end else begin
-			idata = rom[addr_i[12:2]];
+			idata = rom[addr_i[13:2]];
 		end
 	end
-
-	/*
-	assign idata_ok = (ivalid && iready)?(
-		(iaddr == 32'h8000_0000 && idata == 32'hC000_00B7) ||
-		(iaddr == 32'h8000_0004 && idata == 32'h0000_0113) ||
-		(iaddr == 32'h8000_0008 && idata == 32'h0131_5193) ||
-		(iaddr == 32'h8000_000C && idata == 32'h0030_A023) ||
-		(iaddr == 32'h8000_0010 && idata == 32'h0011_0113) ||
-		(iaddr == 32'h8000_0014 && idata == 32'hFF5F_F06F) ||
-		(iaddr == 32'h8000_0018 && idata == 32'h0000_0013)
-	):1;
-	 */
 
 endmodule
 

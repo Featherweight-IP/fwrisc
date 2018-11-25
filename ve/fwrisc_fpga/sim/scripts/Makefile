@@ -3,6 +3,7 @@ include $(PACKAGES_DIR)/packages.mk
 include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_fpga/tests/fwrisc_fpga_tests.mk
+SRC_DIRS += $(FWRISC)/ve/fwrisc/tests
 
 RUN_PRE_TARGETS += rom.hex regs.hex
 
@@ -24,6 +25,7 @@ endif
 
 ifeq (vl,$(SIM))
   VL_TB_OBJS_LIBS += libfwrisc_fpga_tests.o libgoogletest-vl.o libgoogletest.o
+  VL_TB_OBJS_LIBS += ElfFileReader.o ElfSymtabReader.o
   CXXFLAGS += -I$(BUILDDIR)/obj_dir
 endif
 

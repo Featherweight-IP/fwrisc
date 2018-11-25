@@ -20,7 +20,7 @@ RULES := 1
 zephyr/%/zephyr/zephyr.elf : $(ZEPHYR_BASE)/samples/%/CMakeLists.txt $(wildcard $(ZEPHYR_BASE)/samples/%/src/%.c)
 	$(Q)rm -rf zephyr/$*
 	$(Q)mkdir -p zephyr/$*
-	$(Q)cd zephyr/$* ; cmake -DBOARD=fwrisc_sim $(ZEPHYR_BASE)/samples/$*
+	$(Q)cd zephyr/$* ; cmake -DBOARD=fwrisc_fpga $(ZEPHYR_BASE)/samples/$*
 	$(Q)cd zephyr/$* ; $(MAKE)
 	
 zephyr_tests/%/zephyr/zephyr.elf : $(FWRISC_TESTS_DIR)/%/CMakeLists.txt $(wildcard $(FWRISC_TESTS_DIR)/%/src/%.c)

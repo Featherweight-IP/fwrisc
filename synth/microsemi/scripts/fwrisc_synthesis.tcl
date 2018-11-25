@@ -22,6 +22,7 @@ import_files -hdl_source $env(FWRISC)/rtl/fwrisc_fpga_top.sv
 
 set_root fwrisc_fpga_top
 
+file copy $env(FWRISC)/rtl/regs.hex libero/fwrisc_fpga/synthesis/regs.hex
 file copy sw/rom.hex libero/fwrisc_fpga/synthesis/rom.hex
 
 run_tool -name {CONSTRAINT_MANAGEMENT}

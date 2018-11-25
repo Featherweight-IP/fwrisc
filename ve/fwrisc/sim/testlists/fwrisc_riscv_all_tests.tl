@@ -122,7 +122,7 @@ tests/fwrisc_instr_tests_arith_xori.f
 
 
 tests/fwrisc_zephyr_hello_world.f
-tests/fwrisc_zephyr_synchronization.f
+// tests/fwrisc_zephyr_synchronization.f
 // Disabled, since this is an interactive test
 // tests/fwrisc_zephyr_philosophers.f
 
