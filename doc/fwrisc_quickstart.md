@@ -1,6 +1,6 @@
 # FWRISC Quickstart
 
-This Quickstart guide describes a process for getting up and running with FWRISC. Follow the process
+This Quickstart guide describes the process for getting up and running with FWRISC. Follow the process
 described below 
 
 ## Setup Tools
@@ -62,5 +62,12 @@ You should see something like what is seen below:
 
 
 ## Run Synthesis
+Please see the [Synthesis](fwrisc_synthesis.md) document for more information on running synthesis. The short version is:
+
+- Ensure your environment is properly configured
+- cd fwrisc/synth/<target>
+- make
+
+
 
 

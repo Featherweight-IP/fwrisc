@@ -1,0 +1,13 @@
+
+
+---------------------------------------------------------------------
+-- 1.0.0
+
+- Initial release of the FWRISC core
+- All riscv-compliance tests for RV32I pass
+- Zephyr port runs properly
+- Resource consumption:
+  Microsemi: 1060 LUTs, 2x 64x18 RAM
+  Lattice: 1653 LCs, 4x RAM40_4k
+- Speed: 0.15 DMIPS/Mhz
+- FMax: 44Mhz

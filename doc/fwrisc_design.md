@@ -1,6 +1,11 @@
+# FWRISC Design Notes
 
-# Register File
-fwrisc uses FPGA blockram to implement the core RISC-V registers, as well as the CSRs. 
+## Memory Interface
+
+
+## Register File
+fwrisc uses FPGA blockram to implement the core RISC-V registers, as well as the CSRs. Currently, dual-port
+full-width RAM is used to increase performance.
 
 # Performance Counters
 
