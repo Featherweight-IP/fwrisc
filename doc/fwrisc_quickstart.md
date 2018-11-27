@@ -3,9 +3,15 @@
 This Quickstart guide describes a process for getting up and running with FWRISC. Follow the process
 described below 
 
-## Setup tools
+## Setup Tools
+
+Please see the [Tools](fwrisc_tools.md) page for information on the tools required to run FWRISC. 
+Please install the required tools and configure your environment before proceeding.
 
 ## Setup FWRISC Project
+
+Please see the [Setup](fwrisc_setup.md) page for information on cloning and bootstrapping the
+FWRISC project.
 
 ## Run Regression Tests
 

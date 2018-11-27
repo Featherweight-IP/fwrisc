@@ -5,6 +5,7 @@ Before proceeding, please ensure that the tools listed on the [Tools](fwrisc_too
 ## Clone the FWRISC Git Repository
 
 First things first: you must clone the FWRISC Git repository:
+
 ```
 % git clone http://github.com/mballance/fwrisc.git
 ```
@@ -30,3 +31,4 @@ In addition to configuring environment variables for the tools listed on the [To
 ```
 
 After doing so, `runtest.pl` should be present in your path and the PACKAGES_DIR environment variable will be set.
+
