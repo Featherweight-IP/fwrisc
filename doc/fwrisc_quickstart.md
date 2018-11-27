@@ -60,6 +60,26 @@ You should see something like what is seen below:
 % runtest.pl -test tests/fwrisc_zephyr_synchronization.f
 ```
 
+You will see several messages from threadA and threadB, which the testbench monitors to determine
+when the test has passed. Note that the test specifies special flags to the test compilation
+to shorten the test run.
+
+### Run "dhrystone"
+
+```
+% cd fwrisc/ve/fwrisc/sim
+% runtest.pl -test tests/fwrisc_zephyr_dhrystone.f
+```
+
+You should see the following:
+```
+# ***** Booting Zephyr OS zephyr-v1.13.0-1808-gd18ff80 *****
+# start=70458 ; end=1873006
+# Microseconds for one run through Dhrystone: 72
+# Dhrystones per Second:                      13500
+```
+
+Note that the clock for this test is 50Mhz, resulting in 0.15 DMIPS/Mhz.
 
 ## Run Synthesis
 Please see the [Synthesis](fwrisc_synthesis.md) document for more information on running synthesis. The short version is:
