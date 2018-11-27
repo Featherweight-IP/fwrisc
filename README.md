@@ -3,6 +3,9 @@
 FWRISC is a _Featherweight RISC-V_ implementation of the RV32I instruction set. This implementation
 supports the integer instructions, registers, CSRs, and exceptions as required by the RISC-V spec.
 
+This core was originally created for the 2018 RISC-V contest:
+https://riscv.org/2018contest/
+
 FWRISC is a non-pipelined processor that aims to balance performance with FPGA resource utilization. 
 It achieves 0.15 DMIPS/Mhz.
 
