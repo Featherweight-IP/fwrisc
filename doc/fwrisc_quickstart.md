@@ -85,7 +85,9 @@ Note that the clock for this test is 50Mhz, resulting in 0.15 DMIPS/Mhz.
 Please see the [Synthesis](fwrisc_synthesis.md) document for more information on running synthesis. The short version is:
 
 - Ensure your environment is properly configured
-- cd fwrisc/synth/<target>
+- cd fwrisc/synth/microsemi
+- make
+- cd fwrisc/synth/lattice
 - make
 
 
