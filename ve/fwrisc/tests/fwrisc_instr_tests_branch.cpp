@@ -23,6 +23,7 @@
  */
 
 #include "fwrisc_instr_tests_branch.h"
+#include <stdint.h>
 
 fwrisc_instr_tests_branch::fwrisc_instr_tests_branch() {
 	// TODO Auto-generated constructor stub
@@ -171,8 +172,8 @@ TEST_F(fwrisc_instr_tests_branch, bge_gt_t_pos) {
 
 TEST_F(fwrisc_instr_tests_branch, bge_gt_t_neg) {
 	reg_val_s exp[] = {
-			{1, -5},
-			{2, -6},
+			{1, (uint32_t)-5},
+			{2, (uint32_t)-6},
 			{3, 24} // r1==r2
 	};
 	const char *program = R"(
@@ -192,8 +193,8 @@ TEST_F(fwrisc_instr_tests_branch, bge_gt_t_neg) {
 
 TEST_F(fwrisc_instr_tests_branch, bge_eq_t_neg) {
 	reg_val_s exp[] = {
-			{1, -5},
-			{2, -5},
+			{1, (uint32_t)-5},
+			{2, (uint32_t)-5},
 			{3, 24} // r1==r2
 	};
 	const char *program = R"(
@@ -234,8 +235,8 @@ TEST_F(fwrisc_instr_tests_branch, blt_t_pos) {
 
 TEST_F(fwrisc_instr_tests_branch, blt_t_neg) {
 	reg_val_s exp[] = {
-			{1, -6},
-			{2, -5},
+			{1, (uint32_t)-6},
+			{2, (uint32_t)-5},
 			{3, 24} // r1==r2
 	};
 	const char *program = R"(

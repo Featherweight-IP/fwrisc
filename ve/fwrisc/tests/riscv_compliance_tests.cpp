@@ -23,22 +23,22 @@
  */
 
 #include "riscv_compliance_tests.h"
-#include "GoogletestVlCmdlineProcessor.h"
 #include "ElfSymtabReader.h"
 #include <stdlib.h>
 #include <elf.h>
+#include "CmdlineProcessor.h"
 
 void riscv_compliance_tests::SetUp() {
 	fprintf(stdout, "SetUp\n");
 	fwrisc_instr_tests::SetUp();
 
-	raiseObjection(this);
+	GoogletestHdl::raiseObjection();
 }
 
 void riscv_compliance_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 	if (addr == 0x80001000) {
 		fprintf(stdout, "Note: end of test\n");
-		dropObjection(this);
+		GoogletestHdl::dropObjection();
 	} else {
 		fwrisc_instr_tests::memwrite(addr, mask, data);
 	}
@@ -50,7 +50,7 @@ void riscv_compliance_tests::runtest() {
 }
 
 void riscv_compliance_tests::check() {
-	const GoogletestVlCmdlineProcessor &clp = GoogletestVlCmdlineProcessor::instance();
+	const CmdlineProcessor &clp = GoogletestHdl::clp();
 	FILE *ref_file_fp, *elf_file_fp;
 	std::string elf_file, ref_file;
 	char line[256];

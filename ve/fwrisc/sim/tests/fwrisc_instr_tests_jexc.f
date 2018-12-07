@@ -1,3 +1,3 @@
 
---gtest_filter=fwrisc_instr_tests_exception.j
++gtest-filter=fwrisc_instr_tests_exception.j
 

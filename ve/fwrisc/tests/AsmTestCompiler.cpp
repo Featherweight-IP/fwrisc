@@ -92,6 +92,7 @@ bool AsmTestCompiler::compile() {
 
 	if (!fh) {
 		fprintf(stdout, "Error: failed to open file \"%s\"\n", filename.c_str());
+		fflush(stdout);
 		return false;
 	}
 	fputs(full_program.c_str(), fh);
@@ -106,7 +107,8 @@ bool AsmTestCompiler::compile() {
 	cmd += m_basename + ".link.ld";
 
 	if (system(cmd.c_str()) != 0) {
-		fprintf(stdout, "compile failed\n");
+		fprintf(stdout, "Error: compile failed\n");
+		fflush(stdout);
 		return false;
 	}
 
@@ -116,12 +118,14 @@ bool AsmTestCompiler::compile() {
 	cmd += m_basename + ".test.vlog";
 
 	if (system(cmd.c_str()) != 0) {
-		fprintf(stdout, "objcopy failed\n");
+		fprintf(stdout, "Error: objcopy failed\n");
+		fflush(stdout);
 		return false;
 	}
 
 	if (!tohex(m_basename + ".test.vlog", m_out)) {
-		fprintf(stdout, "tohex failed\n");
+		fprintf(stdout, "Error: tohex failed\n");
+		fflush(stdout);
 		return false;
 	}
 

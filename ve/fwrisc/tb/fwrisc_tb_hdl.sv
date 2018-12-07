@@ -9,6 +9,19 @@
  */
 module fwrisc_tb_hdl(input clock);
 	
+`ifdef HAVE_HDL_CLKGEN
+	reg clk_r = 0;
+	
+	initial begin
+		forever begin
+			#10ns;
+			clk_r <= ~clk_r;
+		end
+	end
+	
+	assign clock = clk_r;
+`endif
+	
 	reg reset = 1;
 	reg [7:0] reset_cnt = 0;
 	
@@ -61,6 +74,7 @@ module fwrisc_tb_hdl(input clock);
 		.i_byte_enable_b   (dstrb  					),
 		.o_read_data_b     (drdata					));
 
+	// Connect the tracer BFM to 
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),
 			.reset(reset),

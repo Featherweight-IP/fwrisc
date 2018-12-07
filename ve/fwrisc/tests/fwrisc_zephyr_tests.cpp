@@ -24,8 +24,8 @@
 
 #include "fwrisc_zephyr_tests.h"
 #include "ElfSymtabReader.h"
-#include "GoogletestVlCmdlineProcessor.h"
 #include <stdio.h>
+#include "../../../packages/googletest-hdl/src/CmdlineProcessor.h"
 
 fwrisc_zephyr_tests::fwrisc_zephyr_tests() : fwrisc_ctest_base(10000000) {
 	m_ram_console = 0;
@@ -141,11 +141,11 @@ TEST_F(fwrisc_zephyr_tests, dhrystone) {
 	m_msg_listener = [&](const std::string &msg) {
 		if (msg == "Hello World! fwrisc_sim") {
 			m_end_of_test = true;
-			dropObjection(this);
+			GoogletestHdl::dropObjection();
 		}
 	};
 
-	run(100000000);
+	run();
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }
@@ -158,11 +158,11 @@ TEST_F(fwrisc_zephyr_tests, hello_world) {
 	m_msg_listener = [&](const std::string &msg) {
 		if (msg == "Hello World! fwrisc_sim") {
 			m_end_of_test = true;
-			dropObjection(this);
+			GoogletestHdl::dropObjection();
 		}
 	};
 
-	run(100000);
+	run();
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }
@@ -181,11 +181,11 @@ TEST_F(fwrisc_zephyr_tests, synchronization) {
 
 		if (threadB_count >= 2) {
 			m_end_of_test = true;
-			dropObjection(this);
+			GoogletestHdl::dropObjection();
 		}
 	};
 
-	run(100000000);
+	run();
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }
@@ -197,13 +197,13 @@ TEST_F(fwrisc_zephyr_tests, philosophers) {
 
 	m_raw_console = true;
 
-	run(100000000);
+	run();
 
 	check(exp, sizeof(exp)/sizeof(const char *));
 }
 
 TEST_F(fwrisc_zephyr_tests, coretest) {
-	run(100000);
+	run();
 
 	ASSERT_EQ(m_end_of_test, true);
 }

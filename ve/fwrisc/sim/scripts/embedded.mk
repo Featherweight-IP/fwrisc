@@ -28,5 +28,11 @@ zephyr_tests/%/zephyr/zephyr.elf : $(FWRISC_TESTS_DIR)/%/CMakeLists.txt $(wildca
 	$(Q)mkdir -p zephyr_tests/$*
 	$(Q)cd zephyr_tests/$* ; cmake -DBOARD=fwrisc_sim $(FWRISC_TESTS_DIR)/$*
 	$(Q)cd zephyr_tests/$* ; $(MAKE)
+	
+unit/%.elf : %.o
+	$(Q)if test ! -d `dirname $@`; then mkdir -p `dirname $@`; fi
+	$(Q)$(CC) -o $@ $^ \
+		-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
+		-T$(FWRISC_TESTS_DIR)/unit/unit.ld
 
 include $(MK_INCLUDES)

@@ -24,10 +24,10 @@
 
 #ifndef INCLUDED_FWRISC_INSTR_TESTS_H
 #define INCLUDED_FWRISC_INSTR_TESTS_H
-#include "Vfwrisc_tb_hdl.h"
-#include "GoogletestVlTest.h"
+#include "GoogletestHdl.h"
+#include "fwrisc_tracer_bfm.h"
 
-class fwrisc_instr_tests : public GoogletestVlTest<Vfwrisc_tb_hdl> {
+class fwrisc_instr_tests : public ::testing::Test, public virtual fwrisc_tracer_bfm_rsp_if {
 public:
 	struct reg_val_s {
 		uint32_t	addr;
@@ -40,16 +40,25 @@ public:
 
 	virtual void SetUp();
 
+	virtual void TearDown();
+
 	virtual void regwrite(uint32_t raddr, uint32_t rdata);
 
 	virtual void exec(uint32_t addr, uint32_t instr);
 
 	virtual void memwrite(uint32_t addr, uint8_t mask, uint32_t data);
 
+
 protected:
+
+	virtual void run();
 
 	void runtest(
 			const std::string 	&program,
+			reg_val_s			*regs,
+			uint32_t			n_regs);
+
+	void runtest(
 			reg_val_s			*regs,
 			uint32_t			n_regs);
 
@@ -57,6 +66,7 @@ protected:
 
 public:
 	static fwrisc_instr_tests		*test;
+
 
 protected:
 	uint32_t						m_icount;

@@ -86,6 +86,51 @@ module fwrisc (
 	wire[31:0]					alu_out;
 	wire						alu_carry;
 	wire						alu_eqz;
+
+	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
+	wire op_fence     = (instr[3:0] == 4'b1111);
+	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
+	wire op_arith_imm = (op_branch_ld_st_arith && instr[6:4] == 3'b001);
+	wire op_arith_reg = (op_branch_ld_st_arith && instr[6:4] == 3'b011);
+	wire op_shift_imm = (op_arith_imm && instr[13:12] == 2'b01);
+	wire op_shift_reg = (op_arith_reg && instr[13:12] == 2'b01);
+	wire op_shift     = (op_shift_imm || op_shift_reg);
+	wire op_st        = (op_branch_ld_st_arith && instr[6:4] == 3'b010);
+	wire op_ld_st     = (op_ld || op_st);
+	wire op_branch    = (op_branch_ld_st_arith && instr[6:4] == 3'b110);
+	wire op_jal       = (instr[6:0] == 7'b1101111);
+	wire op_jalr      = (instr[6:0] == 7'b1100111);
+	wire op_auipc     = (instr[6:0] == 7'b0010111);
+	wire op_lui       = (instr[6:0] == 7'b0110111);
+	wire op_sys       = (op_branch_ld_st_arith && instr[6:4] == 3'b111);
+	wire op_sys_prv   = !(|instr[14:12]);
+//	wire op_ecall     = (op_sys && op_sys_prv && instr[24:21] == 4'b0000);
+	wire op_ecall     = (op_sys && op_sys_prv && !instr[28]);
+	// Seems the compiler that Zephyr uses encodes eret as 0x10000073
+//	wire op_eret      = (op_sys && op_sys_prv && instr[24:20] == 5'b00010);
+	wire op_eret      = (op_sys && op_sys_prv && instr[28]);
+	
+	wire op_csr       = (op_sys && |instr[14:12]);
+	wire op_csrr_cs   = (op_csr && instr[13]);
+	wire op_csrrc     = (op_csr && instr[13:12] == 2'b11);
+	wire op_csrrs     = (op_csr && instr[13:12] == 2'b10);
+
+	// Exception signals
+	wire						exception;
+	reg 						misaligned_addr;
+
+	reg[5:0]		ra_raddr;
+	reg[5:0]		rb_raddr;
+	wire[31:0]		ra_rdata;
+	wire[31:0]		rb_rdata;
+	reg[5:0]		rd_waddr;
+	reg[31:0]		rd_wdata;
+	reg				rd_wen;
+
+	// RS1, RS2, and RD are always in the same place
+	wire[4:0]		rs1 = instr[19:15];
+	wire[4:0]		rs2 = instr[24:20];
+	wire[4:0]		rd  = instr[11:7];
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -220,33 +265,6 @@ module fwrisc (
 	end
 	
 
-	wire op_branch_ld_st_arith = (instr[3:0] == 4'b0011);
-	wire op_fence     = (instr[3:0] == 4'b1111);
-	wire op_ld        = (op_branch_ld_st_arith && instr[6:4] == 3'b000);
-	wire op_arith_imm = (op_branch_ld_st_arith && instr[6:4] == 3'b001);
-	wire op_shift_imm = (op_arith_imm && instr[13:12] == 2'b01);
-	wire op_shift_reg = (op_arith_reg && instr[13:12] == 2'b01);
-	wire op_shift     = (op_shift_imm || op_shift_reg);
-	wire op_st        = (op_branch_ld_st_arith && instr[6:4] == 3'b010);
-	wire op_ld_st     = (op_ld || op_st);
-	wire op_arith_reg = (op_branch_ld_st_arith && instr[6:4] == 3'b011);
-	wire op_branch    = (op_branch_ld_st_arith && instr[6:4] == 3'b110);
-	wire op_jal       = (instr[6:0] == 7'b1101111);
-	wire op_jalr      = (instr[6:0] == 7'b1100111);
-	wire op_auipc     = (instr[6:0] == 7'b0010111);
-	wire op_lui       = (instr[6:0] == 7'b0110111);
-	wire op_sys       = (op_branch_ld_st_arith && instr[6:4] == 3'b111);
-	wire op_sys_prv   = !(|instr[14:12]);
-//	wire op_ecall     = (op_sys && op_sys_prv && instr[24:21] == 4'b0000);
-	wire op_ecall     = (op_sys && op_sys_prv && !instr[28]);
-	// Seems the compiler that Zephyr uses encodes eret as 0x10000073
-//	wire op_eret      = (op_sys && op_sys_prv && instr[24:20] == 5'b00010);
-	wire op_eret      = (op_sys && op_sys_prv && instr[28]);
-	
-	wire op_csr       = (op_sys && |instr[14:12]);
-	wire op_csrr_cs   = (op_csr && instr[13]);
-	wire op_csrrc     = (op_csr && instr[13:12] == 2'b11);
-	wire op_csrrs     = (op_csr && instr[13:12] == 2'b10);
 	wire [11:0]	csr   = instr[31:20];
 	reg [5:0]	csr_addr;
 
@@ -262,10 +280,10 @@ module fwrisc (
 	// 0x300-0x306 => 0x20-0x26 (32-38)
 	// 0x340-0x344 => 0x28-0x2C (40-44)
 	// 0xF11-0xF14 => 0x31-0x34 (49-52)
-	// 0xB00       => 0x36
+	// 0xB00-0xB01 => 0x36 (MCYCLE)
 	// 0xB02       => 0x37
-	// 0xB80       => 0x38
-	// 0xB82       => 0x39
+	// 0xB80-0xB81 => 0x38 (MCYCLEH)
+	// 0xB82       => 0x39 
 	// CSR_tmp     => 0x3F (63)
 	always @* begin
 		case (csr[11:8])
@@ -278,8 +296,10 @@ module fwrisc (
 			end
 			4'hb: begin // counters
 				if (csr[7]) begin // 0xB8x
+					// MCYCLEH, TIMEH, INSTRETH
 					csr_addr = {2'd3, 3'b100, csr[1]};
 				end else begin
+					// MCYCLE, TIME, INSTRET
 					csr_addr = {2'd3, 3'b011, csr[1]};
 				end
 			end
@@ -303,19 +323,8 @@ module fwrisc (
 		{{19{1'b0}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
 	wire[31:0]		zero = 32'h00000000;
 	
-	// RS1, RS2, and RD are always in the same place
-	wire[4:0]		rs1 = instr[19:15];
-	wire[4:0]		rs2 = instr[24:20];
-	wire[4:0]		rd  = instr[11:7];
 	
 
-	reg[5:0]		ra_raddr;
-	reg[5:0]		rb_raddr;
-	wire[31:0]		ra_rdata;
-	wire[31:0]		rb_rdata;
-	reg[5:0]		rd_waddr;
-	reg[31:0]		rd_wdata;
-	reg				rd_wen;
 	
 	
 	// Comparator signals
@@ -325,9 +334,6 @@ module fwrisc (
 	wire						comp_out;
 	wire						branch_cond;
 	
-	// Exception signals
-	wire						exception;
-	reg 						misaligned_addr;
 	
 	fwrisc_comparator u_comp (
 		.clock  (clock 		), 

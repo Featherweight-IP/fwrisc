@@ -1,1 +1,1 @@
---gtest_filter=fwrisc_instr_tests_system.csrw
++gtest-filter=fwrisc_instr_tests_system.csrw

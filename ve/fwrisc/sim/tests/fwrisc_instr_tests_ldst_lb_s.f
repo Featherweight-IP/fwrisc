@@ -1,1 +1,1 @@
---gtest_filter=fwrisc_instr_tests_ldst.lb_s
++gtest-filter=fwrisc_instr_tests_ldst.lb_s

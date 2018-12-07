@@ -24,22 +24,27 @@
 
 #include "fwrisc_instr_tests.h"
 #include "AsmTestCompiler.h"
+#include "BfmType.h"
 
 fwrisc_instr_tests::fwrisc_instr_tests(uint32_t max_instr) : m_max_instr(max_instr) {
 	m_halt_addr = 0x80000004;
+	test = this;
 }
 
 fwrisc_instr_tests::~fwrisc_instr_tests() {
 	// TODO Auto-generated destructor stub
+	fprintf(stdout, "fwrisc_instr_tests::~fwrisc_instr_tests\n");
+	fflush(stdout);
+	test = 0;
 }
 
 fwrisc_instr_tests *fwrisc_instr_tests::test = 0;
 
 void fwrisc_instr_tests::SetUp() {
-	BaseT::SetUp();
+	fprintf(stdout, "--> fwrisc_instr_tests::SetUp\n");
+	fflush(stdout);
 
-	Vfwrisc_tb_hdl *tbp = static_cast<Vfwrisc_tb_hdl *>(0);
-	fprintf(stdout, "offset of clock: %d\n", &tbp->clock);
+//	GoogletestHdl::SetUp();
 
 	test = this;
 	m_icount = 0;
@@ -53,22 +58,40 @@ void fwrisc_instr_tests::SetUp() {
 		m_mem[i] = std::pair<uint32_t, bool>(0, false);
 	}
 
-	raiseObjection(this);
+	// Register ourselves as a listener on this BFM
+	fwrisc_tracer_bfm_t::bfm("*.u_tracer")->set_rsp_if(this);
 
-	addClock(top()->clock, 10);
+	GoogletestHdl::raiseObjection();
+	fprintf(stdout, "<-- fwrisc_instr_tests::SetUp\n");
+	fflush(stdout);
+}
+
+void fwrisc_instr_tests::TearDown() {
+	fprintf(stdout, "-- fwrisc_instr_tests::TearDown\n");
+	fflush(stdout);
+	test = 0;
 }
 
 void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
-	fprintf(stdout, "regwrite 0x%02x <= 0x%08x\n", raddr, rdata);
+	fprintf(stdout, "--> regwrite 0x%02x <= 0x%08x\n", raddr, rdata);
+	fflush(stdout);
 	if (raddr == 0) {
 		fprintf(stdout, "ERROR: writing to $zero\n");
 	}
-	m_regs[raddr].first = rdata;
-	m_regs[raddr].second = true;
+	if (raddr < 64) {
+		m_regs[raddr].first = rdata;
+		m_regs[raddr].second = true;
+	} else {
+		fprintf(stdout, "Error: raddr 0x%08x outside 0..63 range\n", raddr);
+	}
+
+	fprintf(stdout, "<-- regwrite 0x%02x <= 0x%08x\n", raddr, rdata);
+	fflush(stdout);
 }
 
 void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 	fprintf(stdout, "memwrite 0x%08x=0x%08x mask=%02x\n", addr, data, mask);
+	fflush(stdout);
 	if ((addr & 0xFFFF8000) == 0x80000000) {
 		uint32_t offset = ((addr & 0x0000FFFF) >> 2);
 		fprintf(stdout, "offset=%d\n", offset);
@@ -99,25 +122,43 @@ void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 
 void fwrisc_instr_tests::exec(uint32_t addr, uint32_t instr) {
 	fprintf(stdout, "EXEC: 0x%08x - 0x%08x\n", addr, instr);
+	fflush(stdout);
 	if (m_halt_addr != 0 && addr == m_halt_addr) {
 		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
 		m_end_of_test = true;
-		dropObjection(this);
+		fprintf(stdout, "--> dropObjection\n");
+		fflush(stdout);
+		GoogletestHdl::dropObjection();
+		fprintf(stdout, "<-- dropObjection\n");
+		fflush(stdout);
 	}
 	if (++m_icount > m_max_instr) {
 		fprintf(stdout, "test timeout\n");
-		dropObjection(this);
+		GoogletestHdl::dropObjection();
 	}
+}
+
+void fwrisc_instr_tests::run() {
+	GoogletestHdl::run();
 }
 
 void fwrisc_instr_tests::runtest(
 		const std::string		&program,
 		reg_val_s 				*regs,
 		uint32_t 				n_regs) {
-	ASSERT_EQ(AsmTestCompiler::compile(testname(), program), true);
+	runtest(regs, n_regs);
+}
 
-	run();
+void fwrisc_instr_tests::runtest(
+		reg_val_s 				*regs,
+		uint32_t 				n_regs) {
+	fprintf(stdout, "--> runtest\n");
+	fflush(stdout);
+
+	GoogletestHdl::run();
 	check(regs, n_regs);
+	fprintf(stdout, "<-- runtest\n");
+	fflush(stdout);
 }
 
 void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
@@ -161,24 +202,6 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 		ASSERT_EQ(m_regs[i].second, accessed[i]);
 	}
 }
-
-extern "C" int unsigned fwrisc_tracer_bfm_register(const char *path) {
-	fprintf(stdout, "register: %s\n", path);
-	return 0;
-}
-
-extern "C" void fwrisc_tracer_bfm_regwrite(unsigned int id, unsigned int raddr, unsigned int rdata) {
-	fwrisc_instr_tests::test->regwrite(raddr, rdata);
-}
-
-extern "C" void fwrisc_tracer_bfm_memwrite(unsigned int id, unsigned int addr, unsigned char mask, unsigned int data) {
-	fwrisc_instr_tests::test->memwrite(addr, mask, data);
-}
-
-extern "C" void fwrisc_tracer_bfm_exec(unsigned int id, unsigned int addr, unsigned int instr) {
-	fwrisc_instr_tests::test->exec(addr, instr);
-}
-
 
 TEST_F(fwrisc_instr_tests, lui) {
 	reg_val_s exp[] = {

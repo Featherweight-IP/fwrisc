@@ -1,1 +1,1 @@
---gtest_filter=fwrisc_instr_tests_jump.jal
++gtest-filter=fwrisc_instr_tests_jump.jal

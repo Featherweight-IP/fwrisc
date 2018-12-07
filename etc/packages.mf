@@ -2,7 +2,8 @@
 simscripts@http://github.com/mballance/simscripts.git
 memory_primitives@http://github.com/mballance/memory_primitives.git
 googletest-ivpm@http://github.com/mballance/googletest-ivpm.git
-googletest-vl@http://github.com/mballance/googletest-vl.git
+googletest-hdl@http://github.com/mballance/googletest-hdl.git
 fwrisc-zephyr@http://github.com/mballance/fwrisc-zephyr.git
+chiselscripts@https://github.com/mballance/chiselscripts/releases/download/0.0.3/chiselscripts-0.0.3.tar.gz
 
 

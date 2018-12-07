@@ -6,8 +6,8 @@
  */
 
 #include "fwrisc_ctest_base.h"
-#include "GoogletestVlCmdlineProcessor.h"
 #include <stdio.h>
+#include "CmdlineProcessor.h"
 
 fwrisc_ctest_base::fwrisc_ctest_base(uint32_t timeout) : fwrisc_instr_tests(timeout) {
 	// TODO Auto-generated constructor stub
@@ -19,7 +19,7 @@ fwrisc_ctest_base::~fwrisc_ctest_base() {
 }
 
 void fwrisc_ctest_base::SetUp() {
-	const GoogletestVlCmdlineProcessor &clp = GoogletestVlCmdlineProcessor::instance();
+	const CmdlineProcessor &clp = GoogletestHdl::clp();
 	std::string elf_file, v;
 	fwrisc_instr_tests::SetUp();
 
@@ -120,7 +120,7 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 	if (addr == m_halt_addr) {
 		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
 		m_end_of_test = true;
-		dropObjection(this);
+		GoogletestHdl::dropObjection();
 	}
 }
 

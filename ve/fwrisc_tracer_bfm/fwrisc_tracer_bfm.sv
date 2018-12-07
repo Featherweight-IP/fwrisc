@@ -28,14 +28,14 @@
 module fwrisc_tracer_bfm(
 		input			clock,
 		input			reset,
-		input [31:0]	addr,
-		input [31:0]	instr,
+		input [31:0]		addr,
+		input [31:0]		instr,
 		input			ivalid,
-		input [31:0]	raddr,
-		input [31:0]	rdata,
+		input [31:0]		raddr,
+		input [31:0]		rdata,
 		input			rwrite,
-		input [31:0]	maddr,
-		input [31:0]	mdata,
+		input [31:0]		maddr,
+		input [31:0]		mdata,
 		input [3:0]		mstrb,
 		input			mwrite,
 		input 			mvalid		
@@ -50,7 +50,7 @@ module fwrisc_tracer_bfm(
 		m_id = fwrisc_tracer_bfm_register($sformatf("%m"));
 	end
 
-	import "DPI-C" function void fwrisc_tracer_bfm_regwrite(
+	import "DPI-C" context task fwrisc_tracer_bfm_regwrite(
 			int unsigned	id,
 			int unsigned	raddr,
 			int unsigned	rdata);
@@ -61,7 +61,7 @@ module fwrisc_tracer_bfm(
 		end
 	end
 
-	import "DPI-C" function void fwrisc_tracer_bfm_exec(
+	import "DPI-C" context task fwrisc_tracer_bfm_exec(
 			int unsigned	id,
 			int unsigned	addr,
 			int unsigned	instr);
@@ -72,7 +72,7 @@ module fwrisc_tracer_bfm(
 		end
 	end
 	
-	import "DPI-C" function void fwrisc_tracer_bfm_memwrite(
+	import "DPI-C" context task fwrisc_tracer_bfm_memwrite(
 			int unsigned	id,
 			int unsigned	addr,
 			byte unsigned	mask,

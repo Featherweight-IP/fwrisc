@@ -23,6 +23,7 @@
  */
 
 #include "fwrisc_instr_tests_arith.h"
+#include <stdint.h>
 
 fwrisc_instr_tests_arith::fwrisc_instr_tests_arith() {
 	// TODO Auto-generated constructor stub
@@ -38,14 +39,8 @@ TEST_F(fwrisc_instr_tests_arith, addi) {
 			{1, 5},
 			{3, 11}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			add		x3, x1, 6
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, addi_neg) {
@@ -53,14 +48,8 @@ TEST_F(fwrisc_instr_tests_arith, addi_neg) {
 			{1, 5},
 			{3, 4}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			add		x3, x1, -1
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, add) {
@@ -69,15 +58,8 @@ TEST_F(fwrisc_instr_tests_arith, add) {
 			{2, 6},
 			{3, 11}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 6
-			add		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, and) {
@@ -86,15 +68,8 @@ TEST_F(fwrisc_instr_tests_arith, and) {
 			{2, 6},
 			{3, 4} // 5&6 == 4
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 6
-			and		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, andi) {
@@ -102,14 +77,8 @@ TEST_F(fwrisc_instr_tests_arith, andi) {
 			{1, 5},
 			{3, 4} // 5&6 == 4
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			andi	x3, x1, 4
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, or) {
@@ -118,15 +87,8 @@ TEST_F(fwrisc_instr_tests_arith, or) {
 			{2, 6},
 			{3, 7} // 5|6=7
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 6
-			or		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, ori) {
@@ -134,14 +96,8 @@ TEST_F(fwrisc_instr_tests_arith, ori) {
 			{1, 5},
 			{3, 7} // 5|6=7
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			ori		x3, x1, 6
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, sll) {
@@ -150,15 +106,8 @@ TEST_F(fwrisc_instr_tests_arith, sll) {
 			{2, 1},
 			{3, (1 << 5)}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 1
-			sll		x3, x2, x1
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, slli) {
@@ -166,14 +115,8 @@ TEST_F(fwrisc_instr_tests_arith, slli) {
 			{1, 1},
 			{3, (1 << 5)}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 1
-			slli	x3, x1, 5
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, slt_t_pos) {
@@ -182,32 +125,18 @@ TEST_F(fwrisc_instr_tests_arith, slt_t_pos) {
 			{2, 6},
 			{3, 1} // 5 < 6
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 6
-			slt		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, slt_t_neg) {
 	reg_val_s exp[] = {
-			{1, -6},
-			{2, -5},
+			{1, (uint32_t)-6},
+			{2, (uint32_t)-5},
 			{3, 1} // 5 < 6
 	};
-	const char *program = R"(
-		entry:
-			li		x1, -6
-			li		x2, -5
-			slt		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 
@@ -217,15 +146,8 @@ TEST_F(fwrisc_instr_tests_arith, slt_f) {
 			{2, 5},
 			{3, 0} // !5 < 4
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 5
-			slt		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, slti_t) {
@@ -233,14 +155,8 @@ TEST_F(fwrisc_instr_tests_arith, slti_t) {
 			{1, 5},
 			{3, 1} // 5 < 6
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			slti	x3, x1, 6
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, slti_f) {
@@ -248,14 +164,8 @@ TEST_F(fwrisc_instr_tests_arith, slti_f) {
 			{1, 5},
 			{3, 0} // !5 < 4
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			slti	x3, x1, 4
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, sltu_t) {
@@ -264,15 +174,8 @@ TEST_F(fwrisc_instr_tests_arith, sltu_t) {
 			{2, 0x80000001},
 			{3, 1} // 5 < 6
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 0x80000000
-			li		x2, 0x80000001
-			sltu	x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, sra) {
@@ -281,15 +184,8 @@ TEST_F(fwrisc_instr_tests_arith, sra) {
 			{2, 0x80000000},
 			{3, 0xF8000000}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 4
-			li		x2, 0x80000000
-			sra		x3, x2, x1
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, srai) {
@@ -297,14 +193,8 @@ TEST_F(fwrisc_instr_tests_arith, srai) {
 			{2, 0x80000000},
 			{3, 0xF8000000}
 	};
-	const char *program = R"(
-		entry:
-			li		x2, 0x80000000
-			srai	x3, x2, 4
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, srl) {
@@ -313,15 +203,8 @@ TEST_F(fwrisc_instr_tests_arith, srl) {
 			{2, 0x80000000},
 			{3, (0x80000000 >> 5)}
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 0x80000000
-			srl		x3, x2, x1
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, srli) {
@@ -329,14 +212,8 @@ TEST_F(fwrisc_instr_tests_arith, srli) {
 			{2, 0x80000000},
 			{3, (0x80000000 >> 5)}
 	};
-	const char *program = R"(
-		entry:
-			li		x2, 0x80000000
-			srli	x3, x2, 5
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, sub) {
@@ -345,15 +222,8 @@ TEST_F(fwrisc_instr_tests_arith, sub) {
 			{2, 6},
 			{3, 1} // 6-5=1
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 6
-			sub		x3, x2, x1
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, xor) {
@@ -362,15 +232,8 @@ TEST_F(fwrisc_instr_tests_arith, xor) {
 			{2, 6},
 			{3, 3} // 5^6=3
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			li		x2, 6
-			xor		x3, x1, x2
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 TEST_F(fwrisc_instr_tests_arith, xori) {
@@ -378,14 +241,8 @@ TEST_F(fwrisc_instr_tests_arith, xori) {
 			{1, 5},
 			{3, 3} // 5^6=3
 	};
-	const char *program = R"(
-		entry:
-			li		x1, 5
-			xori	x3, x1, 6
-			j		done
-			)";
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	runtest(exp, sizeof(exp)/sizeof(reg_val_s));
 }
 
 

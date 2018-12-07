@@ -1,1 +1,1 @@
---gtest_filter=fwrisc_instr_tests_branch.blt_t_pos
++gtest-filter=fwrisc_instr_tests_branch.blt_t_pos

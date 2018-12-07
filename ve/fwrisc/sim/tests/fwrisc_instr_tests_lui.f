@@ -1,1 +1,1 @@
---gtest_filter=fwrisc_instr_tests.lui
++gtest-filter=fwrisc_instr_tests.lui
