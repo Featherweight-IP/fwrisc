@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_system.csrw_csrr
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/system_csrw_csrr.elf

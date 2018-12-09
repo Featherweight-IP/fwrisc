@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_system.eret
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/system_eret.elf
