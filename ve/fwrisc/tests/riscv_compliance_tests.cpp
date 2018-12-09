@@ -44,11 +44,6 @@ void riscv_compliance_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data
 	}
 }
 
-void riscv_compliance_tests::runtest() {
-	run();
-	check();
-}
-
 void riscv_compliance_tests::check() {
 	const CmdlineProcessor &clp = GoogletestHdl::clp();
 	FILE *ref_file_fp, *elf_file_fp;
@@ -101,12 +96,8 @@ void riscv_compliance_tests::check() {
 	}
 }
 
-TEST_F(riscv_compliance_tests, coretest) {
-	runtest();
-}
-
-TEST_F(riscv_compliance_tests, smoke2) {
-	fprintf(stdout, "smoketest2\n");
-	run();
+TEST_F(riscv_compliance_tests, runtest) {
+	GoogletestHdl::run();
+	check();
 }
 

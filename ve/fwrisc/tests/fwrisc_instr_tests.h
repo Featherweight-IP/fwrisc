@@ -25,6 +25,7 @@
 #ifndef INCLUDED_FWRISC_INSTR_TESTS_H
 #define INCLUDED_FWRISC_INSTR_TESTS_H
 #include "GoogletestHdl.h"
+#include "ElfSymtabReader.h"
 #include "fwrisc_tracer_bfm.h"
 
 class fwrisc_instr_tests : public ::testing::Test, public virtual fwrisc_tracer_bfm_rsp_if {

@@ -8,5 +8,10 @@ entry:
 	j		done
 
 
+start_expected:
+.word 1, 5
+.word 2, 5
+.word 3, 0 // !(5<5)
+end_expected:
 
 

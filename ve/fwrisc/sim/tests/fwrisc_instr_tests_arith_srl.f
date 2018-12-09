@@ -1,2 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_arith.srl
++gtest-filter=fwrisc_instr_tests.runtest
 +SW_IMAGE=${BUILD_DIR}/esw/unit/arith_srl.elf

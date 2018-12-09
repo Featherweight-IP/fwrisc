@@ -25,6 +25,7 @@
 #include "fwrisc_instr_tests.h"
 #include "AsmTestCompiler.h"
 #include "BfmType.h"
+#include "ElfDataReader.h"
 
 fwrisc_instr_tests::fwrisc_instr_tests(uint32_t max_instr) : m_max_instr(max_instr) {
 	m_halt_addr = 0x80000004;
@@ -60,6 +61,7 @@ void fwrisc_instr_tests::SetUp() {
 
 	// Register ourselves as a listener on this BFM
 	fwrisc_tracer_bfm_t::bfm("*.u_tracer")->set_rsp_if(this);
+
 
 	GoogletestHdl::raiseObjection();
 	fprintf(stdout, "<-- fwrisc_instr_tests::SetUp\n");
@@ -152,14 +154,16 @@ void fwrisc_instr_tests::runtest(
 void fwrisc_instr_tests::runtest(
 		reg_val_s 				*regs,
 		uint32_t 				n_regs) {
-	fprintf(stdout, "--> runtest\n");
+	fprintf(stdout, "--> runtest (DEPRECATED)\n");
 	fflush(stdout);
 
 	GoogletestHdl::run();
+
 	check(regs, n_regs);
 	fprintf(stdout, "<-- runtest\n");
 	fflush(stdout);
 }
+
 
 void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 	bool accessed[64];
@@ -203,17 +207,37 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 	}
 }
 
-TEST_F(fwrisc_instr_tests, lui) {
-	reg_val_s exp[] = {
-			{1, 0x00005000}
-	};
-	const char *program = R"(
-		entry:
-			lui		x1, 5
-			j		done
-			)";
+TEST_F(fwrisc_instr_tests,runtest) {
+	ElfSymtabReader					symtab;
 
-	runtest(program, exp, sizeof(exp)/sizeof(reg_val_s));
+	GoogletestHdl::run();
+
+	const CmdlineProcessor &clp = GoogletestHdl::clp();
+	std::string sw_image;
+	ASSERT_TRUE(clp.get_plusarg_value("+SW_IMAGE", sw_image));
+	symtab.read(sw_image);
+
+	Elf32_Sym start_expected = symtab.find_sym("start_expected");
+	Elf32_Sym end_expected = symtab.find_sym("end_expected");
+
+	ASSERT_TRUE(start_expected.st_value >= 0x80000000);
+	ASSERT_TRUE(end_expected.st_value >= 0x80000000);
+
+	uint32_t n_regs = (end_expected.st_value-start_expected.st_value)/(sizeof(uint32_t)*2);
+	reg_val_s *regs = new reg_val_s[n_regs];
+
+	ElfDataReader reader;
+	fprintf(stdout, "--> read\n");
+	ASSERT_TRUE(reader.read(sw_image,
+			start_expected.st_value,
+			n_regs*(sizeof(reg_val_s)),
+			regs));
+	fprintf(stdout, "<-- read\n");
+
+	// TODO: need the section of the file that covers start_expected/end_expected
+
+
+	check(regs, n_regs);
 }
 
 

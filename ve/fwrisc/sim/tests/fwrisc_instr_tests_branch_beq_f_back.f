@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_branch.beq_f_back
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/branch_beq_f_back.elf

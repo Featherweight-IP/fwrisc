@@ -39,8 +39,6 @@ public:
 
 	virtual void memwrite(uint32_t addr, uint8_t mask, uint32_t data);
 
-	virtual void runtest();
-
 	virtual void check();
 
 };

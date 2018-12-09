@@ -7,5 +7,10 @@ entry:
 	sll		x3, x2, x1
 	j		done
 
+start_expected:
+.word 1, 5
+.word 2, 1
+.word 3, (1 << 5)
+end_expected:
 
 

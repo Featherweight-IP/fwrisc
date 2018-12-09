@@ -8,4 +8,9 @@ entry:
 	j		done
 
 
+start_expected:
+.word 1, 4
+.word 2, 0x80000000
+.word 3, 0xF8000000
+end_expected:
 

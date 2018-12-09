@@ -6,3 +6,8 @@ entry:
 	add		x3, x1, -1
 	j		done
 
+// Expected value for registers
+start_expected:
+.word 1, 5
+.word 3, 4
+end_expected:

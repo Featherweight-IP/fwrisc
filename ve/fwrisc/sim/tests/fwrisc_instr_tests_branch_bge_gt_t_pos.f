@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_branch.bge_gt_t_pos
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/branch_bge_gt_t_pos.elf
