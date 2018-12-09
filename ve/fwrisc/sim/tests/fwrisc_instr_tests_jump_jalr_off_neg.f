@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_jump.jalr_off_neg
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/jump_jalr_off_neg.elf

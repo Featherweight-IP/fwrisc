@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_jump.j
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/jump_j.elf
