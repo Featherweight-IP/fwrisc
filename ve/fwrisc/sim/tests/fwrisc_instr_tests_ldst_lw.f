@@ -1,1 +1,2 @@
-+gtest-filter=fwrisc_instr_tests_ldst.lw
++gtest-filter=fwrisc_instr_tests.runtest
++SW_IMAGE=${BUILD_DIR}/esw/unit/ldst_lw.elf
