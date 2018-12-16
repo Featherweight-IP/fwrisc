@@ -28,14 +28,21 @@
 module fwrisc_tracer_bfm(
 		input			clock,
 		input			reset,
-		input [31:0]		addr,
-		input [31:0]		instr,
+		input [31:0]	pc,
+		input [31:0]	instr,
 		input			ivalid,
-		input [31:0]		raddr,
-		input [31:0]		rdata,
-		input			rwrite,
-		input [31:0]		maddr,
-		input [31:0]		mdata,
+		// ra, rb
+		input [5:0]		ra_raddr,
+		input [31:0]	ra_rdata,
+		input [5:0]		rb_raddr,
+		input [31:0]	rb_rdata,
+		// rd
+		input [5:0]		rd_waddr,
+		input [31:0]	rd_wdata,
+		input			rd_write,
+		
+		input [31:0]	maddr,
+		input [31:0]	mdata,
 		input [3:0]		mstrb,
 		input			mwrite,
 		input 			mvalid		
@@ -56,8 +63,8 @@ module fwrisc_tracer_bfm(
 			int unsigned	rdata);
 	
 	always @(posedge clock) begin
-		if (rwrite) begin
-			fwrisc_tracer_bfm_regwrite(m_id, raddr, rdata);
+		if (rd_write) begin
+			fwrisc_tracer_bfm_regwrite(m_id, rd_waddr, rd_wdata);
 		end
 	end
 
@@ -68,7 +75,7 @@ module fwrisc_tracer_bfm(
 			
 	always @(posedge clock) begin
 		if (ivalid) begin
-			fwrisc_tracer_bfm_exec(m_id, addr, instr);
+			fwrisc_tracer_bfm_exec(m_id, pc, instr);
 		end
 	end
 	

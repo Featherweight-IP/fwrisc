@@ -1,5 +1,5 @@
 /****************************************************************************
- * fwrisc_tracer.sv
+ * fwrisc_comparator.sv
  * 
  * Copyright 2018 Matthew Ballance
  * 
@@ -18,36 +18,29 @@
  * permissions and limitations under the License.
  ****************************************************************************/
 
+`include "fwrisc_defines.vh"
+
 /**
- * Module: fwrisc_tracer
+ * Module: fwrisc_comparator
  * 
- * Dummy module that provides an attachment site for the
- * monitor BFM
+ * TODO: Add module documentation
  */
-module fwrisc_tracer (
+module fwrisc_comparator(
 		input			clock,
 		input			reset,
-		input [31:0]	pc,
-		input [31:0]	instr,
-		// True during execute stage. 
-		// Note that write-back will occur at the same time
-		input			ivalid,
-		// ra, rb
-		input [5:0]		ra_raddr,
-		input [31:0]	ra_rdata,
-		input [5:0]		rb_raddr,
-		input [31:0]	rb_rdata,
-		// rd
-		input [5:0]		rd_waddr,
-		input [31:0]	rd_wdata,
-		input			rd_write,
-		// memory access
-		input [31:0]	maddr,
-		input [31:0]	mdata,
-		input [3:0]		mstrb,
-		input			mwrite,
-		input 			mvalid
+		input[31:0]		in_a,
+		input[31:0]		in_b,
+		input[1:0]		op,
+		output reg		out
 		);
+	
+	always @* begin
+		case (op) 
+			`COMPARE_EQ: out = (in_a == in_b);
+			`COMPARE_LT: out = ($signed(in_a) < $signed(in_b));
+			default: /*COMPARE_LTU:*/ out = (in_a < in_b);
+		endcase
+	end
 
 endmodule
 

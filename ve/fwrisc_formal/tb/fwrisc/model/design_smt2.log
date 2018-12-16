@@ -1,0 +1,214 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2018  Clifford Wolf <clifford@clifford.at>           |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.8+70 (git sha1 0b9bb85, clang 3.4.2 -fPIC -Os)
+
+
+-- Executing script file `design_smt2.ys' --
+
+1. Executing ILANG frontend.
+Input filename: design.il
+
+2. Printing statistics.
+
+=== fwrisc_tracer ===
+
+   Number of wires:                302
+   Number of wire bits:            732
+   Number of public wires:          23
+   Number of public wire bits:     283
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                286
+     $add                            1
+     $assert                        65
+     $dff                           74
+     $eq                           127
+     $logic_and                      1
+     $mem                            3
+     $mux                           12
+     $not                            2
+     $reduce_bool                    1
+
+=== fwrisc_regfile ===
+
+   Number of wires:                 12
+   Number of wire bits:            161
+   Number of public wires:          11
+   Number of public wire bits:     129
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  4
+     $dff                            2
+     $mem                            1
+     $mux                            1
+
+=== fwrisc_formal_tb ===
+
+   Number of wires:                 18
+   Number of wire bits:            178
+   Number of public wires:          14
+   Number of public wire bits:     168
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 11
+     $add                            1
+     $anyconst                       4
+     $dff                            2
+     $eq                             1
+     $mux                            2
+     fwrisc                          1
+
+=== fwrisc_dbus_if ===
+
+   Number of wires:                 16
+   Number of wire bits:            183
+   Number of public wires:          11
+   Number of public wire bits:     172
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  9
+     $eq                             3
+     $logic_not                      1
+     $logic_or                       1
+     $pmux                           2
+     $shl                            2
+
+=== fwrisc_comparator ===
+
+   Number of wires:                 11
+   Number of wire bits:             74
+   Number of public wires:           6
+   Number of public wire bits:      69
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  6
+     $eq                             2
+     $logic_not                      1
+     $lt                             2
+     $pmux                           1
+
+=== fwrisc_alu ===
+
+   Number of wires:                 23
+   Number of wire bits:            336
+   Number of public wires:          10
+   Number of public wire bits:     167
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 18
+     $add                            1
+     $and                            1
+     $eq                             7
+     $gt                             1
+     $logic_not                      1
+     $mux                            2
+     $or                             1
+     $pmux                           1
+     $reduce_or                      1
+     $sub                            1
+     $xor                            1
+
+=== fwrisc ===
+
+   Number of wires:                264
+   Number of wire bits:           2362
+   Number of public wires:          78
+   Number of public wire bits:     888
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                246
+     $add                            3
+     $dff                            6
+     $eq                            38
+     $logic_and                     32
+     $logic_not                     16
+     $logic_or                      16
+     $mux                           93
+     $pmux                          16
+     $reduce_or                     18
+     $sub                            3
+     fwrisc_alu                      1
+     fwrisc_comparator               1
+     fwrisc_dbus_if                  1
+     fwrisc_regfile                  1
+     fwrisc_tracer                   1
+
+=== design hierarchy ===
+
+   fwrisc_formal_tb                  1
+     fwrisc                          1
+       fwrisc_alu                    1
+       fwrisc_comparator             1
+       fwrisc_dbus_if                1
+       fwrisc_regfile                1
+       fwrisc_tracer                 1
+
+   Number of wires:                646
+   Number of wire bits:           4026
+   Number of public wires:         153
+   Number of public wire bits:    1876
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                574
+     $add                            6
+     $and                            1
+     $anyconst                       4
+     $assert                        65
+     $dff                           84
+     $eq                           178
+     $gt                             1
+     $logic_and                     33
+     $logic_not                     19
+     $logic_or                      17
+     $lt                             2
+     $mem                            4
+     $mux                          110
+     $not                            2
+     $or                             1
+     $pmux                          20
+     $reduce_bool                    1
+     $reduce_or                     19
+     $shl                            2
+     $sub                            4
+     $xor                            1
+
+3. Executing SMT2 backend.
+Creating SMT-LIBv2 representation of module fwrisc_alu.
+Creating SMT-LIBv2 representation of module fwrisc_comparator.
+Creating SMT-LIBv2 representation of module fwrisc_dbus_if.
+Creating SMT-LIBv2 representation of module fwrisc_regfile.
+Creating SMT-LIBv2 representation of module fwrisc_tracer.
+Creating SMT-LIBv2 representation of module fwrisc.
+Creating SMT-LIBv2 representation of module fwrisc_formal_tb.
+
+End of script. Logfile hash: d23bfaf710
+CPU: user 0.07s system 0.00s, MEM: 37.99 MB total, 5.40 MB resident
+Yosys 0.8+70 (git sha1 0b9bb85, clang 3.4.2 -fPIC -Os)
+Time spent: 62% 2x write_smt2 (0 sec), 36% 2x read_ilang (0 sec), ...

@@ -1,0 +1,20 @@
+# running in fwrisc/src/
+read -sv -formal fwrisc.sv \
+fwrisc_formal_tb.sv \
+fwrisc_alu.sv \
+fwrisc_comparator.sv \
+fwrisc_dbus_if.sv \
+fwrisc_regfile.sv \
+fwrisc_formal_arith_checker.sv
+prep -top fwrisc_formal_tb
+
+memory_nordff
+async2sync
+chformal -assume -early
+chformal -live -fair -cover -remove
+opt_clean
+setundef -anyseq
+opt -keepdc -fast
+check
+hierarchy -simcheck
+write_ilang ../model/design.il

@@ -1,0 +1,30 @@
+
+[options]
+mode bmc
+depth 8
+
+[engines]
+smtbmc
+
+[script]
+read -sv -formal fwrisc.sv \
+fwrisc_formal_tb.sv \
+fwrisc_alu.sv \
+fwrisc_comparator.sv \
+fwrisc_dbus_if.sv \
+fwrisc_regfile.sv \
+fwrisc_formal_checker.sv
+prep -top fwrisc_formal_tb
+
+[files]
+{FWRISC}/ve/fwrisc_formal/tb/fwrisc_formal_tb.sv
+fwrisc_formal_checker.sv {FWRISC}/ve/fwrisc_formal/tb/{INSTRUCTION_CHECKER}.sv
+fwrisc_formal_instruction.svh {FWRISC}/ve/fwrisc_formal/tests/{TESTNAME}.svh
+{FWRISC}/ve/fwrisc_formal/tb/fwrisc_formal_opcode_defines.svh
+{FWRISC}/rtl/fwrisc.sv
+{FWRISC}/rtl/fwrisc_alu.sv
+{FWRISC}/rtl/fwrisc_comparator.sv
+{FWRISC}/rtl/fwrisc_dbus_if.sv
+{FWRISC}/rtl/fwrisc_defines.vh
+{FWRISC}/rtl/fwrisc_regfile.sv
+
