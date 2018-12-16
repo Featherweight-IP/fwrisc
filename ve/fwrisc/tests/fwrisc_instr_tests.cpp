@@ -227,15 +227,10 @@ TEST_F(fwrisc_instr_tests,runtest) {
 	reg_val_s *regs = new reg_val_s[n_regs];
 
 	ElfDataReader reader;
-	fprintf(stdout, "--> read\n");
 	ASSERT_TRUE(reader.read(sw_image,
 			start_expected.st_value,
 			n_regs*(sizeof(reg_val_s)),
 			regs));
-	fprintf(stdout, "<-- read\n");
-
-	// TODO: need the section of the file that covers start_expected/end_expected
-
 
 	check(regs, n_regs);
 }
