@@ -47,6 +47,9 @@ module fwrisc_tracer(
 	reg[2:0]	funct3;
 	reg[6:0]	funct7;
 	reg[31:12]	imm_31_12;
+	reg[31:0]	imm_11_0;
+	reg[31:0]	imm_11_0_u;
+	reg[31:0]	pc_r;
 
 	always @(posedge clock) begin
 		// Capture at the end of EXECUTE
@@ -58,6 +61,9 @@ module fwrisc_tracer(
 			funct3 <= `funct3(instr);
 			funct7 <= `funct7(instr);
 			imm_31_12 <= instr[31:12];
+			imm_11_0  <= $signed(instr[31:20]);
+			imm_11_0_u  <= instr[31:20];
+			pc_r <= pc;
 		end
 	end
 	
@@ -94,40 +100,36 @@ module fwrisc_tracer(
 					7'b0110011: begin // register
 						case (funct3)
 							3'b000: begin // add
-								if (rd != 0) begin
-									if (funct7 == 7'b0000000) begin
-										assert(out_regs[rd] == in_regs[rs1] + in_regs[rs2]);
-									end else begin
-										assert(out_regs[rd] == in_regs[rs1] - in_regs[rs2]);
-									end
+								if (funct7 == 7'b0000000) begin
+									assert(rd == 0 || out_regs[rd] == in_regs[rs1] + in_regs[rs2]);
+								end else begin
+									assert(rd == 0 || out_regs[rd] == in_regs[rs1] - in_regs[rs2]);
 								end
 							end
 							3'b001: begin // sll
-								if (rd != 0) assert(out_regs[rd] == in_regs[rs1] << in_regs[rs2]);
+								assert(rd == 0 || out_regs[rd] == in_regs[rs1] << in_regs[rs2]);
 							end
 							3'b010: begin // slt
-								if (rd != 0) assert(out_regs[rd] == ($signed(in_regs[rs1]) < $signed(in_regs[rs2]))?1:0);
+								assert(rd == 0 || out_regs[rd] == ($signed(in_regs[rs1]) < $signed(in_regs[rs2]))?1:0);
 							end
 							3'b011: begin // sltu
-								if (rd != 0) assert(out_regs[rd] == (in_regs[rs1] < in_regs[rs2])?1:0);
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] < in_regs[rs2])?1:0);
 							end
 							3'b100: begin // xor
-								if (rd != 0) assert(out_regs[rd] == (in_regs[rs1] ^ in_regs[rs2]));
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] ^ in_regs[rs2]));
 							end
 							3'b101: begin // srl/sra
-								if (rd != 0) begin
-									if (funct7 == 7'b0000000) begin
-										assert(out_regs[rd] == (in_regs[rs1] >> in_regs[rs2]));
-									end else begin
-										assert(out_regs[rd] == (in_regs[rs1] >>> in_regs[rs2]));
-									end
+								if (funct7 == 7'b0000000) begin
+									assert(rd == 0 || out_regs[rd] == (in_regs[rs1] >> in_regs[rs2]));
+								end else begin
+									assert(rd == 0 || out_regs[rd] == (in_regs[rs1] >>> in_regs[rs2]));
 								end
 							end
 							3'b110: begin // or
-								if (rd != 0) assert(out_regs[rd] == (in_regs[rs1] | in_regs[rs2]));
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] | in_regs[rs2]));
 							end
 							3'b111: begin // and
-								if (rd != 0) assert(out_regs[rd] == (in_regs[rs1] & in_regs[rs2]));
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] & in_regs[rs2]));
 							end
 						endcase
 					end
@@ -135,26 +137,42 @@ module fwrisc_tracer(
 					7'b0010011: begin // immediate
 						case (funct3)
 							3'b000: begin // addi
+								assert(rd == 0 || out_regs[rd] == in_regs[rs1] + imm_11_0);
 							end
 							3'b001: begin // slli
+								assert(rd == 0 || out_regs[rd] == in_regs[rs1] << rs2);
 							end
 							3'b010: begin // slti
+								assert(rd == 0 || out_regs[rd] == ($signed(in_regs[rs1]) < $signed(imm_11_0))?1:0);
 							end
 							3'b011: begin // sltiu
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] < imm_11_0_u)?1:0);
 							end
 							3'b100: begin // xori
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] ^ imm_11_0_u));
 							end
 							3'b101: begin // srli
+								if (funct7[5]) begin
+									assert(rd == 0 || out_regs[rd] == in_regs[rs1] >>> rs2);
+								end else begin
+									assert(rd == 0 || out_regs[rd] == in_regs[rs1] >> rs2);
+								end
 							end
 							3'b110: begin // ori
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] | imm_11_0_u));
 							end
 							3'b111: begin // andi
+								assert(rd == 0 || out_regs[rd] == (in_regs[rs1] & imm_11_0_u));
 							end
 						endcase
 					end
 					
+					7'b0010111: begin // auipc
+						assert(rd == 0 || out_regs[rd] == (pc_r + $signed(imm_31_12)));
+					end
+						
 					7'b0110111: begin // lui
-						if (rd != 0) assert(out_regs[rd] == {imm_31_12, 12'h000});
+						assert(rd == 0 || out_regs[rd] == {imm_31_12, 12'h000});
 					end
 				
 					// Unknown opcode

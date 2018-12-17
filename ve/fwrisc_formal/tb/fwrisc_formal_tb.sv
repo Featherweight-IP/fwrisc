@@ -27,20 +27,9 @@ module fwrisc_formal_tb(input clock);
 	// Include file to force the instruction
 `include "fwrisc_formal_instruction.svh"
 	
-//	`define rtype(target, funct7, rs2, rs1, funct3, rd, opcode) \
-//	assign target[31:25] = funct7; \
-//	assign target[24:20] = rs2; \
-//	assign target[19:15] = rs1; \
-//	assign target[14:12] = funct3; \
-//	assign target[11:7] = rd; \
-//	assign target[6:0] = opcode
-//	
-//	
-//	`rtype_add(idata, $anyconst, $anyconst, $anyconst);
-	
 	wire				iready = ivalid;
 	wire[31:0]			daddr;
-	wire[31:0]          drdata = $anyconst;
+	wire[31:0]          drdata = 'h04030201;
 	wire[31:0]          dwdata;
 	wire[3:0]			dstrb;
 	wire				dvalid;
@@ -62,25 +51,6 @@ module fwrisc_formal_tb(input clock);
 		.dready  (dready ),
 		);
 
-//	bind fwrisc_tracer fwrisc_forma_arith_checker u_checker(
-//			.clock(clock),
-//			.reset(reset),
-//			.pc(pc),
-//			.instr(instr),
-//			.ivalid(ivalid),
-//			.ra_raddr(ra_addr),
-//			.ra_rdata(ra_rdata),
-//			.rb_raddr(rb_addr),
-//			.rb_rdata(rb_rdata),
-//			.rd_waddr(rd_addr),
-//			.rd_wdata(rd_wdata),
-//			.rd_write(rd_write),
-//			.maddr(maddr),
-//			.mdata(mdata),
-//			.mstrb(mstrb),
-//			.mwrite(mwrite),
-//			.mvalid(mvalid)
-//		);	
 endmodule
 
 

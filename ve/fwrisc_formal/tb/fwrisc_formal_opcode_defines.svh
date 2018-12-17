@@ -60,13 +60,25 @@
 `define auipc(target, imm, rd) `utype(imm, rd, 7'b0010111)	
 `define jal(target, imm, rd) `jtype(imm, rd, 7'b0010111)	
 `define jalr(target, imm, rs1, rd) `itype(imm, rs1, 3'b000, rd, 7'b1100111)	
+	
+`define itype_add(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b000, rd, 7'b0010011)
+`define itype_or(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b110, rd, 7'b0010011)
+`define itype_slt(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b010, rd, 7'b0010011)
+`define itype_sltu(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b011, rd, 7'b0010011)
+`define itype_xor(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b100, rd, 7'b0010011)
 
 `define rtype_add(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b000, rd, 7'b0110011)
 `define rtype_and(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b111, rd, 7'b0110011)
 `define rtype_or(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b110, rd, 7'b0110011)
-`define rtype_sll(target, rs2, rs1, rd) `rtype(target, 7'b0100000, rs2, rs1, 3'b001, rd, 7'b0110011)
+`define rtype_sll(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b001, rd, 7'b0110011)
+`define rtype_srl(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b101, rd, 7'b0110011)
+`define rtype_sra(target, rs2, rs1, rd) `rtype(target, 7'b0100000, rs2, rs1, 3'b101, rd, 7'b0110011)
+`define rtype_slt(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b010, rd, 7'b0110011)
+`define rtype_sltu(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b011, rd, 7'b0110011)
 `define rtype_sub(target, rs2, rs1, rd) `rtype(target, 7'b0100000, rs2, rs1, 3'b000, rd, 7'b0110011)
+`define rtype_xor(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b100, rd, 7'b0110011)
 	
 `define utype_lui(target, imm, rd) `utype(target, imm, rd, 7'b0110111)
+`define utype_auipc(target, imm, rd) `utype(target, imm, rd, 7'b0010111)
 	
 `endif /* INCLUDED_FWRISC_FORMAL_OPCODE_DEFINES_SVH */
