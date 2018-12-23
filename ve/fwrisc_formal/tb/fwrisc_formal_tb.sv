@@ -27,13 +27,16 @@ module fwrisc_formal_tb(input clock);
 	// Include file to force the instruction
 `include "fwrisc_formal_instruction.svh"
 	
+	wire				ivalid;
 	wire				iready = ivalid;
 	wire[31:0]			daddr;
-	wire[31:0]          drdata = 'h04030201;
+	wire[31:0]          fwrisc_formal_drdata = $anyconst; // 'h04030201;
 	wire[31:0]          dwdata;
 	wire[3:0]			dstrb;
 	wire				dvalid;
+	wire				dwrite;
 	wire				dready = dvalid;
+	
 
 	fwrisc u_dut (
 		.clock   (clock  ), 
@@ -44,12 +47,13 @@ module fwrisc_formal_tb(input clock);
 		.iready  (iready ), 
 		.daddr   (daddr  ), 
 		.dwdata  (dwdata ), 
-		.drdata  (drdata ), 
+		.drdata  (fwrisc_formal_drdata ), 
 		.dstrb   (dstrb  ), 
 		.dwrite  (dwrite ), 
 		.dvalid  (dvalid ), 
 		.dready  (dready ),
 		);
+	assign u_dut.u_tracer.fwrisc_formal_drdata = fwrisc_formal_drdata;
 
 endmodule
 

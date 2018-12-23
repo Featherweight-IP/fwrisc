@@ -4,7 +4,8 @@ mode bmc
 depth {DEPTH}
 
 [engines]
-smtbmc
+smtbmc boolector
+# smtbmc z3
 
 [script]
 read -sv -formal fwrisc.sv \

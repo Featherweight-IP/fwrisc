@@ -4,7 +4,7 @@
 
 `include "fwrisc_formal_opcode_defines.svh"
 /**
- * Module: fwrisc_formal_arith_checker
+ * Module: fwrisc_formal_ldst_checker
  * 
  * TODO: Add module documentation
  */
@@ -14,22 +14,18 @@ module fwrisc_tracer(
 		// Current instruction
 		input [31:0]	pc,
 		input [31:0]	instr,
-		
 		// True during execute stage. 
 		// Note that write-back will occur at the same time
 		input			ivalid,
-		
 		// ra, rb
 		input [5:0]		ra_raddr,
 		input [31:0]	ra_rdata,
 		input [5:0]		rb_raddr,
 		input [31:0]	rb_rdata,
-		
 		// rd
 		input [5:0]		rd_waddr,
 		input [31:0]	rd_wdata,
 		input			rd_write,
-		
 		// memory access
 		input [31:0]	maddr,
 		input [31:0]	mdata,
@@ -37,11 +33,10 @@ module fwrisc_tracer(
 		input			mwrite,
 		input 			mvalid		
 		);
-	
-	
 	reg[31:0]			in_regs[63:0];
 	reg[31:0]			out_regs[63:0];
 	reg					out_regs_w[63:0];
+	wire[31:0]			fwrisc_formal_drdata;
 	
 	genvar i;
 	for (i=0; i<64; i++) begin
@@ -89,30 +84,21 @@ module fwrisc_tracer(
 		end
 	end
 	
-	wire[31:0] shift_val = ((in_regs[rs1] << in_regs[rs2][4:0]) & 32'hffffffff);
-	wire null_shift = (
-			(opcode == 7'b0110011 && (funct3 == 3'b001 || funct3 == 3'b101) && in_regs[rs2][4:0] == 0) 
-			|| (opcode == 7'b0010011 && (funct3 == 3'b001 || funct3 == 3'b101) && rs2 == 0) 
-		);
-	
-	reg ivalid_r, state=0;
+	reg ivalid_r;
 	always @(posedge clock) begin
 		if (reset == 1) begin
 			ivalid_r <= 0;
-			state <= 0;
 		end else begin
 			ivalid_r <= ivalid;
+			
+			assert(pc == fwrisc_formal_drdata);
 		
 			// Writing to $zero is never expected
 			assert(out_regs_w[0] == 0);
 			
 			cover(ivalid_r == 1);
 			
-			if (ivalid_r && state == 0) begin
-				state <= 1;
-				// PC should always be +4
-				assert(pc == pc_r + 4);
-				
+			if (ivalid_r) begin
 				case (opcode)
 					7'b0110011: begin // register
 						case (funct3)
@@ -124,8 +110,7 @@ module fwrisc_tracer(
 								end
 							end
 							3'b001: begin // sll
-//							assert(rd == 0 || out_regs[rd] == ((in_regs[rs2] << in_regs[rs1]) & 32'hffffffff));
-							assert(rd == 0 || out_regs[rd] == shift_val);
+								assert(rd == 0 || out_regs[rd] == ((in_regs[rs2] << in_regs[rs1]) & 32'hffffffff));
 							end
 							3'b010: begin // slt
 								assert(rd == 0 || out_regs[rd] == ($signed(in_regs[rs1]) < $signed(in_regs[rs2]))?1:0);

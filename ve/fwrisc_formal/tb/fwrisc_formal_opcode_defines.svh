@@ -55,14 +55,17 @@
 `define i_imm(instr) instr[31:20]
 `define funct7(instr) instr[31:25]
 `define funct3(instr) instr[14:12]
+	
+`define imm_jtype(instr) $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0})
 
-`define lui(target, imm, rd) `utype(imm, rd, 7'b0110111)	
-`define auipc(target, imm, rd) `utype(imm, rd, 7'b0010111)	
-`define jal(target, imm, rd) `jtype(imm, rd, 7'b0010111)	
-`define jalr(target, imm, rs1, rd) `itype(imm, rs1, 3'b000, rd, 7'b1100111)	
+`define lui(target, imm, rd) `utype(target, imm, rd, 7'b0110111)	
+`define auipc(target, imm, rd) `utype(target, imm, rd, 7'b0010111)	
+`define jal(target, imm, rd) `jtype(target, imm, rd, 7'b1101111)	
+`define jalr(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b000, rd, 7'b1100111)	
 	
 `define itype_add(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b000, rd, 7'b0010011)
 `define itype_or(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b110, rd, 7'b0010011)
+`define itype_sll(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b001, rd, 7'b0010011)
 `define itype_slt(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b010, rd, 7'b0010011)
 `define itype_sltu(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b011, rd, 7'b0010011)
 `define itype_xor(target, imm, rs1, rd) `itype(target, imm, rs1, 3'b100, rd, 7'b0010011)
