@@ -186,7 +186,7 @@ module fwrisc_tracer(
 					end
 					
 					7'b0010111: begin // auipc
-						assert(rd == 0 || out_regs[rd] == (pc_r + $signed(imm_31_12)));
+						assert(rd == 0 || out_regs[rd] == (pc_r + {$signed(imm_31_12), 12'h000}));
 					end
 						
 					7'b0110111: begin // lui
