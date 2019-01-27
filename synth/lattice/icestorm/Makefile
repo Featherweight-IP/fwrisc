@@ -23,7 +23,8 @@ synth.d :
 	$(Q)rm -rf output
 	$(Q)mkdir -p output
 	$(Q)cp $(FWRISC)/rtl/* output
-	$(Q)cd output ; yosys -p 'synth_ice40 -top fwrisc -blif fwrisc.blif' \
+	$(Q)cd output ; yosys -s ../cmds.do 
+#		-p 'synth_intel -top fwrisc -blif fwrisc.blif' \
 		fwrisc_alu.sv \
 		fwrisc_dbus_if.sv \
 		fwrisc_comparator.sv \
@@ -31,6 +32,7 @@ synth.d :
 		fwrisc_regfile.sv \
 		fwrisc.sv
 	$(Q)touch $@
+#		-p 'synth_ice40 -top fwrisc -blif fwrisc.blif' \
 
 sw_$(SW_APP).d : $(wildcard $(MICROSEMI_SYNTH_DIR)/sw/$(SW_APP)/src/*)
 	$(Q)rm -rf $(SW_BUILDDIR)
