@@ -1,0 +1,22 @@
+{
+
+	"tasks": [
+		{ "name": "regwrite", "type": "ack",
+		"parameters": [
+			{"name": "raddr", "type": "uint32_t"},
+			{"name": "rdata", "type": "uint32_t"}
+		]},
+		{ "name": "exec", "type": "ack",
+		"parameters": [
+			{"name": "addr", "type": "uint32_t"},
+			{"name": "instr", "type": "uint32_t"}
+		]},
+		{ "name": "memwrite", "type": "ack",
+		"parameters": [
+			{"name": "addr", "type": "uint32_t"},
+			{"name": "mask", "type": "uint8_t"},
+			{"name": "data", "type": "uint32_t"}
+		]}
+	]
+}
+

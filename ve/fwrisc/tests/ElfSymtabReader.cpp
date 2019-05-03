@@ -121,4 +121,17 @@ void ElfSymtabReader::visit_shdr(const Elf32_Shdr &shdr) {
 	}
 }
 
+void *elf_symtab_reader_new(const char *file) {
+	ElfSymtabReader *reader = new ElfSymtabReader();
+	reader->read(file);
+
+	return reader;
+}
+
+unsigned int elf_symtab_reader_get_sym(void *reader_p, const char *name) {
+	ElfSymtabReader *reader = static_cast<ElfSymtabReader *>(reader_p);
+	Elf32_Sym sym = reader->find_sym(name);
+
+	return sym.st_value;
+}
 

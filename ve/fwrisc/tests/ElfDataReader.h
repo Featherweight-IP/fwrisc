@@ -30,4 +30,8 @@ private:
 	bool						m_found;
 };
 
+extern "C" {
+int unsigned elf_data_reader_read32(const char *filename, int unsigned addr);
+}
+
 #endif /* INCLUDED_ELF_DATA_READER_H */

@@ -1,1 +1,2 @@
 -F ./tb/tb.F
+-F ./tests/tests.F

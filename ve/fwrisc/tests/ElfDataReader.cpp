@@ -40,3 +40,12 @@ void ElfDataReader::visit_shdr(const Elf32_Shdr &shdr) {
 	}
 }
 
+int unsigned elf_data_reader_read32(const char *filename, int unsigned addr) {
+	ElfDataReader rdr;
+	int unsigned ret;
+
+
+	rdr.read(filename, addr, 4, &ret);
+
+	return ret;
+}

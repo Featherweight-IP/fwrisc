@@ -62,3 +62,5 @@ void ElfFileReader::read(uint32_t off, void *dst, uint32_t sz) {
 	fseek(m_fp, off, 0);
 	fread(dst, sz, 1, m_fp);
 }
+
+

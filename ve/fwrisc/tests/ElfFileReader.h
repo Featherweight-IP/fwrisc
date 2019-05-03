@@ -47,5 +47,6 @@ private:
 	Elf32_Ehdr				m_hdr;
 };
 
+
 #endif /* INCLUDED_ELF_FILE_READER_H */
 

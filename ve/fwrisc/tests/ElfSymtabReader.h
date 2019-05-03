@@ -59,4 +59,9 @@ private:
 
 };
 
+extern "C" {
+void *elf_symtab_reader_new(const char *file);
+unsigned int elf_symtab_reader_get_sym(void *, const char *name);
+}
+
 #endif /* INCLUDED_ELF_SYMTAB_READER_H */

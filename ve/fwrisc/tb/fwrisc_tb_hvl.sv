@@ -13,12 +13,12 @@
 module fwrisc_tb_hvl;
 `ifdef HAVE_UVM
 		import uvm_pkg::*;
-		import googletest_uvm_pkg::*;
+		import fwrisc_tests_pkg::*;
 `endif
 	
 	initial begin
 `ifdef HAVE_UVM
-		run_test("googletest_uvm_test");
+		run_test();
 `else
 		googletest_sv_pkg::run_all_tests();
 `endif /* HAVE_UVM */

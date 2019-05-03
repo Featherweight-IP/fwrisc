@@ -73,6 +73,7 @@ module fwrisc_tb_hdl(input clock);
 		.i_address_b       (daddr[31:2]				),
 		.i_byte_enable_b   (dstrb  					),
 		.o_read_data_b     (drdata					));
+	
 
 	// Connect the tracer BFM to 
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(

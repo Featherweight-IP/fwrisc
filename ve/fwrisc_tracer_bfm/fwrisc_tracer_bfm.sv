@@ -47,49 +47,81 @@ module fwrisc_tracer_bfm(
 		input			mwrite,
 		input 			mvalid		
 		);
-	
-	int unsigned			m_id;
-	
-	import "DPI-C" context function int unsigned fwrisc_tracer_bfm_register(string path);
-	
-	initial begin
-		$display("fwrisc_tracer_bfm: %m");
-		m_id = fwrisc_tracer_bfm_register($sformatf("%m"));
-	end
+`ifdef HAVE_UVM
+		import uvm_pkg::*;
+`endif
 
-	import "DPI-C" context task fwrisc_tracer_bfm_regwrite(
-			int unsigned	id,
-			int unsigned	raddr,
-			int unsigned	rdata);
-	
+	fwrisc_tracer_core u_core(
+		.clock(clock), 
+		.reset(reset));
+
+	assign u_core.pc = pc;
+	assign u_core.instr = instr;
+	assign u_core.ivalid = ivalid;
+	assign u_core.ra_raddr = ra_raddr;
+	assign u_core.ra_rdata = ra_rdata;
+	assign u_core.rb_raddr = rb_raddr;
+	assign u_core.rb_rdata = rb_rdata;
+	assign u_core.rd_waddr = rd_waddr;
+	assign u_core.rd_wdata = rd_wdata;
+	assign u_core.rd_write = rd_write;
+	assign u_core.maddr = maddr;
+	assign u_core.mdata = mdata;
+	assign u_core.mstrb = mstrb;
+	assign u_core.mwrite = mwrite;
+	assign u_core.mvalid = mvalid;
+
+`ifdef HAVE_UVM
+	initial begin
+		uvm_config_db #(virtual fwrisc_tracer_core)::set(
+				uvm_top, "", "tracer", u_core);
+	end
+`endif
+endmodule
+
+interface fwrisc_tracer_core(
+	input		clock,
+	input		reset);
+
+wire [31:0]		pc;
+wire [31:0]		instr;
+wire			ivalid;
+// ra, rb
+wire [5:0]		ra_raddr;
+wire [31:0]		ra_rdata;
+wire [5:0]		rb_raddr;
+wire [31:0]		rb_rdata;
+// rd
+wire [5:0]		rd_waddr;
+wire [31:0]		rd_wdata;
+wire			rd_write;
+
+wire [31:0]		maddr;
+wire [31:0]		mdata;
+wire [3:0]		mstrb;
+wire			mwrite;
+wire 			mvalid;
+
+`include "fwrisc_tracer_bfm_api.svh"
+
 	always @(posedge clock) begin
 		if (rd_write) begin
-			fwrisc_tracer_bfm_regwrite(m_id, rd_waddr, rd_wdata);
+			regwrite(rd_waddr, rd_wdata);
 		end
 	end
 
-	import "DPI-C" context task fwrisc_tracer_bfm_exec(
-			int unsigned	id,
-			int unsigned	addr,
-			int unsigned	instr);
-			
 	always @(posedge clock) begin
 		if (ivalid) begin
-			fwrisc_tracer_bfm_exec(m_id, pc, instr);
+			exec(pc, instr);
 		end
 	end
-	
-	import "DPI-C" context task fwrisc_tracer_bfm_memwrite(
-			int unsigned	id,
-			int unsigned	addr,
-			byte unsigned	mask,
-			int unsigned	data);
+
 	always @(posedge clock) begin
 		if (mvalid && mwrite) begin
-			fwrisc_tracer_bfm_memwrite(m_id, maddr, mstrb, mdata);
+			memwrite(maddr, mstrb, mdata);
 		end
 	end	
 
-endmodule
+endinterface
 
 
