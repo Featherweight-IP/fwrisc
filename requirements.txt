@@ -1,0 +1,4 @@
+
+pyelftools
+-e git+https://github.com/fvutils/py-hpi#egg=hpi
+

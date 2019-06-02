@@ -6,12 +6,6 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>clean,full,incremental,</triggers>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
 			<name>org.python.pydev.PyDevBuilder</name>
 			<arguments>
 			</arguments>
@@ -21,20 +15,10 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
-		<buildCommand>
-			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
-			<triggers>full,incremental,</triggers>
-			<arguments>
-			</arguments>
-		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>net.sf.sveditor.core.SVNature</nature>
 		<nature>org.python.pydev.pythonNature</nature>
-		<nature>org.eclipse.cdt.core.cnature</nature>
-		<nature>org.eclipse.cdt.core.ccnature</nature>
-		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
-		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+		<nature>net.sf.sveditor.core.SVNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
@@ -42,24 +26,5 @@
 			<type>2</type>
 			<locationURI>svext://fwrisc</locationURI>
 		</link>
-		<link>
-			<name>ve/verilator_home</name>
-			<type>2</type>
-			<locationURI>$%7BVERILATOR_HOME%7D</locationURI>
-		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>FWRISC</name>
-			<value>$%7BPROJECT_LOC%7D</value>
-		</variable>
-		<variable>
-			<name>MEMORY_PRIMITIVES</name>
-			<value>$%7BPACKAGES_DIR%7D/memory_primitives</value>
-		</variable>
-		<variable>
-			<name>PACKAGES_DIR</name>
-			<value>$%7BPROJECT_LOC%7D/packages</value>
-		</variable>
-	</variableList>
 </projectDescription>

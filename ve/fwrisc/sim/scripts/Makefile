@@ -16,6 +16,7 @@ SRC_DIRS += $(FWRISC)/ve/fwrisc/tb
 
 TB_MODULES_HDL=fwrisc_tb_hdl
 TB_MODULES_HVL=fwrisc_tb_hvl
+PYHPI_CLOCKSPEC=-clk clk=10ns
 
 SW_IMAGES := $(foreach img,$(call get_plusarg,SW_IMAGE,$(PLUSARGS)),$(subst $(BUILD_DIR)/esw/,,$(img)))
 SW_IMAGE := $(firstword $(SW_IMAGES))
