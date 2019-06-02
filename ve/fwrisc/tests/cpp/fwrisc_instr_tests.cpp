@@ -23,8 +23,9 @@
  */
 
 #include "fwrisc_instr_tests.h"
-#include "AsmTestCompiler.h"
+
 #include "BfmType.h"
+#include "AsmTestCompiler.h"
 #include "ElfDataReader.h"
 
 fwrisc_instr_tests::fwrisc_instr_tests(uint32_t max_instr) : m_max_instr(max_instr) {
@@ -60,7 +61,7 @@ void fwrisc_instr_tests::SetUp() {
 	}
 
 	// Register ourselves as a listener on this BFM
-	fwrisc_tracer_bfm_t::bfm("*.u_tracer")->set_rsp_if(this);
+	fwrisc_tracer_bfm_t::bfm("*.u_tracer.u_core")->set_rsp_if(this);
 
 
 	GoogletestHdl::raiseObjection();

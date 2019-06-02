@@ -11,6 +11,7 @@ import fwrisc_tracer_bfm_api_pkg::*;
 	import "DPI-C" context function int unsigned fwrisc_tracer_bfm_register(string path);
 	
 	initial begin
+		$display("TRACER: %m");
 		m_id = fwrisc_tracer_bfm_register($sformatf("%m"));
 	end
 `endif

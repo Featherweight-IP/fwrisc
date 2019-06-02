@@ -5,7 +5,7 @@
 /**
  * Class: fwrisc_test_base
  * 
- * TODO: Add class documentation
+ * Base test for FWRISC. Captures 
  */
 class fwrisc_test_base extends uvm_test 
 		implements fwrisc_tracer_bfm_api_if;
@@ -15,6 +15,7 @@ class fwrisc_test_base extends uvm_test
 	string				m_summary_msg;
 	bit					m_reg_written[int unsigned];
 	int unsigned		m_reg_value[int unsigned];
+	int unsigned		m_memory[1024];
 
 	function new(string name="fwrisc_test_base", uvm_component parent=null);
 		super.new(name, parent);
@@ -28,7 +29,7 @@ class fwrisc_test_base extends uvm_test
 
 	// Listeners that monitor core activity
 	virtual task regwrite(int unsigned raddr, int unsigned rdata);
-		$display("regwrite: %0d = 'h%08h", raddr, rdata);
+		// Save the written register value
 		m_reg_written[raddr] = 1;
 		m_reg_value[raddr] = rdata;
 	endtask
@@ -39,6 +40,7 @@ class fwrisc_test_base extends uvm_test
 	
 	virtual task memwrite(int unsigned addr, byte unsigned mask, int unsigned data);
 		if ((addr & 'hFFFF_8000) == 'h8000_0000) begin
+			m_memory[(addr & 'hFFFF)] = data;
 		end else begin
 			`uvm_error(get_name(), $sformatf("illegal access to address 'h%08h", addr));
 		end
@@ -68,8 +70,6 @@ class fwrisc_test_base extends uvm_test
 		if (!$value$plusargs("TESTNAME=%s", testname)) begin
 			`uvm_fatal(get_name(), "No +TESTNAME specified");
 		end
-		
-		// TODO:
 		
 		num_errors = srv.get_severity_count(UVM_ERROR);
 		num_warnings = srv.get_severity_count(UVM_WARNING);

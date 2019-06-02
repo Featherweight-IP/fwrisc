@@ -7,10 +7,10 @@
 
 #ifndef INCLUDED_FWRISC_CTEST_BASE_H
 #define INCLUDED_FWRISC_CTEST_BASE_H
-#include "fwrisc_instr_tests.h"
-#include "ElfSymtabReader.h"
 #include <stack>
 #include <set>
+#include "ElfSymtabReader.h"
+#include "fwrisc_instr_tests.h"
 
 class fwrisc_ctest_base : public fwrisc_instr_tests {
 public:

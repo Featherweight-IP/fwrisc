@@ -9,11 +9,11 @@
 #define INCLUDED_FWRISC_FPGA_TESTS_H
 #include "Vfwrisc_fpga_tb_hdl.h"
 #include "GoogletestVlTest.h"
-#include "ElfSymtabReader.h"
 #include <stack>
 #include <set>
 #include <string>
 #include <functional>
+#include "../../fwrisc/tests/cpp/ElfSymtabReader.h"
 
 class fwrisc_fpga_tests : public GoogletestVlTest<Vfwrisc_fpga_tb_hdl> {
 public:
