@@ -24,9 +24,9 @@
 
 #ifndef INCLUDED_FWRISC_ZEPHYR_TESTS_H
 #define INCLUDED_FWRISC_ZEPHYR_TESTS_H
-#include "fwrisc_ctest_base.h"
-#include "ElfSymtabReader.h"
 #include <functional>
+#include "ElfSymtabReader.h"
+#include "fwrisc_ctest_base.h"
 
 class fwrisc_zephyr_tests : public fwrisc_ctest_base {
 public:

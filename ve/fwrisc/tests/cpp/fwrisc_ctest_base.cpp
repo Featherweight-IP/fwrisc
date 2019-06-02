@@ -6,6 +6,7 @@
  */
 
 #include "fwrisc_ctest_base.h"
+
 #include <stdio.h>
 #include "CmdlineProcessor.h"
 

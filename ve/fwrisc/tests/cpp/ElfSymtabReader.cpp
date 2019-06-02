@@ -22,6 +22,7 @@
  */
 
 #include "ElfSymtabReader.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>

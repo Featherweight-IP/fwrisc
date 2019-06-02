@@ -23,11 +23,11 @@
 
 #ifndef INCLUDED_ELF_SYMTAB_READER_H
 #define INCLUDED_ELF_SYMTAB_READER_H
-#include "ElfFileReader.h"
 #include <stdint.h>
 #include <string>
 #include <map>
 #include <vector>
+#include "ElfFileReader.h"
 
 class ElfSymtabReader : public ElfFileReader {
 public:

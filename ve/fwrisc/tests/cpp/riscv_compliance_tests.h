@@ -25,8 +25,8 @@
 
 #ifndef INCLUDED_RISCV_COMPLIANCE_TESTS_H
 #define INCLUDED_RISCV_COMPLIANCE_TESTS_H
-#include "fwrisc_instr_tests.h"
 #include <stdint.h>
+#include "fwrisc_instr_tests.h"
 
 class riscv_compliance_tests : public fwrisc_instr_tests {
 public:

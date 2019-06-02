@@ -23,9 +23,11 @@
  */
 
 #include "riscv_compliance_tests.h"
-#include "ElfSymtabReader.h"
+
 #include <stdlib.h>
 #include <elf.h>
+
+#include "ElfSymtabReader.h"
 #include "CmdlineProcessor.h"
 
 void riscv_compliance_tests::SetUp() {
