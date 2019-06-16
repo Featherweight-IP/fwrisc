@@ -28,6 +28,8 @@ import fwrisc_tracer_bfm_api_pkg::*;
     endtask
 
 `else
+    export "DPI-C" task fwrisc_tracer_bfm_dumpregs;
+
     task regwrite(int unsigned raddr, int unsigned rdata);
         fwrisc_tracer_bfm_regwrite(m_id, raddr, rdata);
     endtask

@@ -6,17 +6,19 @@ MK_INCLUDES += $(FWRISC)/ve/fwrisc/tests/fwrisc_tests.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc/tb/vl/fwrisc_tb_vl.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_tracer_bfm/gvm/fwrisc_tracer_bfm.mk
 
-#ifeq (true,$(
 MK_INCLUDES += $(GOOGLETEST_HDL)/src/sv/googletest_hdl_sv.mk
 MK_INCLUDES += $(GOOGLETEST_HDL)/src/vl/googletest_hdl_vl.mk
 
 RUN_PRE_TARGETS += ram.hex regs.hex
 
 SRC_DIRS += $(FWRISC)/ve/fwrisc/tb
+PY_SRC_DIRS += $(FWRISC)/ve/fwrisc/tests/pyfv-hpi
+PY_SRC_DIRS += $(FWRISC)/ve/fwrisc_tracer_bfm/pyfv-hpi
 
 TB_MODULES_HDL=fwrisc_tb_hdl
 TB_MODULES_HVL=fwrisc_tb_hvl
-PYHPI_CLOCKSPEC=-clk clk=10ns
+PYHPI_CLOCKSPEC=-clk clock=10ns
+PYHPI_MODULES += fwrisc_tests
 
 SW_IMAGES := $(foreach img,$(call get_plusarg,SW_IMAGE,$(PLUSARGS)),$(subst $(BUILD_DIR)/esw/,,$(img)))
 SW_IMAGE := $(firstword $(SW_IMAGES))

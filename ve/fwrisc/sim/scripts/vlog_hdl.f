@@ -1,4 +1,6 @@
 
+// +define+MINIMIZE_COMM
+
 -f ${MEMORY_PRIMITIVES}/rtl/sim/sim.f
 
 -f ${FWRISC}/rtl/fwrisc.f

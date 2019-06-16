@@ -25,7 +25,7 @@
 #include "fwrisc_zephyr_tests.h"
 
 #include <stdio.h>
-#include "../../../packages/googletest-hdl/src/CmdlineProcessor.h"
+#include "CmdlineProcessor.h"
 #include "ElfSymtabReader.h"
 
 fwrisc_zephyr_tests::fwrisc_zephyr_tests() : fwrisc_ctest_base(10000000) {

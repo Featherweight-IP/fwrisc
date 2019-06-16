@@ -18,6 +18,8 @@ public:
 
 	virtual ~fwrisc_tracer_bfm();
 
+	void dumpregs();
+
 public:
 
 };

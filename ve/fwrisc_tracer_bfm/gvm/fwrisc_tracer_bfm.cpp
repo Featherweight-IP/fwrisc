@@ -18,6 +18,10 @@ fwrisc_tracer_bfm::~fwrisc_tracer_bfm() {
 	// TODO Auto-generated destructor stub
 }
 
+void fwrisc_tracer_bfm::dumpregs() {
+
+}
+
 extern "C" uint32_t fwrisc_tracer_bfm_register(const char *path) {
 	uint32_t ret = fwrisc_tracer_bfm_t::register_bfm(path);
 

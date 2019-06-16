@@ -101,18 +101,63 @@ wire [31:0]		mdata;
 wire [3:0]		mstrb;
 wire			mwrite;
 wire 			mvalid;
+// 
+bit[31:0]		regs[63:0];
+bit			reg_write[63:0];
+bit[31:0]		last_instr;
+
+// By default, just trace the target of jump/call instructions
+`ifdef MINIMIZE_COMM
+bit				trace_all_instr = 0;
+`else
+bit				trace_all_instr = 1;
+`endif
+
+// By default, register accesses are queried
+`ifdef MINIMIZE_COMM
+bit				trace_reg_writes = 0;
+`else
+bit				trace_reg_writes = 1;
+`endif
+
+	task fwrisc_tracer_bfm_dumpregs();
+		$display("dumpregs");
+		foreach (reg_write[i]) begin
+			$display("   reg_write[%0d]=%0d", i, reg_write[i]);
+			if (reg_write[i]) begin
+				regwrite(i, regs[i]);
+			end
+		end
+	endtask
 
 `include "fwrisc_tracer_bfm_api.svh"
 
+initial begin
+	foreach (reg_write[i]) begin
+		reg_write[i] = 0;
+	end
+end
+
 	always @(posedge clock) begin
 		if (rd_write) begin
-			regwrite(rd_waddr, rd_wdata);
+			if (trace_reg_writes) begin
+				regwrite(rd_waddr, rd_wdata);
+			end
+			regs[rd_waddr] <= rd_wdata;
+			reg_write[rd_waddr] <= 1;
 		end
 	end
 
 	always @(posedge clock) begin
 		if (ivalid) begin
-			exec(pc, instr);
+			last_instr <= instr;
+			
+			if (trace_all_instr ||
+					last_instr[6:0] == 7'b1101111 || // jal
+					last_instr[6:0] == 7'b1100111    // jalr
+					) begin
+				exec(pc, instr);
+			end
 		end
 	end
 

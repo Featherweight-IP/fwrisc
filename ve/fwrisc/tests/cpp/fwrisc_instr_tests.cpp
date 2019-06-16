@@ -25,26 +25,22 @@
 #include "fwrisc_instr_tests.h"
 
 #include "BfmType.h"
-#include "AsmTestCompiler.h"
 #include "ElfDataReader.h"
 
 fwrisc_instr_tests::fwrisc_instr_tests(uint32_t max_instr) : m_max_instr(max_instr) {
 	m_halt_addr = 0x80000004;
+	m_max_instr = 1000000000;
 	test = this;
 }
 
 fwrisc_instr_tests::~fwrisc_instr_tests() {
 	// TODO Auto-generated destructor stub
-	fprintf(stdout, "fwrisc_instr_tests::~fwrisc_instr_tests\n");
-	fflush(stdout);
 	test = 0;
 }
 
 fwrisc_instr_tests *fwrisc_instr_tests::test = 0;
 
 void fwrisc_instr_tests::SetUp() {
-	fprintf(stdout, "--> fwrisc_instr_tests::SetUp\n");
-	fflush(stdout);
 
 //	GoogletestHdl::SetUp();
 
@@ -65,19 +61,17 @@ void fwrisc_instr_tests::SetUp() {
 
 
 	GoogletestHdl::raiseObjection();
-	fprintf(stdout, "<-- fwrisc_instr_tests::SetUp\n");
-	fflush(stdout);
 }
 
 void fwrisc_instr_tests::TearDown() {
-	fprintf(stdout, "-- fwrisc_instr_tests::TearDown\n");
-	fflush(stdout);
 	test = 0;
 }
 
 void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
+	/*
 	fprintf(stdout, "--> regwrite 0x%02x <= 0x%08x\n", raddr, rdata);
 	fflush(stdout);
+	 */
 	if (raddr == 0) {
 		fprintf(stdout, "ERROR: writing to $zero\n");
 	}
@@ -88,16 +82,20 @@ void fwrisc_instr_tests::regwrite(uint32_t raddr, uint32_t rdata) {
 		fprintf(stdout, "Error: raddr 0x%08x outside 0..63 range\n", raddr);
 	}
 
+	/*
 	fprintf(stdout, "<-- regwrite 0x%02x <= 0x%08x\n", raddr, rdata);
 	fflush(stdout);
+	 */
 }
 
 void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
+	/*
 	fprintf(stdout, "memwrite 0x%08x=0x%08x mask=%02x\n", addr, data, mask);
 	fflush(stdout);
+	 */
 	if ((addr & 0xFFFF8000) == 0x80000000) {
 		uint32_t offset = ((addr & 0x0000FFFF) >> 2);
-		fprintf(stdout, "offset=%d\n", offset);
+//		fprintf(stdout, "offset=%d\n", offset);
 		m_mem[offset].second = true; // accessed
 
 		if (mask & 1) {
@@ -124,8 +122,11 @@ void fwrisc_instr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
 }
 
 void fwrisc_instr_tests::exec(uint32_t addr, uint32_t instr) {
+	fprintf(stdout, "exec: 0x%08x - 0x%08x\n", addr, instr);
+	/*
 	fprintf(stdout, "EXEC: 0x%08x - 0x%08x\n", addr, instr);
 	fflush(stdout);
+	 */
 	if (m_halt_addr != 0 && addr == m_halt_addr) {
 		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
 		m_end_of_test = true;
@@ -177,28 +178,35 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 	for (uint32_t i=0; i<sizeof(m_regs)/sizeof(reg_val_s); i++) {
 		if (m_regs[i].second) {
 			fprintf(stdout, "R[%d] = 0x%08x\n", i, m_regs[i].first);
+			fflush(stdout);
 		}
 	}
 	fprintf(stdout, "Expected Registers:\n");
 	for (uint32_t i=0; i<n_regs; i++) {
 		fprintf(stdout, "Expect R[%d] = 0x%08x\n", regs[i].addr, regs[i].val);
+		fflush(stdout);
 	}
 
 	// Perform the affirmative test
 	for (uint32_t i=0; i<n_regs; i++) {
 		if (!m_regs[regs[i].addr].second) {
 			fprintf(stdout, "Error: reg %d was not written\n", regs[i].addr);
+			fflush(stdout);
 		}
 		ASSERT_EQ(m_regs[regs[i].addr].second, true); // Ensure we wrote the register
 		if (m_regs[regs[i].addr].first != regs[i].val) {
 			fprintf(stdout, "Error: reg %d regs.value='h%08x expected='h%08hx\n",
 					regs[i].addr, m_regs[regs[i].addr].first, regs[i].val);
+			fflush(stdout);
 		}
 		ASSERT_EQ(m_regs[regs[i].addr].first, regs[i].val);
 		accessed[regs[i].addr] = true;
 	}
 
 	for (uint32_t i=0; i<63; i++) { // r63 is the CSR temp register
+		if (i == 54 || i == 55) { // ignore the counter registers
+			continue;
+		}
 		if (m_regs[i].second != accessed[i]) {
 			fprintf(stdout, "Error: reg %d: regs.accessed=%s accessed=%s\n",
 					i, (m_regs[i].second)?"true":"false",

@@ -1,4 +1,4 @@
 
 pyelftools
--e git+https://github.com/fvutils/py-hpi#egg=hpi
+-e git+ssh://git@github.com/fvutils/py-hpi.git#egg=hpi
 
