@@ -21,7 +21,7 @@ fwrisc_ripe_tests::~fwrisc_ripe_tests() {
 
 void fwrisc_ripe_tests::SetUp() {
 	fwrisc_zephyr_tests::SetUp();
-
+	m_attack_attempted = false;
 }
 
 TEST_F(fwrisc_ripe_tests, ripe) {
@@ -31,13 +31,15 @@ TEST_F(fwrisc_ripe_tests, ripe) {
 void fwrisc_ripe_tests::enter_func(uint32_t addr, const std::string &name) {
 	fwrisc_zephyr_tests::enter_func(addr, name);
 
-	if (m_intrusion_functions.find(name) != m_intrusion_functions.end()) {
-		GoogletestHdl::dropObjection();
-		fprintf(stdout, "FAILED: hit intrusion function \"%s\"\n", name.c_str());
-		FAIL();
+	if (name == "perform_attack") {
+		m_attack_attempted = true;
 	}
 
 	if (m_intrusion_functions.find(name) != m_intrusion_functions.end()) {
+		GoogletestHdl::dropObjection();
+		fprintf(stdout, "Note: attack_attempted=%d\n", m_attack_attempted);
+		fprintf(stdout, "FAILED: hit intrusion function \"%s\"\n", name.c_str());
+		FAIL();
 	}
 }
 

@@ -24,6 +24,7 @@ public:
 
 private:
 	std::set<std::string>		m_intrusion_functions;
+	bool						m_attack_attempted;
 
 };
 

@@ -42,7 +42,6 @@ void fwrisc_ctest_base::SetUp() {
 
 void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 //	fprintf(stdout, "exec: 0x%08x\n", addr);
-	if (m_trace_funcs) {
 	if (m_call_stack.size() == 0) {
 		// Look for an entry symbol
 		int32_t sym_idx;
@@ -105,7 +104,6 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 			}
 		}
 	}
-	}
 
 //	std::string sym;
 //	if (m_trace_funcs) {
@@ -125,14 +123,18 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 }
 
 void fwrisc_ctest_base::enter_func(uint32_t addr, const std::string &name) {
-	fprintf(stdout, "%s==> %s\n", m_indent.c_str(), name.c_str());
-	fflush(stdout);
-	m_indent.append("  ");
+	if (m_trace_funcs) {
+		fprintf(stdout, "%s==> %s\n", m_indent.c_str(), name.c_str());
+		fflush(stdout);
+		m_indent.append("  ");
+	}
 }
 
 void fwrisc_ctest_base::leave_func(uint32_t addr, const std::string &name) {
-	m_indent = m_indent.substr(0, m_indent.size()-2);
-	fprintf(stdout, "%s<== %s\n", m_indent.c_str(), name.c_str());
-	fflush(stdout);
+	if (m_trace_funcs) {
+		m_indent = m_indent.substr(0, m_indent.size()-2);
+		fprintf(stdout, "%s<== %s\n", m_indent.c_str(), name.c_str());
+		fflush(stdout);
+	}
 }
 

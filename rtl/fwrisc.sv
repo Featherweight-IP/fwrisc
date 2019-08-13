@@ -826,7 +826,9 @@ module fwrisc (
 				end
 			endcase		
 		end else if (op_jal || op_jalr || (op_branch && branch_cond)) begin
-			misaligned_addr = alu_out[1]; // the low-bit is always cleared on jump
+			misaligned_addr = (
+					alu_out[1] ||
+					!(alu_out >= 'h80000000 && alu_out <= 'h80005a4c)); // the low-bit is always cleared on jump
 		end else begin
 			misaligned_addr = 0;
 		end
