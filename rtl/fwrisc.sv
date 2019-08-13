@@ -104,10 +104,8 @@ module fwrisc (
 	wire op_lui       = (instr[6:0] == 7'b0110111);
 	wire op_sys       = (op_branch_ld_st_arith && instr[6:4] == 3'b111);
 	wire op_sys_prv   = !(|instr[14:12]);
-//	wire op_ecall     = (op_sys && op_sys_prv && instr[24:21] == 4'b0000);
 	wire op_ecall     = (op_sys && op_sys_prv && !instr[28]);
 	// Seems the compiler that Zephyr uses encodes eret as 0x10000073
-//	wire op_eret      = (op_sys && op_sys_prv && instr[24:20] == 5'b00010);
 	wire op_eret      = (op_sys && op_sys_prv && instr[28]);
 	
 	wire op_csr       = (op_sys && |instr[14:12]);
@@ -127,17 +125,6 @@ module fwrisc (
 	reg[31:0]		rd_wdata;
 	reg				rd_wen;
 	
-`ifdef FORMAL
-	// Cannot write to $zero
-	always @(posedge clock) begin
-		if (!reset) begin
-			if (rd_wen) begin
-				assert(rd_waddr != 0);
-			end
-		end
-	end
-`endif
-
 	// RS1, RS2, and RD are always in the same place
 	wire[4:0]		rs1 = instr[19:15];
 	wire[4:0]		rs2 = instr[24:20];
@@ -323,8 +310,7 @@ module fwrisc (
 	wire[31:0]      jal_off = (instr[31])?{{21{1'b1}}, instr[31], instr[19:12], instr[20], instr[30:21],1'b0}:
 											{{21{1'b0}}, instr[31], instr[19:12], instr[20], instr[30:21],1'b0};
 	wire[31:0]      auipc_imm_31_12 = {instr[31:12], {12{1'b0}}};
-	wire[31:0]      imm_11_0_u = instr[31:20];
-	wire[31:0]      imm_11_0   = (instr[31])?{{22{1'b1}}, instr[31:20]}:{{22{1'b0}}, instr[31:20]};
+	wire[31:0]      imm_11_0 = (instr[31])?{{22{1'b1}}, instr[31:20]}:{{22{1'b0}}, instr[31:20]};
 	wire[31:0]      st_imm_11_0 = (instr[31])?
 		{{22{1'b1}}, instr[31:25], instr[11:7]}:
 		{{22{1'b0}}, instr[31:25], instr[11:7]};
@@ -334,6 +320,9 @@ module fwrisc (
 		{{19{1'b1}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0}:
 		{{19{1'b0}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
 	wire[31:0]		zero = 32'h00000000;
+	
+	
+
 	
 	
 	// Comparator signals
@@ -432,11 +421,7 @@ module fwrisc (
 			`SHIFT_1, `SHIFT_2: begin
 				// rs1 has been read as ra_rdata
 				// write to CSR_tmp
-				if (|ra_rdata[31:5]) begin
-					ra_raddr = zero;
-				end else begin
-					ra_raddr = CSR_tmp;
-				end
+				ra_raddr = CSR_tmp;
 				rb_raddr = zero;
 				rd_waddr = CSR_tmp;
 			end
@@ -724,14 +709,8 @@ module fwrisc (
 					alu_op_b = zero;
 				end else if (op_auipc || op_jal || op_branch) begin
 					alu_op_b = {pc, 2'b0};
-				end else if (op_jalr || op_ld) begin
+				end else if (op_jalr || op_ld || (op_arith_imm && !op_shift)) begin
 					alu_op_b = imm_11_0;
-				end else if (op_arith_imm && !op_shift) begin
-					if (instr[14]) begin // logical operator
-						alu_op_b = imm_11_0_u;
-					end else begin
-						alu_op_b = imm_11_0;
-					end
 				end else if (op_st) begin
 					alu_op_b = st_imm_11_0;
 				end else begin
@@ -776,7 +755,8 @@ module fwrisc (
 			
 			`SHIFT_2:
 				alu_op = (instr[14])?
-					(instr[30])?`OP_SRA:`OP_SRL:`OP_SLL;
+					(instr[30])?`OP_SRA:`OP_SRL:
+					`OP_SLL;
 			
 			`CSR_1: begin
 				if (op_csrrc) begin
@@ -853,7 +833,7 @@ module fwrisc (
 	end
 
 	assign exception = (state == `EXECUTE && (op_ecall || misaligned_addr));
-
+	
 	wire exec_state = (state == `EXECUTE);
 	
 	/**

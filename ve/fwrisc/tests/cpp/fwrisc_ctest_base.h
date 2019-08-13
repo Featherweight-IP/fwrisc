@@ -23,6 +23,10 @@ public:
 
 	void filter_func(const std::string &func) { m_filter_funcs.insert(func); }
 
+	virtual void enter_func(uint32_t addr, const std::string &name);
+
+	virtual void leave_func(uint32_t addr, const std::string &name);
+
 protected:
 	ElfSymtabReader										m_symtab;
 

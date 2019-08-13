@@ -31,7 +31,7 @@
 class riscv_compliance_tests : public fwrisc_instr_tests {
 public:
 
-	riscv_compliance_tests() : fwrisc_instr_tests(10000) { };
+	riscv_compliance_tests() : fwrisc_instr_tests(100000) { };
 
 	virtual ~riscv_compliance_tests() { };
 

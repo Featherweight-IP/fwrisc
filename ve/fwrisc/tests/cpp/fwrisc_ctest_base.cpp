@@ -55,11 +55,9 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 			const Elf32_Sym &next = m_symtab.get_sym(sym_idx+1);
 			const std::string &func = m_symtab.get_sym_name(sym_idx);
 			if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
-				fprintf(stdout, "%s==> %s\n", m_indent.c_str(), func.c_str());
-				fflush(stdout);
+				enter_func(next.st_value, func);
 			}
 			m_call_stack.push(std::pair<Elf32_Addr,Elf32_Addr>(addr,next.st_value-4));
-			m_indent.append("  ");
 		}
 	} else {
 		// We should be in a function
@@ -79,29 +77,30 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 				const Elf32_Sym &next = m_symtab.get_sym(sym_idx+1);
 				const std::string &func = m_symtab.get_sym_name(sym_idx);
 				if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
-					fprintf(stdout, "%s==> %s\n", m_indent.c_str(), func.c_str());
-					fflush(stdout);
+					enter_func(next.st_value, func);
 				}
 				m_call_stack.push(std::pair<Elf32_Addr,Elf32_Addr>(addr,next.st_value-4));
-				m_indent.append("  ");
 			} else {
 				sym_idx = m_symtab.find_sym(func.first);
 				// Consider this exiting the current scope
 				m_call_stack.pop();
 
-				const std::pair<Elf32_Addr,Elf32_Addr> &new_func = m_call_stack.top();
+				if (m_call_stack.size() > 0) {
+					const std::pair<Elf32_Addr,Elf32_Addr> &new_func = m_call_stack.top();
 
-				m_indent = m_indent.substr(0, m_indent.size()-2);
-				if (addr >= new_func.first && addr <= new_func.second) {
-					const std::string &func = m_symtab.get_sym_name(sym_idx);
-					if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
-						fprintf(stdout, "%s<== %s\n", m_indent.c_str(), func.c_str());
-						fflush(stdout);
-					}
-				} else {
-//					fprintf(stdout, "Error: left function for unknown scope 0x%08x..0x%08x (0x%08x)\n",
+					if (addr >= new_func.first && addr <= new_func.second) {
+						const std::string &func = m_symtab.get_sym_name(sym_idx);
+						if (m_filter_funcs.find(func) == m_filter_funcs.end()) {
+							leave_func(new_func.first, func);
+						}
+					} else {
+//						fprintf(stdout, "Error: left function for unknown scope 0x%08x..0x%08x (0x%08x)\n",
 //							new_func.first, new_func.second, addr);
 //					fflush(stdout);
+					}
+				} else {
+					fprintf(stdout, "Error: stack is now empty\n");
+					fflush(stdout);
 				}
 			}
 		}
@@ -115,7 +114,7 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 //		}
 //	}
 	if (m_trace_instr) {
-		fprintf(stdout, "EXEC: 0x%08x\n", addr);
+		fprintf(stdout, "EXEC: 0x%08x 0x%08x\n", addr, instr);
 	}
 
 	if (addr == m_halt_addr) {
@@ -123,5 +122,17 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 		m_end_of_test = true;
 		GoogletestHdl::dropObjection();
 	}
+}
+
+void fwrisc_ctest_base::enter_func(uint32_t addr, const std::string &name) {
+	fprintf(stdout, "%s==> %s\n", m_indent.c_str(), name.c_str());
+	fflush(stdout);
+	m_indent.append("  ");
+}
+
+void fwrisc_ctest_base::leave_func(uint32_t addr, const std::string &name) {
+	m_indent = m_indent.substr(0, m_indent.size()-2);
+	fprintf(stdout, "%s<== %s\n", m_indent.c_str(), name.c_str());
+	fflush(stdout);
 }
 
