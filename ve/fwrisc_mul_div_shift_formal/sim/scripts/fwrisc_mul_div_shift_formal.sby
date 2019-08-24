@@ -1,0 +1,22 @@
+
+[options]
+mode cover
+depth {DEPTH}
+
+[engines]
+smtbmc boolector
+# smtbmc z3
+
+[script]
+read -sv -formal fwrisc_mul_div_shift.sv \
+fwrisc_mul_div_shift_formal_checker.sv \
+fwrisc_mul_div_shift_formal_op.sv \
+fwrisc_mul_div_shift_formal_tb.sv
+prep -top fwrisc_mul_div_shift_formal_tb
+
+[files]
+{FWRISC}/ve/fwrisc_mul_div_shift_formal/tb/fwrisc_mul_div_shift_formal_tb.sv
+fwrisc_mul_div_shift_formal_checker.sv {FWRISC}/ve/fwrisc_mul_div_shift_formal/tb/{CHECKER}.sv
+fwrisc_mul_div_shift_formal_op.sv {FWRISC}/ve/fwrisc_mul_div_shift_formal/tests/{TESTNAME}.sv
+{FWRISC}/rtl/fwrisc_mul_div_shift.sv
+
