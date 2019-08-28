@@ -1,0 +1,3 @@
+
++CHECKER=fwrisc_mul_div_shift_formal_mul_checker
+
