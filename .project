@@ -22,6 +22,11 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>net.sf.sveditor.core.SVProjectBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.cdt.core.cnature</nature>
@@ -29,5 +34,23 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>org.python.pydev.pythonNature</nature>
+		<nature>net.sf.sveditor.core.SVNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>External SV Files</name>
+			<type>2</type>
+			<locationURI>svext://fwrisc-s</locationURI>
+		</link>
+	</linkedResources>
+	<variableList>
+		<variable>
+			<name>PACKAGES_DIR</name>
+			<value>$%7BPROJECT_LOC%7D/packages</value>
+		</variable>
+		<variable>
+			<name>SV_BFMS</name>
+			<value>$%7BPACKAGES_DIR%7D/sv_bfms</value>
+		</variable>
+	</variableList>
 </projectDescription>

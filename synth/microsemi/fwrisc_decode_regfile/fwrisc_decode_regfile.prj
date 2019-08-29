@@ -1,19 +1,13 @@
 #--  Synopsys, Inc.
 #--  Version L-2016.09M-SP1-5
-#--  Project file /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc_area.prj
-#--  Written on Sat Aug 24 12:08:41 2019
+#--  Project file /project/fun/fwrisc/fwrisc/synth/microsemi/synplify/fwrisc_area.prj
+#--  Written on Mon Nov 26 17:13:06 2018
 
 
 #project files
-add_file -verilog -vlog_std sysv "../../../rtl/fwrisc.sv"
-add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_alu.sv"
-add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_comparator.sv"
-add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_dbus_if.sv"
+add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_decode.sv"
 add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_regfile.sv"
-add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_tracer.sv"
-add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_mul_div_shift.sv"
-
-
+add_file -verilog -vlog_std sysv "fwrisc_decode_regfile.sv"
 
 #implementation: "rev_1"
 impl -add rev_1 -type fpga

@@ -106,6 +106,7 @@ module fwrisc_fetch #(
 								end
 								default: begin
 									// Go back and fetch from scratch
+									instr_cache_valid <= 0;
 									state <= 3'b000;
 								end
 							endcase

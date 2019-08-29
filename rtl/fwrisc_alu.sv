@@ -36,34 +36,16 @@ module fwrisc_alu (
 		output 					carry,
 		output					eqz);
 	
-	wire[31:0] or_xor = (op == `OP_XOR)?(op_a ^ op_b):(op_a | op_b);
-	wire[31:0] add_sub = (op == `OP_ADD)?(op_a + op_b):(op_a - op_b);
-	
-//	assign carry = (op_b > op_a);
 	assign carry = ($signed(op_b) > $signed(op_a));
 	assign eqz = (op_b == op_a);
-//	assign carry = 0;
-	
-//	genvar i;
-//	for (i=0; i<31; i++) 
-//		assign or_xor[i] = (op == `OP_XOR)?(op_a[i] ^ op_b[i]):(op_a[i] | op_b[i]);
-
-//	assign eqz = 0;
 	
 	always @* begin
 		case (op) 
-			/*
-			`OP_ADD: out = op_a + op_b;
-			`OP_SUB: out = op_a - op_b;
-			 */
-			`OP_ADD,`OP_SUB: out = add_sub;
-			`OP_SLL: out = op_a << 1;
-			`OP_SRL: out = op_a >> 1;
-			`OP_SRA: out = $signed(op_a) >>> 1;
-			`OP_AND: out = op_a & op_b;
-//			`OP_XOR: out = op_a ^ op_b;
-//			default: /*`OP_OR:*/ out = op_a | op_b;
-			default: out = or_xor;
+			`OP_ADD:  out = op_a + op_b;
+			`OP_SUB:  out = op_a - op_b;
+			`OP_AND:  out = op_a & op_b;
+			`OP_OR:   out = op_a | op_b;
+			default /*OP_XOR */: out = op_a ^ op_b;
 		endcase
 	end
 

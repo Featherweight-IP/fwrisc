@@ -16,14 +16,22 @@
  * permissions and limitations under the License.
  ****************************************************************************/
 
-`define	OP_ADD 3'b000
-`define	OP_SUB 3'b001
-`define	OP_AND 3'b010
-`define	OP_OR  3'b011
-`define	OP_XOR 3'b100
-`define	OP_SLL 3'b101
-`define OP_SRL 3'b110
-`define	OP_SRA 3'b111
+`define	OP_ADD  4'b0000
+`define	OP_SUB  4'b0001
+`define	OP_AND  4'b0010
+`define	OP_OR   4'b0011
+`define	OP_XOR  4'b0100
+//`define	OP_SLL  4'b0101
+//`define OP_SRL  4'b0110
+//`define	OP_SRA  4'b0111
+//`define	OP_MUL  4'b1000
+//`define	OP_MULH 4'b1001
+//`define	OP_DIV  4'b1010
+//`define	OP_REM  4'b1011
+
+`define MDS_OP_SLL `4b0000
+`define MDS_OP_SRL `4b0001
+`define MDS_OP_SRA `4b0010
 
 `define	COMPARE_EQ  2'b00
 `define	COMPARE_LT  2'b01
@@ -38,8 +46,9 @@
 `define MEMR					4'b0110
 `define EXCEPTION_1				4'b0111
 `define EXCEPTION_2				4'b1000
-`define SHIFT_1					4'b1001
-`define SHIFT_2					4'b1010
+`define MDS_WAIT				4'b1001
+//`define SHIFT_1					4'b1001
+//`define SHIFT_2					4'b1010
 `define CYCLE_COUNT_UPDATE_1	4'b1011
 `define CYCLE_COUNT_UPDATE_2	4'b1100
 `define INSTR_COUNT_UPDATE_1	4'b1101

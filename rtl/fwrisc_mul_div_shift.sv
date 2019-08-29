@@ -40,7 +40,7 @@ module fwrisc_mul_div_shift #(
 				op_r <= op;
 				working <= 1;
 				case (op)
-					4'b0000, 4'b0001, 4'b0010: begin // lsl
+					4'b0000, 4'b0001, 4'b0010: begin // sll
 						shift_amt_r <= in_b[4:0];
 						out <= in_a;
 					end
@@ -65,17 +65,17 @@ module fwrisc_mul_div_shift #(
 			
 			if (working) begin
 				case (op_r)
-					4'b0000: begin // lsl
+					4'b0000: begin // sll
 						if (|shift_amt_r) begin
 							out <= (out << 1);
 						end
 					end
-					4'b0001: begin // lsr
+					4'b0001: begin // srl
 						if (|shift_amt_r) begin
 							out <= (out >> 1);
 						end
 					end
-					4'b0010: begin // rsr
+					4'b0010: begin // sra
 						if (|shift_amt_r) begin
 							out <= (out >>> 1);
 						end
