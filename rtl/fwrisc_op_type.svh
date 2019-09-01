@@ -1,0 +1,6 @@
+
+parameter [4:0] 
+  OP_TYPE_ARITH = 5'd0,
+  OP_TYPE_BRANCH = (OP_TYPE_ARITH+5'd1),
+  OP_TYPE_JUMP = (OP_TYPE_BRANCH+5'd1)
+  ;

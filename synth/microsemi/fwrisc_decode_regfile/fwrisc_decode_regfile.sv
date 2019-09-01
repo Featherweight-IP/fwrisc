@@ -23,7 +23,7 @@ module fwrisc_decode_regfile(
 		output reg[31:0]	op_a, 		// operand a (immediate or register)
 		output reg[31:0]	op_b, 		// operand b (immediate or register)
 		output reg[5:0]		rd_raddr, 	// Destination register address
-		output reg[31:0]	op_imm,		// Immediate operand (S-type, B-type)
+		output reg[31:0]	op_c,		// Immediate operand (S-type, B-type)
 		output reg			op_ld,
 		output reg			op_st,
 		
@@ -58,9 +58,8 @@ module fwrisc_decode_regfile(
 			.op_a               (op_a              ), 
 			.op_b               (op_b              ), 
 			.rd_raddr           (rd_raddr          ), 
-			.op_imm             (op_imm            ), 
-			.op_ld              (op_ld             ), 
-			.op_st              (op_st             ));
+			.op_c               (op_c              )
+			);
 		
 		fwrisc_regfile #(
 			.ENABLE_COUNTERS  (1 )
@@ -77,5 +76,4 @@ module fwrisc_decode_regfile(
 			.rd_wen           (rd_wen          ));
 
 endmodule
-
 

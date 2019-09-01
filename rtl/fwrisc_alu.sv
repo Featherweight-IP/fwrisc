@@ -39,12 +39,21 @@ module fwrisc_alu (
 	assign carry = ($signed(op_b) > $signed(op_a));
 	assign eqz = (op_b == op_a);
 	
+	parameter [2:0] 
+		OP_ADD = 3'd0,
+		OP_SUB = (OP_ADD+3'd1),
+		OP_AND = (OP_SUB+3'd1),
+		OP_OR  = (OP_AND+3'd1),
+		OP_CLR = (OP_OR+3'd1),
+		OP_XOR = (OP_CLR+3'd1);
+	
 	always @* begin
 		case (op) 
-			`OP_ADD:  out = op_a + op_b;
-			`OP_SUB:  out = op_a - op_b;
-			`OP_AND:  out = op_a & op_b;
-			`OP_OR:   out = op_a | op_b;
+			OP_ADD:  out = op_a + op_b;
+			OP_SUB:  out = op_a - op_b;
+			OP_AND:  out = op_a & op_b;
+			OP_OR:   out = op_a | op_b;
+			OP_CLR:  out = op_a ^ (op_a & op_b); // Used for CSRC
 			default /*OP_XOR */: out = op_a ^ op_b;
 		endcase
 	end
