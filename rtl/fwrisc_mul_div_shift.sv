@@ -10,7 +10,8 @@
 module fwrisc_mul_div_shift #(
 		parameter ENABLE_MUL_DIV=1,
 		parameter ENABLE_MUL=ENABLE_MUL_DIV,
-		parameter ENABLE_DIV=ENABLE_MUL_DIV
+		parameter ENABLE_DIV=ENABLE_MUL_DIV,
+		parameter SINGLE_CYCLE_SHIFT=0
 		)(
 		input				clock,
 		input				reset,
@@ -61,8 +62,29 @@ module fwrisc_mul_div_shift #(
 				working <= 1;
 				case (op)
 					OP_SLL, OP_SRL, OP_SRA: begin // sll
-						shift_amt_r <= in_b[4:0];
-						out <= in_a;
+						if (SINGLE_CYCLE_SHIFT) begin
+							shift_amt_r <= 0;
+							case (op_r)
+								OP_SLL: begin // sll
+									if (|in_b[4:0]) begin
+										out <= (out << in_b[4:0]);
+									end
+								end
+								OP_SRL: begin // srl
+									if (|in_b[4:0]) begin
+										out <= (out >> in_b[4:0]);
+									end
+								end
+								OP_SRA: begin // sra
+									if (|in_b[4:0]) begin
+										out <= (out >>> in_b[4:0]);
+									end
+								end
+							endcase
+						end else begin
+							shift_amt_r <= in_b[4:0];
+							out <= in_a;
+						end
 					end
 					OP_MUL, OP_MULH: begin // mul/mulh
 						if (ENABLE_MUL) begin

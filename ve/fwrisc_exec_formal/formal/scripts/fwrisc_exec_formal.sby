@@ -1,0 +1,24 @@
+#****************************************************************************
+#* fwrisc_exec_formal.sby
+#*
+#* Formal template script 
+#****************************************************************************
+
+
+[options]
+mode {MODE}
+depth {DEPTH}
+
+[engines]
+smtbmc boolector
+
+[script]
+# TODO: add in RTL files
+read -sv -formal {CORE_SRC_FILES}
+prep -top fwrisc_exec_formal_tb
+
+[files]
+# Copy source files
+{VE_DIR}/../../rtl/fwrisc_op_type.svh
+{VE_DIR}/../../rtl/fwrisc_alu_op.svh
+

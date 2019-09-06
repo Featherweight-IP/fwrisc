@@ -5,6 +5,7 @@
 
 
 #project files
+add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_c_decode.sv"
 add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_decode.sv"
 add_file -verilog -vlog_std sysv "../../../rtl/fwrisc_regfile.sv"
 add_file -verilog -vlog_std sysv "fwrisc_decode_regfile.sv"

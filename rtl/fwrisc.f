@@ -21,6 +21,7 @@ ${FWRISC}/rtl/fwrisc_mul_div_shift.sv
 ${FWRISC}/rtl/fwrisc_comparator.sv
 ${FWRISC}/rtl/fwrisc_tracer.sv
 ${FWRISC}/rtl/fwrisc_fetch.sv
+${FWRISC}/rtl/fwrisc_c_decode.sv
 ${FWRISC}/rtl/fwrisc_decode.sv
 ${FWRISC}/rtl/fwrisc_alu.sv
 ${FWRISC}/rtl/fwrisc_exec.sv

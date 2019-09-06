@@ -1,6 +1,12 @@
 
 parameter [4:0] 
-  OP_TYPE_ARITH = 5'd0,
+  OP_TYPE_ARITH  = 5'd0,
   OP_TYPE_BRANCH = (OP_TYPE_ARITH+5'd1),
-  OP_TYPE_JUMP = (OP_TYPE_BRANCH+5'd1)
+  OP_TYPE_LD     = (OP_TYPE_BRANCH+5'd1),
+  OP_TYPE_ST     = (OP_TYPE_LD+5'd1),
+  OP_TYPE_MDS    = (OP_TYPE_ST+5'd1),
+  OP_TYPE_JUMP   = (OP_TYPE_MDS+5'd1),
+  OP_TYPE_FENCE  = (OP_TYPE_JUMP+5'd1),
+  OP_TYPE_CALL   = (OP_TYPE_FENCE+5'd1),
+  OP_TYPE_CSR    = (OP_TYPE_CALL+5'd1)
   ;

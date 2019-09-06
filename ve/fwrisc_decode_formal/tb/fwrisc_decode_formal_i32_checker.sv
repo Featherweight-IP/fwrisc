@@ -15,6 +15,7 @@ module fwrisc_decode_formal_checker(
 		input[5:0]			rd_raddr, 	// Destination register address
 		input[4:0]			op_type
 		);
+	`include "fwrisc_op_type.svh"
 	
 	reg[5:0]			count = 0;
 	
@@ -33,12 +34,18 @@ module fwrisc_decode_formal_checker(
 					7'b0110111: begin // LUI
 						assert(rd_raddr == instr[11:7]);
 						assert(op_a == u_imm);
+						assert(op_type == OP_TYPE_ARITH);
 //						assert(op_c == 1);
 					end
 					7'b0110011: begin // ADD,SUB,SLL,SLT,SLTU,XOR,SRL,SRA
 //						assert(rd_raddr == instr[11:7]);
 						assert(op_a == instr[19:15]);
 						assert(op_b == instr[24:20]);
+						if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
+							assert(op_type == OP_TYPE_MDS);
+						end else begin
+							assert(op_type == OP_TYPE_ARITH);
+						end
 					end
 					7'b0010011: begin // ADDI, SLTI, SLTIU, XORI, ORI, ANDI
 						assert(op_a == instr[19:15]);

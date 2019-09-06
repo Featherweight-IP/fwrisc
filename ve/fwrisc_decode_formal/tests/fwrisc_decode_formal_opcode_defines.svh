@@ -57,6 +57,31 @@
 `define funct7(instr) instr[31:25]
 `define funct3(instr) instr[14:12]
 	
+`define crtype(target, funct4, rd_rs1, rs2, op) \
+	assign target[15:12] = funct4; \
+	assign target[11:7] = rd_rs1; \
+	assign target[6:2] = rs2; \
+	assign target[1:0] = op
+	
+`define citype(target, funct3, imm, rd_rs1, op) \
+	assign target[15:13] = funct3; \
+	assign target[12] = imm[5]; \
+	assign target[11:7] = rd_rs1; \
+	assign target[6:2] = imm[4:0]; \
+	assign target[1:0] = op
+	
+`define cjtype(target, funct3, jtarg, op) \
+	assign target[15:13] = funct3; \
+	assign target[12] = imm[11];  \
+	assign target[11] = imm[4];  \
+	assign target[10:9] = imm[9:8]; \
+	assign target[8] = imm[10]; \
+	assign target[7] = imm[6]; \
+	assign target[6] = imm[7]; \
+	assign target[5:3] = imm[3:1]; \
+	assign target[2] = imm[5]; \
+	assign target[1:0] = op
+	
 `define imm_jtype(instr) $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0})
 
 `define lui(target, imm, rd) `utype(target, imm, rd, 7'b0110111)	

@@ -61,7 +61,7 @@ module fwrisc_decode_formal_tb(input clock);
 		.reset              (reset             ), 
 		.fetch_valid        (fetch_valid       ), 
 		.decode_ready       (decode_ready      ), 
-		.instr              (instr             ), 
+		.instr_i            (instr             ), 
 		.instr_c            (instr_c           ), 
 		.ra_raddr           (ra_raddr          ), 
 		.ra_rdata           (ra_rdata          ), 
