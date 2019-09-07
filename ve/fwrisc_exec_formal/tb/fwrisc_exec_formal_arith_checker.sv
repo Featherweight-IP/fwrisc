@@ -37,21 +37,21 @@ module fwrisc_exec_formal_checker(
 	always @(posedge clock) begin
 		if (reset) begin
 			count <= 0;
-			rw_data <= 0;
+			wr_data <= 0;
 		end else begin
 			if (instr_complete) begin
 				case (op_type)
 					OP_TYPE_ARITH: begin
-						cover(op==OP_ADD);
-						cover(op==OP_SUB);
-						cover(op==OP_AND);
-						cover(op==OP_OR);
-						cover(op==OP_CLR);
-						cover(op==OP_EQ);
-						cover(op==OP_LT);
-						cover(op==OP_LTU);
-						cover(op==OP_XOR);
-						assert(op == OP_ADD || op == OP_SUB || op == OP_AND ||
+						`cover(op==OP_ADD);
+						`cover(op==OP_SUB);
+						`cover(op==OP_AND);
+						`cover(op==OP_OR);
+						`cover(op==OP_CLR);
+						`cover(op==OP_EQ);
+						`cover(op==OP_LT);
+						`cover(op==OP_LTU);
+						`cover(op==OP_XOR);
+						`assert(op == OP_ADD || op == OP_SUB || op == OP_AND ||
 								op == OP_OR || op == OP_CLR || op == OP_EQ ||
 								op == OP_LT || op == OP_LTU || op == OP_XOR);
 						case (op)

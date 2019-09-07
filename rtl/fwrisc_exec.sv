@@ -13,7 +13,7 @@ module fwrisc_exec #(
 		input				clock,
 		input				reset,
 		input				decode_valid,
-		output	 			instr_complete,
+		output reg 			instr_complete,
 
 		// Indicates whether the instruction is compressed
 		input				instr_c,
@@ -47,10 +47,15 @@ module fwrisc_exec #(
 	
 	// Holds the next PC if execution is sequential
 	wire[31:1]				next_pc_seq = (instr_c)?pc+32'd1:pc+32'd2;
-	
-	assign instr_complete = (
+
+	wire instr_complete_w = (
 			decode_valid &&
-			((exec_state == STATE_EXECUTE && op_type == OP_TYPE_ARITH))
+			(
+				(exec_state == STATE_EXECUTE && (
+						op_type == OP_TYPE_ARITH || 
+						(op_type == OP_TYPE_BRANCH && !alu_out[0])))
+				|| (exec_state == STATE_BRANCH_TAKEN)
+			)
 		);
 	
 	always @* begin
@@ -64,6 +69,7 @@ module fwrisc_exec #(
 			exec_state <= STATE_EXECUTE;
 			pc <= ('h8000_0000 >> 1);
 		end else begin
+			instr_complete <= instr_complete_w;
 			case (exec_state)
 				STATE_EXECUTE: begin
 					// Single-cycle execute state. For ALU instructions,
@@ -78,19 +84,30 @@ module fwrisc_exec #(
 								if (alu_out[0]) begin
 									// Taken branch
 									exec_state <= STATE_BRANCH_TAKEN;
+								end else begin
+									// Still sequential
+									pc <= pc_next;
 								end
 							end
 						endcase
 					end
+				end
+				
+				STATE_BRANCH_TAKEN: begin
+					pc <= alu_out;
+					exec_state <= STATE_EXECUTE;
 				end
 			endcase
 		end
 	end
 
 	// TODO: ALU input selector
-	wire [31:0]	alu_op_a = op_a;
-	wire [31:0]	alu_op_b = op_b;
-	wire [3:0]	alu_op = op;
+	wire alu_op_a_sel_pc = (exec_state == STATE_BRANCH_TAKEN);
+	wire alu_op_b_sel_c = (exec_state == STATE_BRANCH_TAKEN);
+	wire alu_op_sel_add = (exec_state == STATE_BRANCH_TAKEN);
+	wire [31:0]	alu_op_a = (alu_op_a_sel_pc)?pc:op_a;
+	wire [31:0]	alu_op_b = (alu_op_b_sel_c)?op_c:op_b;
+	wire [3:0]	alu_op = (alu_op_sel_add)?OP_ADD:op;
 	wire [31:0]	alu_out;
 	
 	// TODO: rd_wen

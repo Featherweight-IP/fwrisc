@@ -51,6 +51,6 @@ run-sby :
 
 run-sim :
 	$(Q)iverilog $(IVL_FLAGS) $(CORE_SRC_FILES)
-	$(Q)vvp a.out
+	$(Q)vvp -l simx.log a.out
 
 include $(PACKAGES_DIR)/packages.mk
