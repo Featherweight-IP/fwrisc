@@ -29,12 +29,13 @@ module fwrisc_decode #(
 	
 		// Output to Exec phase
 		output reg			decode_valid,
-		input				exec_ready,
+		input				exec_complete,
 		output reg[31:0]	op_a, 		// operand a (immediate or register)
 		output reg[31:0]	op_b, 		// operand b (immediate or register)
 		output reg[31:0]	op_c, 		// operand b (immediate or register)
+		output reg[31:0]	rd,			// address of destination register
 		// Instruction
-		output reg[3:0]		alu_op,
+		output reg[3:0]		op,
 		output reg[5:0]		rd_raddr, 	// Destination register address
 		output reg[4:0]		op_type
 		);
@@ -102,7 +103,7 @@ module fwrisc_decode #(
 	reg[5:0]		rd_raddr_w;
 	
 	always @* begin
-		alu_op = 0; // TODO
+		op = 0; // TODO
 		
 //		if (instr_c && ENABLE_COMPRESSED) begin
 //			// TODO:
@@ -161,7 +162,9 @@ module fwrisc_decode #(
 		
 			// Determine op_type
 			case (instr[6:4])
-				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_FENCE:OP_TYPE_LD;
+				// TODO:
+//				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_FENCE:OP_TYPE_LD;
+				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_ARITH:OP_TYPE_LDST;
 				3'b001: begin
 					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
 						op_type_w = OP_TYPE_MDS;
@@ -169,7 +172,9 @@ module fwrisc_decode #(
 						op_type_w = OP_TYPE_ARITH;
 					end
 				end
-				3'b010: op_type_w = OP_TYPE_ST;
+				// TODO:
+//				3'b010: op_type_w = OP_TYPE_ST;
+				3'b010: op_type_w = OP_TYPE_LDST;
 				3'b011: begin
 					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001) begin
 						op_type_w = OP_TYPE_MDS;
@@ -245,7 +250,7 @@ module fwrisc_decode #(
 		;
 	reg [1:0]			decode_state;
 	
-	assign decode_ready = exec_ready;
+	assign decode_ready = exec_complete;
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -265,7 +270,7 @@ module fwrisc_decode #(
 					end
 				end
 				default /*STATE_REG*/: begin // Register read data is now valid
-					if (exec_ready) begin
+					if (exec_complete) begin
 						decode_state <= STATE_DECODE;
 						decode_valid <= 1'b0;
 					end

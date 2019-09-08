@@ -86,7 +86,7 @@ module fwrisc_exec_formal_arith_checker(
 								`assert(rd_wr_data == (op_a | op_b));
 							end
 							OP_CLR: begin
-								`assert(rd_wr_data == (op_a ^ (op_a & op_b)));
+								`assert(rd_wr_data == (op_b ^ (op_a & op_b)));
 							end
 							OP_EQ: begin
 								`assert(rd_wr_data == (op_a == op_b));

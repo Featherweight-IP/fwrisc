@@ -1,6 +1,6 @@
 
 
-+CHECKER=fwrisc_fetch_formal_smoke_checker
++CHECKER=fwrisc_fetch_formal_seqmix_checker
 +MODE=cover
-+DEPTH=64
++DEPTH=128
 

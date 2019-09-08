@@ -1,7 +1,7 @@
 
 
 
-module fwrisc_fetch_formal_checker(
+module fwrisc_fetch_formal_smoke_checker(
 		input				clock,
 		input				reset,
 		output[31:1]		next_pc,

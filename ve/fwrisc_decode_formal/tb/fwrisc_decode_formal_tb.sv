@@ -23,7 +23,7 @@ module fwrisc_decode_formal_tb(input clock);
 
 	// TODO: instance checker, test, and DUT
 	wire 		fetch_valid;
-	wire 		decode_ready;
+	wire 		decode_complete;
 	wire[31:0] 	instr;
 	wire		instr_c;
 	wire[5:0]	ra_raddr;
@@ -31,10 +31,11 @@ module fwrisc_decode_formal_tb(input clock);
 	wire[5:0]	rb_raddr;
 	reg[31:0]	rb_rdata;
 	wire		decode_valid;
-	reg			exec_ready;
+	reg			exec_complete;
 	wire[31:0]	op_a;
 	wire[31:0]	op_b;
 	wire[31:0]	op_c;
+	wire[5:0]	rd;
 	wire[5:0]	rd_raddr;
 	wire[4:0]	op_type;
 	
@@ -43,7 +44,7 @@ module fwrisc_decode_formal_tb(input clock);
 		.clock              (clock             ), 
 		.reset              (reset             ), 
 		.fetch_valid        (fetch_valid       ), 
-		.decode_ready       (decode_ready      ), 
+		.decode_ready       (decode_complete   ), 
 		.instr              (instr             ), 
 		.instr_c            (instr_c           )
 			);
@@ -51,7 +52,7 @@ module fwrisc_decode_formal_tb(input clock);
 	always @(posedge clock) begin
 		ra_rdata <= ra_raddr;
 		rb_rdata <= rb_raddr;
-		exec_ready <= decode_valid;
+		exec_complete <= decode_valid;
 	end
 
 	fwrisc_decode #(
@@ -60,7 +61,7 @@ module fwrisc_decode_formal_tb(input clock);
 		.clock              (clock             ), 
 		.reset              (reset             ), 
 		.fetch_valid        (fetch_valid       ), 
-		.decode_ready       (decode_ready      ), 
+		.decode_complete    (decode_complete   ), 
 		.instr_i            (instr             ), 
 		.instr_c            (instr_c           ), 
 		.ra_raddr           (ra_raddr          ), 
@@ -68,10 +69,11 @@ module fwrisc_decode_formal_tb(input clock);
 		.rb_raddr           (rb_raddr          ), 
 		.rb_rdata           (rb_rdata          ), 
 		.decode_valid       (decode_valid      ), 
-		.exec_ready         (exec_ready        ), 
+		.exec_complete      (exec_complete     ), 
 		.op_a               (op_a              ), 
 		.op_b               (op_b              ), 
 		.op_c               (op_c              ), 
+		.rd					(rd                ),
 		.rd_raddr           (rd_raddr          ), 
 		.op_type            (op_type           ));
 
