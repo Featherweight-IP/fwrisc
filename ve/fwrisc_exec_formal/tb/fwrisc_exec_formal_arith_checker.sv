@@ -66,11 +66,12 @@ module fwrisc_exec_formal_arith_checker(
 						`cover(op==OP_LT);
 						`cover(op==OP_LTU);
 						`cover(op==OP_XOR);
-						`cover(op==OP_NOP);
+						`cover(op==OP_OPA);
+						`cover(op==OP_OPB);
 						`assert(op == OP_ADD || op == OP_SUB || op == OP_AND ||
 								op == OP_OR || op == OP_CLR || op == OP_EQ ||
 								op == OP_LT || op == OP_LTU || op == OP_XOR || 
-								op == OP_NOP);
+								op == OP_OPA || op == OP_OPB);
 						case (op)
 							OP_ADD: begin
 								`assert(rd_wr_data == (op_a + op_b));
@@ -99,8 +100,11 @@ module fwrisc_exec_formal_arith_checker(
 							OP_XOR: begin
 								`assert(rd_wr_data == (op_a ^ op_b));
 							end
-							OP_NOP: begin
+							OP_OPA: begin
 								`assert(rd_wr_data == op_a);
+							end
+							OP_OPB: begin
+								`assert(rd_wr_data == op_b);
 							end
 							default: begin
 								`assert(0);

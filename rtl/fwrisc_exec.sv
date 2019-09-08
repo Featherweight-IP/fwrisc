@@ -42,7 +42,8 @@ module fwrisc_exec #(
 		STATE_EXECUTE = 4'd0,
 		STATE_BRANCH_TAKEN = (STATE_EXECUTE + 4'd1),
 		STATE_JUMP         = (STATE_BRANCH_TAKEN + 4'd1),
-		STATE_MDS_COMPLETE = (STATE_JUMP + 4'd1)
+		STATE_CSR          = (STATE_JUMP + 4'd1),
+		STATE_MDS_COMPLETE = (STATE_CSR + 4'd1)
 		;
 
 	reg [3:0]				exec_state;
@@ -70,9 +71,11 @@ module fwrisc_exec #(
 			decode_valid &&
 			(
 				(exec_state == STATE_EXECUTE && (
-						op_type == OP_TYPE_ARITH || !branch_taken))
+						op_type == OP_TYPE_ARITH || 
+						(op_type == OP_TYPE_BRANCH && !branch_taken)))
 				|| (exec_state == STATE_BRANCH_TAKEN)
 				|| (exec_state == STATE_JUMP)
+				|| (exec_state == STATE_CSR)
 			)
 		);
 	
@@ -139,10 +142,21 @@ module fwrisc_exec #(
 							OP_TYPE_CALL: begin
 								// TODO:
 							end
+							/**
+							 * STATE_EXECUTE: regs[csr] <= op_a [op] op_b
+							 * STATE_CSR: regs[rd] <= op_b (regs[csr])
+							 */
 							default /*OP_TYPE_CSR*/: begin
+								exec_state <= STATE_CSR;
 							end
 						endcase
 					end
+				end
+				
+				STATE_CSR: begin
+					pc <= pc_next;
+					pc_seq <= pc_seq_next;
+					exec_state <= STATE_EXECUTE;
 				end
 				
 				STATE_JUMP: begin
@@ -182,25 +196,45 @@ module fwrisc_exec #(
 			(exec_state == STATE_BRANCH_TAKEN)
 			|| (exec_state == STATE_JUMP)
 			);
+	wire alu_op_sel_opb = (
+			(exec_state == STATE_CSR)
+			);
 	wire [31:0]	alu_op_a = (alu_op_a_sel_pc)?next_pc_seq:op_a;
 	wire [31:0]	alu_op_b = (alu_op_b_sel_c)?op_c:op_b;
+	reg [3:0]   alu_op;
 	
-	wire [3:0]	alu_op = (alu_op_sel_add)?OP_ADD:op;
+	always @* begin
+		case ({alu_op_sel_add,alu_op_sel_opb})
+			2'b10: alu_op = OP_ADD;
+			2'b01: alu_op = OP_OPB;
+			default: alu_op = op;
+		endcase
+		
+	end
 	
 	wire [31:0]	alu_out;
 	
 	// TODO: rd_wen
 	always @* begin
 		rd_wen = (decode_valid && 
-				((exec_state == STATE_EXECUTE) && 
-					(op_type == OP_TYPE_ARITH || op_type == OP_TYPE_JUMP))
-				);
+				(
+					(exec_state == STATE_EXECUTE) && 
+						(op_type == OP_TYPE_ARITH || op_type == OP_TYPE_JUMP 
+							|| op_type == OP_TYPE_CSR)
+					|| (exec_state == STATE_CSR)
+				)
+				
+		);
 	end
 
 	// TODO: rd_wdata input selector
 	always @* begin
 		rd_wdata = alu_out;
-		rd_waddr = rd;
+		if (exec_state == STATE_EXECUTE && op_type == OP_TYPE_CSR) begin
+			rd_waddr = op_c[5:0];
+		end else begin
+			rd_waddr = rd;
+		end
 	end
 
 	fwrisc_alu u_alu (

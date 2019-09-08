@@ -2,7 +2,7 @@
 `include "fwrisc_exec_formal_defines.svh"
 
 
-module fwrisc_exec_formal_jump_test(
+module fwrisc_exec_formal_csr_test(
 		input					clock,
 		input					reset,
 		output 					decode_valid,
@@ -37,6 +37,11 @@ module fwrisc_exec_formal_jump_test(
 	wire[5:0]		rd_w;
 	assign rd_w[5] = 0;
 	assign rd_w[4:0] = `anyconst;
+	wire[5:0]		csr_w;
+	assign csr_w[5] = 0;
+	assign csr_w[4:0] = `anyconst;
+	wire[31:0]		op_a_w = `anyconst;
+	wire[31:0]		op_b_w = `anyconst;
 	
 	assign decode_valid = (decode_valid_r && !instr_complete);
 	
@@ -44,11 +49,11 @@ module fwrisc_exec_formal_jump_test(
 		if (reset) begin
 			state <= 0;
 			instr_c <= 0;
-			op_type <= OP_TYPE_JUMP;
-			op_a <= 0; // RS1 in the case of JR ; PC in the case of J
-			op_b <= 0; // Always zero
-			op <= OP_OPA; // Always NOP
-			op_c <= 0; // Offset
+			op_type <= OP_TYPE_CSR;
+			op_a <= 0; 
+			op_b <= 0; 
+			op <= OP_OPA; 
+			op_c <= 0; 
 			rd <= 0;
 			decode_valid_r <= 0;
 		end else begin
@@ -57,9 +62,16 @@ module fwrisc_exec_formal_jump_test(
 					// Send out a new instruction
 					decode_valid_r <= 1;
 					instr_c <= instr_c_w;
-					op_a <= jump_base;
-					op_c <= $signed(jump_off);
+					case (op_w)
+						2'b00: op <= OP_OPA; // store regs[rs1] to CSR
+						2'b01: op <= OP_OR; // set regs[csr] <= regs[csr] | regs[rs1]
+						default: op <= OP_CLR; // set regs[csr] <= regs[csr] | regs[rs1]
+					endcase
 					rd <= rd_w;
+					op_a <= op_a_w;
+					op_b <= op_b_w;
+					rd <= rd_w;
+					op_c <= csr_w;
 				end
 				1: begin
 					if (instr_complete) begin
