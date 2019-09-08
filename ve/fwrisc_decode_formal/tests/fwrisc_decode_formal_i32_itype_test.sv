@@ -23,6 +23,8 @@ module fwrisc_decode_formal_test(
 	wire[11:0] imm = instr[31:20];
 //	wire[5:0] rs2 = instr[24:20];
 	wire[5:0] rd  = instr[11:7];
+
+	wire[2:0] isel = $anyconst;
 	
 	`itype_add(instr_add, $anyconst, $anyconst, $anyconst);
 	`itype_and(instr_and, $anyconst, $anyconst, $anyconst);
@@ -43,7 +45,10 @@ module fwrisc_decode_formal_test(
 			case (state) 
 				0: begin
 					fetch_valid <= 1;
-					case (count) 
+					case (isel % 6)
+//					assume(instr == instr_add || instr == instr_and || instr == instr_or || instr == instr_slt);
+					
+//					case (count) 
 						0: instr <= instr_add;
 						1: instr <= instr_and;
 						2: instr <= instr_or;
@@ -54,10 +59,16 @@ module fwrisc_decode_formal_test(
 					endcase
 					state <= 1;
 					count <= count + 1;
-					cover (count == 5);
+//					cover (count == 5);
 				end
 				1: begin
 					if (decode_ready) begin
+						cover(isel == 0); // add
+						cover(isel == 1); // and
+						cover(isel == 2);
+						cover(isel == 3);
+						cover(isel == 4);
+						cover(isel == 5);
 						fetch_valid <= 0;
 						state <= 0;
 					end

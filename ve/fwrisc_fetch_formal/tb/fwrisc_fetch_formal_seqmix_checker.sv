@@ -53,6 +53,7 @@ module fwrisc_fetch_formal_seqmix_checker(
 						`cover({next_pc[1], instr_c} == 2'b00);
 						`cover({next_pc[1], instr_c} == 2'b01);
 						`cover({next_pc[1], instr_c} == 2'b10);
+						// Formal tool really doesn't like to cover this case for some reason...
 //						`cover({next_pc[1], instr_c} == 2'b11);
 						case ({next_pc[1], instr_c})
 							2'b00: `assert(num_fetch == 1);

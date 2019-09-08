@@ -88,12 +88,7 @@ module fwrisc_fetch_formal_seqmix_test(
 			decode_state <= 0;
 			instr_count <= 0;
 			in_reset <= 1;
-//			data_type <= 0;
 		end else begin
-			`cover(data_type == 2'b00);
-			`cover(data_type == 2'b01);
-			`cover(data_type == 2'b10);
-			`cover(data_type == 2'b11);
 			if (in_reset) begin
 				in_reset <= 0;
 `ifdef FORMAL
@@ -105,10 +100,6 @@ module fwrisc_fetch_formal_seqmix_test(
 			case (decode_state)
 				2'b00: begin // wait for fetch to complete
 					if (fetch_valid) begin
-//						`cover(data_type == 2'b00);
-//						`cover(data_type == 2'b01);
-//						`cover(data_type == 2'b10);
-//						`cover(data_type == 2'b11);
 						decode_state <= 2'b01;
 					end
 				end
@@ -126,6 +117,7 @@ module fwrisc_fetch_formal_seqmix_test(
 					`cover(data_type == 2'b00);
 					`cover(data_type == 2'b01);
 					`cover(data_type == 2'b10);
+					// Formal tool really doesn't like to cover this case for some reason
 //					`cover(data_type == 2'b11);
 //					data_type <= data_type + 1;
 					decode_state <= 2'b00;

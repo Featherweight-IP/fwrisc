@@ -26,7 +26,7 @@
 module fwrisc_regfile #(
 		parameter ENABLE_COUNTERS = 1,
 		// Enable Data Execution Protection
-		parameter ENABLE_DEP = 1,
+		parameter ENABLE_DEP = 1
 		) (
 		input				clock,
 		input				reset,

@@ -25,7 +25,7 @@
  */
 module fwrisc #(
 		parameter ENABLE_COMPRESSED=1,
-		parameter ENABLE_MUL=1,
+		parameter ENABLE_MUL_DIV=1,
 		parameter ENABLE_DEP=1,
 		parameter ENABLE_COUNTERS=1
 		) (
@@ -65,7 +65,7 @@ module fwrisc #(
 		.ivalid             (ivalid            ), 
 		.iready             (iready            ), 
 		.fetch_valid        (fetch_valid       ), 
-		.decode_complete    (instr_complete    ), 
+		.decode_complete    (decode_complete   ), 
 		.instr              (instr             ), 
 		.instr_c            (instr_c           ));
 
@@ -74,6 +74,7 @@ module fwrisc #(
 	wire[31:0]				rb_raddr;
 	wire[31:0]				rb_rdata;
 	wire					decode_valid;
+	wire					decode_complete;
 	wire[31:0]				op_a;
 	wire[31:0]				op_b;
 	wire[31:0]				op_c;
@@ -87,7 +88,7 @@ module fwrisc #(
 		.clock              (clock             ), 
 		.reset              (reset             ), 
 		.fetch_valid        (fetch_valid       ), 
-		.decode_ready       (decode_ready      ), 
+		.decode_complete    (decode_complete   ), 
 		.instr_i            (instr             ), 
 		.instr_c            (instr_c           ), 
 		.pc                 (pc                ), 
@@ -96,7 +97,7 @@ module fwrisc #(
 		.rb_raddr           (rb_raddr          ), 
 		.rb_rdata           (rb_rdata          ), 
 		.decode_valid       (decode_valid      ), 
-		.exec_ready         (exec_ready        ), 
+		.exec_complete      (instr_complete    ), 
 		.op_a               (op_a              ), 
 		.op_b               (op_b              ), 
 		.op_c               (op_c              ), 

@@ -16,7 +16,7 @@ module fwrisc_decode #(
 		input				reset,
 		
 		input				fetch_valid, // valid/accept signals back to fetch
-		output				decode_ready, // signals that instr has been accepted
+		output				decode_complete, // signals that instr has been accepted
 		input[31:0]			instr_i,
 		input				instr_c,
 		input[31:0]			pc,
@@ -166,7 +166,7 @@ module fwrisc_decode #(
 //				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_FENCE:OP_TYPE_LD;
 				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_ARITH:OP_TYPE_LDST;
 				3'b001: begin
-					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
+					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001) begin
 						op_type_w = OP_TYPE_MDS;
 					end else begin
 						op_type_w = OP_TYPE_ARITH;
@@ -176,7 +176,7 @@ module fwrisc_decode #(
 //				3'b010: op_type_w = OP_TYPE_ST;
 				3'b010: op_type_w = OP_TYPE_LDST;
 				3'b011: begin
-					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001) begin
+					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
 						op_type_w = OP_TYPE_MDS;
 					end else begin
 						op_type_w = OP_TYPE_ARITH;
@@ -250,7 +250,7 @@ module fwrisc_decode #(
 		;
 	reg [1:0]			decode_state;
 	
-	assign decode_ready = exec_complete;
+	assign decode_complete = exec_complete;
 	
 	always @(posedge clock) begin
 		if (reset) begin

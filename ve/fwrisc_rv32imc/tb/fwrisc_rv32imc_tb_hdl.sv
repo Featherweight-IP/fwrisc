@@ -1,0 +1,104 @@
+/****************************************************************************
+ * fwrisc_rv32imc_tb_hdl.sv
+ ***************************************************************************/
+ 
+module fwrisc_rv32imc_tb_hdl(input clock);
+
+`ifdef HAVE_HDL_CLKGEN
+	reg clk_r = 0;
+
+	initial begin
+		forever begin
+			#10ns;
+			clk_r <= ~clk_r;
+		end
+	end
+
+	assign clock = clk_r;
+`endif
+
+	reg reset = 1;
+	reg [7:0] reset_cnt = 0;
+
+	always @(posedge clock) begin
+		if (reset_cnt == 10) begin
+			reset <= 0;
+		end else begin
+			reset_cnt <= reset_cnt + 1;
+		end
+	end
+	
+	wire [31:0]			iaddr, idata;
+	wire				ivalid;
+	reg					 iready;
+	wire [31:0]			daddr, dwdata, drdata;
+	wire [3:0]			dstrb;
+	wire				dwrite, dvalid;
+	reg					dready;
+	
+	fwrisc #(
+		.ENABLE_COMPRESSED  (1), 
+		.ENABLE_MUL_DIV     (1), 
+		.ENABLE_DEP         (1), 
+		.ENABLE_COUNTERS    (1)
+		) u_dut (
+		.clock              (clock             ), 
+		.reset              (reset             ), 
+		.iaddr              (iaddr             ), 
+		.idata              (idata             ), 
+		.ivalid             (ivalid            ), 
+		.iready             (iready            ), 
+		.daddr              (daddr             ), 
+		.dwdata             (dwdata            ), 
+		.drdata             (drdata            ), 
+		.dstrb              (dstrb             ), 
+		.dwrite             (dwrite            ), 
+		.dvalid             (dvalid            ), 
+		.dready             (dready            ));
+	
+	always @(posedge clock) begin
+		if (reset) begin
+			iready <= 0;
+			dready <= 0;
+		end else begin
+			if (ivalid) begin
+				if (!iready) begin
+					iready <= 1;
+				end else begin
+					iready <= 0;
+				end
+			end else begin
+				iready <= 0;
+			end
+			
+			if (dvalid) begin
+				if (!dready) begin
+					dready <= 1;
+				end else begin
+					dready <= 0;
+				end
+			end else begin
+				dready <= 0;
+			end
+		end
+	end
+
+	generic_sram_byte_en_dualport #(
+			.DATA_WIDTH        (32       ), 
+			.ADDRESS_WIDTH     (14       ), // 64k (4x16k)
+			.INIT_FILE         ("ram.hex")
+		) u_sram (
+			.i_clk             (clock            		), 
+			.i_write_data_a    (32'b0   				), 
+			.i_write_enable_a  (1'b0 					), 
+			.i_address_a       (iaddr[31:2]				), 
+			.i_byte_enable_a   (4'hf  					), 
+			.o_read_data_a     (idata    				), 
+			.i_write_data_b    (dwdata   				), 
+			.i_write_enable_b  ((dvalid && dwrite) 		), 
+			.i_address_b       (daddr[31:2]				),
+			.i_byte_enable_b   (dstrb  					),
+			.o_read_data_b     (drdata					));	
+
+	
+endmodule

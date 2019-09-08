@@ -41,6 +41,7 @@ module fwrisc_decode_formal_checker(
 //						assert(rd_raddr == instr[11:7]);
 						assert(op_a == instr[19:15]);
 						assert(op_b == instr[24:20]);
+						assert(rd_raddr == instr[11:7]);
 						if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
 							assert(op_type == OP_TYPE_MDS);
 						end else begin
@@ -53,7 +54,10 @@ module fwrisc_decode_formal_checker(
 							assert(op_b == imm_11_0_u);
 						end else begin
 							assert(op_b == imm_11_0_s);
+							assert(op_type == OP_TYPE_ARITH);
 						end
+						assert(rd_raddr == instr[11:7]);
+						cover(rd_raddr != 0);
 					end
 					7'b1100011: begin // beq, bne, blt, bge, bltu, bgeu
 						assert(op_a == instr[19:15]);

@@ -61,14 +61,18 @@ ram.hex : $(BUILD_DIR)/esw/$(SW_IMAGE)
 		-width 32 -offset 0x80000000 -le ram.vlog ram.hex
 else # No software image
 ram.hex :
-	$(Q)echo "00000000" > $@
-	$(Q)echo "00000000" >> $@
-	$(Q)echo "00000000" >> $@
-	$(Q)echo "00000000" >> $@
-	$(Q)echo "00000000" >> $@
-	$(Q)echo "00000000" >> $@
-	$(Q)echo "00000000" >> $@
-	$(Q)echo "00000000" >> $@
+	# 00007013 -- ANDI
+	$(Q)echo "@00000000" > $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
+	$(Q)echo "00007013" >> $@
 endif
 
 embedded_sw :
