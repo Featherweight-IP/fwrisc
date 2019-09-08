@@ -1,11 +1,14 @@
 
+`include "fwrisc_exec_formal_defines.svh"
 
 
-module fwrisc_exec_formal_test(
+module fwrisc_exec_formal_branch_test(
 		input					clock,
 		input					reset,
-		output reg				decode_valid,
+		output 					decode_valid,
 		input	 				instr_complete,
+		
+		input[31:0]				pc,
 
 		// Indicates whether the instruction is compressed
 		output reg				instr_c,
@@ -15,7 +18,8 @@ module fwrisc_exec_formal_test(
 		output reg[31:0]		op_a,
 		output reg[31:0]		op_b,
 		output reg[5:0]			op,
-		output reg[31:0]		op_c
+		output reg[31:0]		op_c,
+		output reg[5:0]			rd
 		);
 	`include "fwrisc_op_type.svh"
 	`include "fwrisc_alu_op.svh"
@@ -26,7 +30,9 @@ module fwrisc_exec_formal_test(
 	wire[31:0]		value = `anyconst;
 	wire[11:0]		branch = `anyconst;
 	
-//	assign decode_valid = (state == 0 && !instr_complete);
+	reg decode_valid_r;
+	
+	assign decode_valid = (decode_valid_r && !instr_complete);
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -37,12 +43,13 @@ module fwrisc_exec_formal_test(
 			op_b <= 0;
 			op <= 0;
 			op_c <= 0;
-			decode_valid <= 0;
+			rd <= 0;
+			decode_valid_r <= 0;
 		end else begin
 			case (state)
 				0: begin
 					// Send out a new instruction
-					decode_valid <= 1;
+					decode_valid_r <= 1;
 					// EQ, LT, LTU
 					op <= OP_EQ+(op_w%3);
 					op_c <= (branch)?branch:1;
@@ -78,7 +85,7 @@ module fwrisc_exec_formal_test(
 				end
 				1: begin
 					if (instr_complete) begin
-						decode_valid <= 0;
+						decode_valid_r <= 0;
 						state <= 0;
 					end
 				end

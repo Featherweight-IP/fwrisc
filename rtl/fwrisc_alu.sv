@@ -44,6 +44,7 @@ module fwrisc_alu (
 			OP_EQ:   out = {31'b0, op_a == op_b};
 			OP_LT:   out = {31'b0, $signed(op_a) < $signed(op_b)}; // {31'b0, carry};
 			OP_LTU:  out = {31'b0, op_a < op_b};
+			OP_NOP:  out = op_a; // passthrough
 			default /*OP_XOR */: out = op_a ^ op_b;
 		endcase
 	end

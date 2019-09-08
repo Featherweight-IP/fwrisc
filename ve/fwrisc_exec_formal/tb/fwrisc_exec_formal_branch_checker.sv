@@ -1,7 +1,7 @@
 `include "fwrisc_exec_formal_defines.svh"
 
 
-module fwrisc_exec_formal_checker(
+module fwrisc_exec_formal_branch_checker(
 		input				clock,
 		input				reset,
 		input				decode_valid,
@@ -16,12 +16,13 @@ module fwrisc_exec_formal_checker(
 		input[31:0]			op_b,
 		input[5:0]			op,
 		input[31:0]			op_c,
+		input[5:0]			rd,
 		
 		input[5:0]			rd_waddr,
 		input[31:0]			rd_wdata,
 		input				rd_wen,
 		
-		input[31:1]			pc,
+		input[31:0]			pc,
 		// Indicates that the PC is sequential to the last PC
 		input				pc_seq		
 		// TODO: fill in port list
@@ -31,12 +32,10 @@ module fwrisc_exec_formal_checker(
 	
 	reg[7:0] count = 0;
 	reg[31:0]		wr_data;
-	(* keep *)
-	reg[31:0]		exp_data;
 	reg				instr_c_last;
-	reg[31:1]		pc_last;
-	wire[31:1]		pc_branch_taken = (pc_last + $signed(op_c[11:0]));
-	wire[31:1]		pc_branch_nottaken = (instr_c_last)?(pc_last+31'd1):(pc_last+31'd2);
+	reg[31:0]		pc_last;
+	wire[31:0]		pc_branch_taken = (pc_last + $signed(op_c[11:0]));
+	wire[31:0]		pc_branch_nottaken = (instr_c_last)?(pc_last+31'd2):(pc_last+31'd4);
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -53,6 +52,7 @@ module fwrisc_exec_formal_checker(
 					OP_TYPE_BRANCH: begin
 						`cover(op==OP_EQ);
 						`cover(op==OP_LT);
+						`cover(op==OP_LTU);
 						`assert(op == OP_EQ || op == OP_LT || op == OP_LTU);
 						case (op)
 							OP_EQ: begin
@@ -60,19 +60,35 @@ module fwrisc_exec_formal_checker(
 								`cover(op_a != op_b);
 								if (op_a == op_b) begin
 									`assert(pc == pc_branch_taken);
+									`assert(pc_seq == 0);
 								end else begin // branch not taken
 									`assert(pc == pc_branch_nottaken);
+									`assert(pc_seq == 1);
 								end
 							end
 							
 							OP_LT: begin
 								`cover($signed(op_a) < $signed(op_b));
 								`cover($signed(op_a) >= $signed(op_b));
+								if ($signed(op_a) < $signed(op_b)) begin
+									`assert(pc == pc_branch_taken);
+									`assert(pc_seq == 0);
+								end else begin // branch not taken
+									`assert(pc == pc_branch_nottaken);
+									`assert(pc_seq == 1);
+								end
 							end
 							
 							OP_LTU: begin
 								`cover(op_a < op_b);
 								`cover(op_a >= op_b);
+								if (op_a < op_b) begin
+									`assert(pc == pc_branch_taken);
+									`assert(pc_seq == 0);
+								end else begin // branch not taken
+									`assert(pc == pc_branch_nottaken);
+									`assert(pc_seq == 1);
+								end
 							end
 						endcase
 					end

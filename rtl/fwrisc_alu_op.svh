@@ -8,4 +8,5 @@ OP_CLR = (OP_OR+4'd1),	// 4
 OP_EQ  = (OP_CLR+4'd1),	// 5
 OP_LT  = (OP_EQ+4'd1),	// 6
 OP_LTU = (OP_LT+4'd1),	// 7
-OP_XOR = (OP_LTU+4'd1);
+OP_NOP = (OP_LTU+4'd1),
+OP_XOR = (OP_NOP+4'd1);

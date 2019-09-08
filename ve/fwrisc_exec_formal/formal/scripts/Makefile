@@ -32,6 +32,7 @@ REDIRECT= | tee simx.log 2>&1
 endif
 
 CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_exec.sv
+CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_mul_div_shift.sv
 CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_alu.sv
 CORE_SRC_FILES += $(VE_DIR)/tb/fwrisc_exec_formal_tb.sv
 CORE_SRC_FILES += $(VE_DIR)/tb/$(CHECKER).sv

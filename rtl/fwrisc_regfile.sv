@@ -29,6 +29,7 @@ module fwrisc_regfile #(
 		input				clock,
 		input				reset,
 		input				instr_complete,
+		// TODO: 
 		input[5:0]			ra_raddr,
 		output reg[31:0]	ra_rdata,
 		input[5:0]			rb_raddr,

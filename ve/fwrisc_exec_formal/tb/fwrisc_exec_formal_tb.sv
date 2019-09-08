@@ -2,6 +2,16 @@
  * fwrisc_exec_formal_tb.sv
  ****************************************************************************/
 
+`include "fwrisc_exec_formal_tb_defines.svh"
+
+`ifndef TEST_MODULE
+`define TEST_MODULE fwrisc_exec_formal_smoke_test
+`endif
+
+`ifndef CHECKER_MODULE
+`define CHECKER_MODULE fwrisc_exec_formal_smoke_checker
+`endif
+
 /**
  * Module: fwrisc_exec_formal_tb
  * 
@@ -41,25 +51,28 @@ module fwrisc_exec_formal_tb(input clock);
 	wire[31:0]			op_b;
 	wire[5:0]			op;
 	wire[31:0]			op_c;
+	wire[5:0]			rd;
 	wire[5:0]			rd_waddr;
 	wire[31:0]			rd_wdata;
 	wire				rd_wen;
-	wire[31:1]			pc;
+	wire[31:0]			pc;
 	wire				pc_seq;
 
 	// TODO: instance checker, test, and DUT
 	
-	fwrisc_exec_formal_test u_test(
+	`TEST_MODULE u_test(
 			.clock           (clock          ), 
 			.reset           (reset          ), 
 			.decode_valid    (decode_valid   ), 
 			.instr_complete  (instr_complete ), 
+			.pc              (pc             ),
 			.instr_c         (instr_c        ), 
 			.op_type         (op_type        ), 
 			.op_a            (op_a           ), 
 			.op_b            (op_b           ), 
 			.op              (op             ), 
-			.op_c            (op_c           )
+			.op_c            (op_c           ),
+			.rd              (rd             )
 			);
 	
 	
@@ -75,7 +88,8 @@ module fwrisc_exec_formal_tb(input clock);
 		.op_a            (op_a           ), 
 		.op_b            (op_b           ), 
 		.op              (op             ), 
-		.op_c            (op_c           ), 
+		.op_c            (op_c           ),
+		.rd              (rd             ),
 		.rd_waddr        (rd_waddr       ), 
 		.rd_wdata        (rd_wdata       ), 
 		.rd_wen          (rd_wen         ), 
@@ -84,7 +98,7 @@ module fwrisc_exec_formal_tb(input clock);
 
 	// TODO: instance DUT
 	
-	fwrisc_exec_formal_checker u_checker(
+	`CHECKER_MODULE u_checker(
 			.clock           (clock          ), 
 			.reset           (reset          ), 
 			.decode_valid    (decode_valid   ), 
@@ -95,6 +109,7 @@ module fwrisc_exec_formal_tb(input clock);
 			.op_b            (op_b           ), 
 			.op              (op             ), 
 			.op_c            (op_c           ), 
+			.rd              (rd             ),
 			.rd_waddr        (rd_waddr       ), 
 			.rd_wdata        (rd_wdata       ), 
 			.rd_wen          (rd_wen         ), 

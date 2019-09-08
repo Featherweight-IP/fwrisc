@@ -1,10 +1,5 @@
 
+tests/fwrisc_exec_formal_arith.f
+tests/fwrisc_exec_formal_branch.f
+tests/fwrisc_exec_formal_jump.f
 
-
-tests/fwrisc_exec_formal_smoke.f
-tests/fwrisc_mul_div_shift_formal_sra.f
-tests/fwrisc_mul_div_shift_formal_srl.f
-tests/fwrisc_mul_div_shift_formal_mul.f
-tests/fwrisc_mul_div_shift_formal_mulh.f
-tests/fwrisc_mul_div_shift_formal_muls.f
-tests/fwrisc_mul_div_shift_formal_mulsh.f
