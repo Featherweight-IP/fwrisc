@@ -10,6 +10,11 @@ parameter [4:0]
    * op_a = regs[rs1] 
    * op_b = regs[rs2] | imm
    * op = alu_op_type
+   * 
+   * LUI and AUIPC are also represented as ARTH ops
+   * op_a = imm
+   * op_b = imm base (pc or zero)
+   * op = alu_op_type - OPA, ADD
    */
   OP_TYPE_ARITH  = 5'd0,
   

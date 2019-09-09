@@ -35,6 +35,7 @@ module fwrisc_decode_formal_tb(input clock);
 	wire[31:0]	op_a;
 	wire[31:0]	op_b;
 	wire[31:0]	op_c;
+	wire[3:0]	op;
 	wire[5:0]	rd;
 	wire[5:0]	rd_raddr;
 	wire[4:0]	op_type;
@@ -73,6 +74,7 @@ module fwrisc_decode_formal_tb(input clock);
 		.op_a               (op_a              ), 
 		.op_b               (op_b              ), 
 		.op_c               (op_c              ), 
+		.op					(op                ),
 		.rd					(rd                ),
 		.rd_raddr           (rd_raddr          ), 
 		.op_type            (op_type           ));
@@ -85,7 +87,8 @@ module fwrisc_decode_formal_tb(input clock);
 		.decode_valid       (decode_valid      ), 
 		.op_a               (op_a              ), 
 		.op_b               (op_b              ), 
-		.op_c               (op_c              ), 
+		.op_c               (op_c              ),
+		.op					(op                ),
 		.rd_raddr           (rd_raddr          ), 
 		.op_type            (op_type           )
 		);

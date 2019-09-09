@@ -23,6 +23,8 @@ module fwrisc_decode_formal_test(
 	wire[11:0] imm = instr[31:20];
 //	wire[5:0] rs2 = instr[24:20];
 	wire[5:0] rd  = instr[11:7];
+	
+	wire[2:0] isel = $anyconst;
 
 	`btype_beq(instr_beq, $anyconst, $anyconst, $anyconst);
 	`btype_bne(instr_bne, $anyconst, $anyconst, $anyconst);
@@ -32,7 +34,6 @@ module fwrisc_decode_formal_test(
 	`btype_bgeu(instr_bgeu, $anyconst, $anyconst, $anyconst);
 	
 	reg state = 0;
-	reg[3:0] count = 0;
 	
 	always @(posedge clock) begin
 		if (reset) begin
@@ -44,7 +45,7 @@ module fwrisc_decode_formal_test(
 			case (state) 
 				0: begin
 					fetch_valid <= 1;
-					case (count) 
+					case ((isel % 6)) 
 						0: instr <= instr_beq;
 						1: instr <= instr_bne;
 						2: instr <= instr_blt;
@@ -54,13 +55,17 @@ module fwrisc_decode_formal_test(
 						default: instr <= instr_beq;
 					endcase
 					state <= 1;
-					count <= count + 1;
-					cover (count == 5);
 				end
 				1: begin
 					if (decode_ready) begin
 						fetch_valid <= 0;
 						state <= 0;
+						cover(isel == 0);
+						cover(isel == 1);
+						cover(isel == 2);
+						cover(isel == 3);
+						cover(isel == 4);
+						cover(isel == 5);
 					end
 				end
 			endcase

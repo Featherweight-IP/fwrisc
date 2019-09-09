@@ -101,7 +101,7 @@
 	
 `define btype_beq(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b000, 7'b1100011)
 `define btype_bne(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b001, 7'b1100011)
-`define btype_blt(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b110, 7'b1100011)
+`define btype_blt(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b100, 7'b1100011)
 `define btype_bge(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b101, 7'b1100011)
 `define btype_bltu(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b110, 7'b1100011)
 `define btype_bgeu(target, imm, rs1, rs2) `btype(target, imm, rs1, rs2, 3'b111, 7'b1100011)
@@ -116,6 +116,14 @@
 `define rtype_sltu(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b011, rd, 7'b0110011)
 `define rtype_sub(target, rs2, rs1, rd) `rtype(target, 7'b0100000, rs2, rs1, 3'b000, rd, 7'b0110011)
 `define rtype_xor(target, rs2, rs1, rd) `rtype(target, 7'b0000000, rs2, rs1, 3'b100, rd, 7'b0110011)
+`define rtype_mul(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b000, rd, 7'b0110011)
+`define rtype_mulh(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b001, rd, 7'b0110011)
+`define rtype_mulhsu(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b010, rd, 7'b0110011)
+`define rtype_mulhu(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b011, rd, 7'b0110011)
+`define rtype_div(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b100, rd, 7'b0110011)
+`define rtype_divu(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b101, rd, 7'b0110011)
+`define rtype_rem(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b110, rd, 7'b0110011)
+`define rtype_remu(target, rs2, rs1, rd) `rtype(target, 7'b0000001, rs2, rs1, 3'b111, rd, 7'b0110011)
 	
 `define utype_lui(target, imm, rd) `utype(target, imm, rd, 7'b0110111)
 `define utype_auipc(target, imm, rd) `utype(target, imm, rd, 7'b0010111)

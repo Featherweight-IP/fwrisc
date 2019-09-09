@@ -41,6 +41,8 @@ module fwrisc_decode #(
 		);
 	
 	`include "fwrisc_op_type.svh"
+	`include "fwrisc_alu_op.svh"
+	`include "fwrisc_mul_div_shift_op.svh"
 
 	// Compute various immediate outputs
 	wire[31:0]		jal_off = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
@@ -73,12 +75,12 @@ module fwrisc_decode #(
 	// Compressed slices
 	
 	parameter[3:0]  
-		I_TYPE_R = 4'd0,
-		I_TYPE_I = (I_TYPE_R+4'd1),
-		I_TYPE_S = (I_TYPE_I+4'd1),
-		I_TYPE_B = (I_TYPE_S+4'd1),
-		I_TYPE_U = (I_TYPE_B+4'd1),
-		I_TYPE_J = (I_TYPE_U+4'd1)
+		I_TYPE_R = 4'd0,			// 0
+		I_TYPE_I = (I_TYPE_R+4'd1),	// 1
+		I_TYPE_S = (I_TYPE_I+4'd1),	// 2
+		I_TYPE_B = (I_TYPE_S+4'd1),	// 3
+		I_TYPE_U = (I_TYPE_B+4'd1),	// 4
+		I_TYPE_J = (I_TYPE_U+4'd1)	// 5
 		;
 	parameter[3:0]
 		CI_TYPE_CR   = 4'd0,
@@ -166,7 +168,9 @@ module fwrisc_decode #(
 //				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_FENCE:OP_TYPE_LD;
 				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_ARITH:OP_TYPE_LDST;
 				3'b001: begin
-					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001) begin
+					if (instr[2]) begin // AUIPC
+						op_type_w = OP_TYPE_ARITH;
+					end else if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001) begin
 						op_type_w = OP_TYPE_MDS;
 					end else begin
 						op_type_w = OP_TYPE_ARITH;
@@ -176,7 +180,9 @@ module fwrisc_decode #(
 //				3'b010: op_type_w = OP_TYPE_ST;
 				3'b010: op_type_w = OP_TYPE_LDST;
 				3'b011: begin
-					if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
+					if (instr[2]) begin // LUI
+						op_type_w = OP_TYPE_ARITH;
+					end else if (instr[14:12] == 3'b101 || instr[14:12] == 3'b001 || instr[25]) begin
 						op_type_w = OP_TYPE_MDS;
 					end else begin
 						op_type_w = OP_TYPE_ARITH;
@@ -239,6 +245,48 @@ module fwrisc_decode #(
 				end
 				default:
 					op_c = 32'b0; 
+			endcase
+			
+			case (op_type) 
+				OP_TYPE_ARITH: begin
+					if (instr[2]) begin // AUIPC or LUI
+						op = (instr[5])?OP_OPA:OP_ADD;
+					end else begin
+						case (instr[14:12]) 
+							3'b000: begin
+								if (i_type == I_TYPE_R && instr[30]) begin
+									op = OP_SUB;
+								end else begin
+									op = OP_ADD;
+								end
+							end
+							3'b010: op = OP_LT;
+							3'b011: op = OP_LTU;
+							3'b100: op = OP_XOR;
+							3'b110: op = OP_OR;
+							default /*3'b111*/ : op = OP_AND;
+						endcase
+					end
+				end
+				OP_TYPE_BRANCH: begin
+					case (instr[14:12])
+						3'b000: op = OP_EQ;
+						3'b001: op = OP_NE;
+						3'b100: op = OP_LT;
+						3'b101: op = OP_GE;
+						3'b110: op = OP_LTU;
+						default /*3'b111*/: op = OP_GEU;
+					endcase
+				end
+				OP_TYPE_MDS: begin
+					case (instr[14:12])
+						3'b001: op = OP_SLL;
+						3'b101: op = (instr[30])?OP_SRA:OP_SRL;
+						
+					endcase
+				end
+				OP_TYPE_LI: begin
+				end
 			endcase
 			
 //		end

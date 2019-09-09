@@ -42,8 +42,11 @@ module fwrisc_alu (
 			OP_OR:   out = op_a | op_b;
 			OP_CLR:  out = op_b ^ (op_a & op_b); // Used for CSRC
 			OP_EQ:   out = {31'b0, op_a == op_b};
+			OP_NE:   out = {31'b0, op_a != op_b};
 			OP_LT:   out = {31'b0, $signed(op_a) < $signed(op_b)}; // {31'b0, carry};
+			OP_GE:   out = {31'b0, $signed(op_a) >= $signed(op_b)}; // {31'b0, carry};
 			OP_LTU:  out = {31'b0, op_a < op_b};
+			OP_GEU:  out = {31'b0, op_a > op_b};
 			OP_OPA:  out = op_a; // passthrough
 			OP_OPB:  out = op_b; // passthrough
 			default /*OP_XOR */: out = op_a ^ op_b;
