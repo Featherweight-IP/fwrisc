@@ -67,18 +67,18 @@ module fwrisc_exec #(
 
 	// Detect end-of-instruction
 	wire branch_taken = ((op_type == OP_TYPE_BRANCH && alu_out[0]) || op_type == OP_TYPE_JUMP);
-	wire instr_complete_w = (
-			decode_valid &&
-			(
-				(exec_state == STATE_EXECUTE && (
-						op_type == OP_TYPE_ARITH || 
-						(op_type == OP_TYPE_BRANCH && !branch_taken)))
-				|| (exec_state == STATE_BRANCH_TAKEN)
-				|| (exec_state == STATE_JUMP)
-				|| (exec_state == STATE_CSR)
-			)
-		);
-	
+//	wire instr_complete_w = (
+//			decode_valid &&
+//			(
+//				(exec_state == STATE_EXECUTE && (
+//						op_type == OP_TYPE_ARITH || 
+//						(op_type == OP_TYPE_BRANCH && !branch_taken)))
+//				|| (exec_state == STATE_BRANCH_TAKEN)
+//				|| (exec_state == STATE_JUMP)
+//				|| (exec_state == STATE_CSR)
+//			)
+//		);
+//	
 	always @* begin
 		// TODO:
 		if (exec_state == STATE_BRANCH_TAKEN || exec_state == STATE_JUMP) begin
@@ -97,7 +97,7 @@ module fwrisc_exec #(
 			pc <= 'h8000_0000;
 			pc_seq <= 1;
 		end else begin
-			instr_complete <= instr_complete_w;
+//			instr_complete <= instr_complete_w;
 			case (exec_state)
 				STATE_EXECUTE: begin
 					// Single-cycle execute state. For ALU instructions,
@@ -111,6 +111,7 @@ module fwrisc_exec #(
 							OP_TYPE_ARITH: begin
 								pc <= pc_next;
 								pc_seq <= pc_seq_next;
+								instr_complete <= 1;
 							end
 							/**
 							 * STATE_EXECUTE: alu_out = (op_a ? op_b)
@@ -124,6 +125,7 @@ module fwrisc_exec #(
 									// Still sequential
 									pc <= pc_next;
 									pc_seq <= pc_seq_next;
+									instr_complete <= 1;
 								end
 							end
 							OP_TYPE_LDST: begin
@@ -150,6 +152,8 @@ module fwrisc_exec #(
 								exec_state <= STATE_CSR;
 							end
 						endcase
+					end else begin
+						instr_complete <= 0;
 					end
 				end
 				
@@ -157,24 +161,28 @@ module fwrisc_exec #(
 					pc <= pc_next;
 					pc_seq <= pc_seq_next;
 					exec_state <= STATE_EXECUTE;
+					instr_complete <= 1;
 				end
 				
 				STATE_JUMP: begin
 					pc <= alu_out;
 					pc_seq <= pc_seq_next;
 					exec_state <= STATE_EXECUTE;
+					instr_complete <= 1;
 				end
 				
 				STATE_BRANCH_TAKEN: begin
 					pc <= alu_out;
 					pc_seq <= pc_seq_next;
 					exec_state <= STATE_EXECUTE;
+					instr_complete <= 1;
 				end
 				STATE_MDS_COMPLETE: begin
 					if (mds_out_valid) begin
 						exec_state <= STATE_EXECUTE;
 						pc <= pc_next;	
 						pc_seq <= pc_seq_next;
+						instr_complete <= 1;
 					end
 				end
 			endcase
@@ -216,7 +224,7 @@ module fwrisc_exec #(
 	
 	// TODO: rd_wen
 	always @* begin
-		rd_wen = (decode_valid && 
+		rd_wen = (decode_valid && !instr_complete &&
 				(
 					(exec_state == STATE_EXECUTE) && 
 						(op_type == OP_TYPE_ARITH || op_type == OP_TYPE_JUMP 

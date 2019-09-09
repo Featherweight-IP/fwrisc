@@ -78,9 +78,8 @@ module fwrisc #(
 	wire[31:0]				op_a;
 	wire[31:0]				op_b;
 	wire[31:0]				op_c;
-	wire[5:0]				rd;
 	wire[3:0]				op;
-	wire[31:0]				rd_raddr;
+	wire[5:0]				rd_raddr;
 	wire[4:0]				op_type;
 	fwrisc_decode #(
 		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED )
@@ -101,7 +100,6 @@ module fwrisc #(
 		.op_a               (op_a              ), 
 		.op_b               (op_b              ), 
 		.op_c               (op_c              ), 
-		.rd                 (rd                ), 
 		.op                 (op                ), 
 		.rd_raddr           (rd_raddr          ), 
 		.op_type            (op_type           ));
@@ -122,7 +120,7 @@ module fwrisc #(
 		.op_b            (op_b           ), 
 		.op              (op             ), 
 		.op_c            (op_c           ), 
-		.rd              (rd             ), 
+		.rd              (rd_raddr       ), 
 		.rd_waddr        (rd_waddr       ), 
 		.rd_wdata        (rd_wdata       ), 
 		.rd_wen          (rd_wen         ), 

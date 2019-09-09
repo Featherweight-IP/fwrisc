@@ -56,6 +56,7 @@ module fwrisc_decode_formal_checker(
 							assert(op_b == imm_11_0_s);
 							assert(op_type == OP_TYPE_ARITH);
 						end
+						assert(op_a == instr[19:15]); // op_a == regs[rs1]
 						assert(rd_raddr == instr[11:7]);
 						cover(rd_raddr != 0);
 					end

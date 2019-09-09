@@ -28,12 +28,11 @@ module fwrisc_decode #(
 		input[31:0]			rb_rdata,
 	
 		// Output to Exec phase
-		output reg			decode_valid,
+		output 				decode_valid,
 		input				exec_complete,
 		output reg[31:0]	op_a, 		// operand a (immediate or register)
 		output reg[31:0]	op_b, 		// operand b (immediate or register)
 		output reg[31:0]	op_c, 		// operand b (immediate or register)
-		output reg[31:0]	rd,			// address of destination register
 		// Instruction
 		output reg[3:0]		op,
 		output reg[5:0]		rd_raddr, 	// Destination register address
@@ -54,6 +53,7 @@ module fwrisc_decode #(
 	wire[31:0]		imm_branch = $signed({instr[31], instr[7], instr[30:25], instr[11:8], 1'b0});	
 	reg[4:0]		op_type_w;
 	wire[31:0]		instr; // 32-bit instruction
+	reg				decode_valid_r;
 
 	// Hook in the compressed-instruction expander if compressed
 	// instructions are enabled
@@ -285,8 +285,6 @@ module fwrisc_decode #(
 						
 					endcase
 				end
-				OP_TYPE_LI: begin
-				end
 			endcase
 			
 //		end
@@ -299,11 +297,12 @@ module fwrisc_decode #(
 	reg [1:0]			decode_state;
 	
 	assign decode_complete = exec_complete;
+	assign decode_valid = (decode_valid_r && !exec_complete);
 	
 	always @(posedge clock) begin
 		if (reset) begin
 			decode_state <= STATE_DECODE;
-			decode_valid <= 1'b0;
+			decode_valid_r <= 1'b0;
 			rd_raddr <= 0;
 		end else begin
 			case (decode_state) 
@@ -312,15 +311,15 @@ module fwrisc_decode #(
 						decode_state <= STATE_REG;
 						rd_raddr <= rd_raddr_w;
 						op_type <= op_type_w;
-						decode_valid <= 1'b1;
+						decode_valid_r <= 1'b1;
 					end else begin
-						decode_valid <= 1'b0;
+						decode_valid_r <= 1'b0;
 					end
 				end
 				default /*STATE_REG*/: begin // Register read data is now valid
 					if (exec_complete) begin
 						decode_state <= STATE_DECODE;
-						decode_valid <= 1'b0;
+						decode_valid_r <= 1'b0;
 					end
 				end
 			endcase
