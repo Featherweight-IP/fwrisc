@@ -42,6 +42,7 @@ module fwrisc_decode #(
 	`include "fwrisc_op_type.svh"
 	`include "fwrisc_alu_op.svh"
 	`include "fwrisc_mul_div_shift_op.svh"
+	`include "fwrisc_mem_op.svh"
 
 	// Compute various immediate outputs
 	wire[31:0]		jal_off = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
@@ -278,6 +279,18 @@ module fwrisc_decode #(
 						default /*3'b111*/: op = OP_GEU;
 					endcase
 				end
+				OP_TYPE_LDST: begin
+					case ({instr[5], instr[14:12]})
+						4'b0000: op = OP_LB;
+						4'b0001: op = OP_LH;
+						4'b0010: op = OP_LW;
+						4'b0100: op = OP_LBU;
+						4'b0101: op = OP_LHU;
+						4'b1000: op = OP_SB;
+						4'b1001: op = OP_SH;
+						default /*4'b1010*/: op = OP_SW;
+					endcase
+				end
 				OP_TYPE_MDS: begin
 					case (instr[14:12])
 						3'b001: op = OP_SLL;
@@ -285,6 +298,7 @@ module fwrisc_decode #(
 						
 					endcase
 				end
+				
 			endcase
 			
 //		end

@@ -24,6 +24,7 @@ ${FWRISC}/rtl/fwrisc_fetch.sv
 ${FWRISC}/rtl/fwrisc_c_decode.sv
 ${FWRISC}/rtl/fwrisc_decode.sv
 ${FWRISC}/rtl/fwrisc_alu.sv
+${FWRISC}/rtl/fwrisc_mem.sv
 ${FWRISC}/rtl/fwrisc_exec.sv
 ${FWRISC}/rtl/fwrisc.sv
 ${FWRISC}/rtl/fwrisc_dbus_if.sv

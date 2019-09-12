@@ -32,7 +32,14 @@ module fwrisc_exec #(
 		
 		output reg[31:0]	pc,
 		// Indicates that the PC is sequential to the last PC
-		output reg			pc_seq
+		output reg			pc_seq,
+		output reg[31:0]	daddr,
+		output reg			dvalid,
+		output reg			dwrite,
+		output reg[31:0]	dwdata,
+		output reg[3:0]		dwstb,
+		input[31:0]			drdata,
+		input				dready
 		);
 	
 	`include "fwrisc_alu_op.svh"
@@ -129,6 +136,8 @@ module fwrisc_exec #(
 								end
 							end
 							OP_TYPE_LDST: begin
+								// alu_out holds the data address
+								daddr <= alu_out;
 								// TODO:
 							end
 							OP_TYPE_MDS: begin
@@ -201,7 +210,8 @@ module fwrisc_exec #(
 			|| (exec_state == STATE_JUMP)
 			);
 	wire alu_op_sel_add = (
-			(exec_state == STATE_BRANCH_TAKEN)
+			(exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST)
+			|| (exec_state == STATE_BRANCH_TAKEN)
 			|| (exec_state == STATE_JUMP)
 			);
 	wire alu_op_sel_opb = (

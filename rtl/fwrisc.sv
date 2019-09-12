@@ -37,12 +37,12 @@ module fwrisc #(
 		output			ivalid,
 		input			iready,
 		
+		output			dvalid,
 		output[31:0]	daddr,
 		output[31:0]	dwdata,
-		input[31:0]		drdata,
-		output[3:0]		dstrb,
+		output[3:0]		dwstb,
 		output			dwrite,
-		output			dvalid,
+		input[31:0]		drdata,
 		input			dready
 		);
 	
@@ -125,7 +125,15 @@ module fwrisc #(
 		.rd_wdata        (rd_wdata       ), 
 		.rd_wen          (rd_wen         ), 
 		.pc              (pc             ), 
-		.pc_seq          (pc_seq         ));
+		.pc_seq          (pc_seq         ),
+		.dvalid          (dvalid         ),
+		.daddr           (daddr          ),
+		.dwrite          (dwrite         ),
+		.dwdata          (dwdata         ),
+		.dwstb           (dwstb          ),
+		.drdata          (drdata         ),
+		.dready          (dready         )
+		);
 	
 	fwrisc_regfile #(
 		.ENABLE_COUNTERS  (ENABLE_COUNTERS ),

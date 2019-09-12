@@ -31,7 +31,7 @@ parameter [4:0]
    * OP_TYPE_LDST (2)
    * op_a = regs[rs1]
    * op_b = regs[rs2] (ST)
-   * op = (TBD)
+   * op = mem_op_type 
    * op_c = offset
    */
   OP_TYPE_LDST   = (OP_TYPE_BRANCH+5'd1),
