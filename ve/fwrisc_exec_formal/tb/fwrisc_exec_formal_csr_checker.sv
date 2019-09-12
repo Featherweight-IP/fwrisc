@@ -58,7 +58,8 @@ module fwrisc_exec_formal_csr_checker(
 				assert(rd_waddr == rd || rd_waddr == op_c);
 				if (rd_waddr == rd) begin
 					rd_val <= rd_wdata;
-				end else begin
+				end
+				if (rd_waddr == op_c) begin
 					csr_val <= rd_wdata;
 				end
 			end

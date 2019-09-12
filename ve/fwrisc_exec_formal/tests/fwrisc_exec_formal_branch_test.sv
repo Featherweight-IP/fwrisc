@@ -25,7 +25,7 @@ module fwrisc_exec_formal_branch_test(
 	`include "fwrisc_alu_op.svh"
 
 	reg[1:0]		state;
-	wire			cond = `anyconst;
+	reg				cond;
 	wire[1:0]		op_w = `anyconst;
 	wire[31:0]		value = `anyconst;
 	wire[11:0]		branch = `anyconst;
@@ -51,10 +51,12 @@ module fwrisc_exec_formal_branch_test(
 					// Send out a new instruction
 					decode_valid_r <= 1;
 					// EQ, LT, LTU
-					op <= OP_EQ+(op_w%3);
 					op_c <= (branch)?branch:1;
-					case ((OP_EQ+(op_w%3)))
-						OP_EQ: begin
+					case (op_w%3)
+						0: begin // OP_EQ
+							op <= OP_EQ;
+							`cover(cond==0);
+							`cover(cond==1);
 							if (cond) begin
 								op_a <= value;
 								op_b <= value;
@@ -63,7 +65,10 @@ module fwrisc_exec_formal_branch_test(
 								op_b <= ~value;
 							end
 						end
-						OP_LT: begin
+						1: begin
+							op <= OP_LT;
+							`cover(cond==0);
+							`cover(cond==1);
 							if (cond) begin
 								op_a <= value;
 								op_b <= $signed(value) + 1;
@@ -72,7 +77,10 @@ module fwrisc_exec_formal_branch_test(
 								op_b <= value;
 							end
 						end
-						OP_LTU: begin
+						2: begin
+							op <= OP_LTU;
+							`cover(cond==0);
+							`cover(cond==1);
 							if (cond) begin
 								op_a <= value;
 								op_b <= value + 1;
@@ -82,6 +90,7 @@ module fwrisc_exec_formal_branch_test(
 							end
 						end
 					endcase
+					state <= 1;
 				end
 				1: begin
 					if (instr_complete) begin

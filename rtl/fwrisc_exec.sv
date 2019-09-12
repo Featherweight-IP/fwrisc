@@ -182,7 +182,7 @@ module fwrisc_exec #(
 				
 				STATE_BRANCH_TAKEN: begin
 					pc <= alu_out;
-					pc_seq <= pc_seq_next;
+					pc_seq <= c_seq_next;
 					exec_state <= STATE_EXECUTE;
 					instr_complete <= 1;
 				end

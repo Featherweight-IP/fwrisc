@@ -38,7 +38,7 @@ module fwrisc_exec_formal_csr_test(
 	assign rd_w[5] = 0;
 	assign rd_w[4:0] = `anyconst;
 	wire[5:0]		csr_w;
-	assign csr_w[5] = 0;
+	assign csr_w[5] = 1;
 	assign csr_w[4:0] = `anyconst;
 	wire[31:0]		op_a_w = `anyconst;
 	wire[31:0]		op_b_w = `anyconst;
