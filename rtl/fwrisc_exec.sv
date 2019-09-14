@@ -33,16 +33,19 @@ module fwrisc_exec #(
 		output reg[31:0]	pc,
 		// Indicates that the PC is sequential to the last PC
 		output reg			pc_seq,
-		output reg[31:0]	daddr,
-		output reg			dvalid,
-		output reg			dwrite,
-		output reg[31:0]	dwdata,
-		output reg[3:0]		dwstb,
+	
+		// Data interface
+		output[31:0]		daddr,
+		output				dvalid,
+		output				dwrite,
+		output[31:0]		dwdata,
+		output[3:0]			dwstb,
 		input[31:0]			drdata,
 		input				dready
 		);
 	
 	`include "fwrisc_alu_op.svh"
+	`include "fwrisc_mem_op.svh"
 	`include "fwrisc_op_type.svh"
 	
 	parameter [3:0] 
@@ -50,7 +53,8 @@ module fwrisc_exec #(
 		STATE_BRANCH_TAKEN = (STATE_EXECUTE + 4'd1),
 		STATE_JUMP         = (STATE_BRANCH_TAKEN + 4'd1),
 		STATE_CSR          = (STATE_JUMP + 4'd1),
-		STATE_MDS_COMPLETE = (STATE_CSR + 4'd1)
+		STATE_MDS_COMPLETE = (STATE_CSR + 4'd1),
+		STATE_LDST_COMPLETE = (STATE_MDS_COMPLETE + 4'd1)
 		;
 
 	reg [3:0]				exec_state;
@@ -59,6 +63,11 @@ module fwrisc_exec #(
 	wire					mds_in_valid = (op_type == OP_TYPE_MDS && exec_state == STATE_EXECUTE);
 	wire					mds_out_valid;
 	wire[31:0]				mds_out;
+
+	reg						mem_req_valid;
+	reg[31:0]				mem_req_addr;
+	wire					mem_ack_valid;
+	wire[31:0]				mem_ack_data;
 	
 	// Holds the next PC if execution is sequential
 	reg[2:0]				next_pc_seq_incr;
@@ -137,8 +146,10 @@ module fwrisc_exec #(
 							end
 							OP_TYPE_LDST: begin
 								// alu_out holds the data address
-								daddr <= alu_out;
-								// TODO:
+								// TODO: handle misaligne accesses
+								mem_req_addr <= alu_out;
+								mem_req_valid <= 1;
+								exec_state <= STATE_LDST_COMPLETE;
 							end
 							OP_TYPE_MDS: begin
 								exec_state <= STATE_MDS_COMPLETE;
@@ -182,12 +193,20 @@ module fwrisc_exec #(
 				
 				STATE_BRANCH_TAKEN: begin
 					pc <= alu_out;
-					pc_seq <= c_seq_next;
+					pc_seq <= pc_seq_next;
 					exec_state <= STATE_EXECUTE;
 					instr_complete <= 1;
 				end
 				STATE_MDS_COMPLETE: begin
 					if (mds_out_valid) begin
+						exec_state <= STATE_EXECUTE;
+						pc <= pc_next;	
+						pc_seq <= pc_seq_next;
+						instr_complete <= 1;
+					end
+				end
+				STATE_LDST_COMPLETE: begin
+					if (mem_ack_valid) begin
 						exec_state <= STATE_EXECUTE;
 						pc <= pc_next;	
 						pc_seq <= pc_seq_next;
@@ -240,6 +259,9 @@ module fwrisc_exec #(
 						(op_type == OP_TYPE_ARITH || op_type == OP_TYPE_JUMP 
 							|| op_type == OP_TYPE_CSR)
 					|| (exec_state == STATE_CSR)
+					|| (exec_state == STATE_LDST_COMPLETE 
+						&& (op == OP_LB || op == OP_LH || op == OP_LW
+							|| op == OP_LBU || op == OP_LHU) && mem_ack_valid)
 				)
 				
 		);
@@ -271,11 +293,27 @@ module fwrisc_exec #(
 		.reset           (reset          ), 
 		.in_a            (op_a           ), 
 		.in_b            (op_b           ), 
-		.op              (op             ), 
+		.op              (op[3:0]        ), 
 		.in_valid        (mds_in_valid   ), 
 		.out             (mds_out        ), 
 		.out_valid       (mds_out_valid  ));
 	
+	fwrisc_mem u_mem (
+		.clock      (clock         ), 
+		.reset      (reset         ), 
+		.req_valid  (mem_req_valid ), 
+		.req_addr   (mem_req_addr  ), 
+		.req_op     (op[3:0]       ), 
+		.req_data   (op_b          ), 
+		.ack_valid  (mem_ack_valid ), 
+		.ack_data   (mem_ack_data  ), 
+		.dvalid     (dvalid        ), 
+		.daddr      (daddr         ), 
+		.dwdata     (dwdata        ), 
+		.dwstb      (dwstb         ), 
+		.dwrite     (dwrite        ), 
+		.drdata     (drdata        ), 
+		.dready     (dready        ));
 
 
 endmodule

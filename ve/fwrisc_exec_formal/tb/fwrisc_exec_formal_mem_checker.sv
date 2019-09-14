@@ -1,7 +1,7 @@
 `include "fwrisc_exec_formal_defines.svh"
 
 
-module fwrisc_exec_formal_jump_checker(
+module fwrisc_exec_formal_mem_checker(
 		input				clock,
 		input				reset,
 		input				decode_valid,
@@ -34,12 +34,10 @@ module fwrisc_exec_formal_jump_checker(
 		input				dready		
 		);
 	`include "fwrisc_op_type.svh"
-	`include "fwrisc_alu_op.svh"
+	`include "fwrisc_mem_op.svh"
 	
 	reg[7:0] count = 0;
 	reg[31:0]		wr_data;
-	(* keep *)
-	reg[31:0]		exp_data;
 	reg				instr_c_last;
 	reg[31:0]		pc_last;
 	reg[2:0]		rd_wr_count;
@@ -60,29 +58,27 @@ module fwrisc_exec_formal_jump_checker(
 			end
 			if (rd_wen) begin
 				rd_wr_count <= rd_wr_count + 1;
-				rd_addr <= rd_waddr;
+				`assert(rd_waddr == rd);
 				rd_val <= rd_wdata;
 			end
 			if (instr_complete) begin
-				`cover(1);
-				// op_a is jump_base
-				`assert(pc == (op_a + op_c));
-				`assert(rd_wr_count == 1);
-				if (instr_c) begin
-					`assert(rd_val == (pc_last + 2));
+				`cover(op == OP_LB);
+				`cover(op == OP_LH);
+				`cover(op == OP_LBU);
+				`cover(op == OP_LHU);
+				`cover(op == OP_LW);
+				`cover(op == OP_SB);
+				`cover(op == OP_SH);
+				`cover(op == OP_SW);
+//				case (op)
+//				endcase
+				if (op == OP_LB || op == OP_LH || op == OP_LBU || op == OP_LHU || op == OP_LW) begin
+					`assert(rd_wr_count == 1);
 				end else begin
-					`assert(rd_val == (pc_last + 4));
+					`assert(rd_wr_count == 0);
 				end
 				rd_wr_count <= 0;
 			end
-			if (count == 15) begin
-				`assert(1);
-			end else begin
-				count <= count + 1;
-			end
-//			if (instr_complete) begin
-//				assert(0);
-//			end
 		end
 	end
 	

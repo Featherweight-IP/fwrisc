@@ -45,6 +45,10 @@
 	</linkedResources>
 	<variableList>
 		<variable>
+			<name>FWRISC</name>
+			<value>$%7BPROJECT_LOC%7D</value>
+		</variable>
+		<variable>
 			<name>PACKAGES_DIR</name>
 			<value>$%7BPROJECT_LOC%7D/packages</value>
 		</variable>

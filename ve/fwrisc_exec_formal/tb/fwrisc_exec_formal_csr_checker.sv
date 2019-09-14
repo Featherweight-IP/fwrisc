@@ -24,8 +24,14 @@ module fwrisc_exec_formal_csr_checker(
 		
 		input[31:0]			pc,
 		// Indicates that the PC is sequential to the last PC
-		input				pc_seq		
-		// TODO: fill in port list
+		input				pc_seq,
+		input[31:0]			daddr,
+		input				dvalid,
+		input				dwrite,
+		input[31:0]			dwdata,
+		input[3:0]			dwstb,
+		input[31:0]			drdata,
+		input				dready		
 		);
 	`include "fwrisc_op_type.svh"
 	`include "fwrisc_alu_op.svh"

@@ -85,6 +85,21 @@ module fwrisc_mem_tb(input clock);
 		.dready     (dready    ));
 	
 	fwrisc_mem_checker u_checker(
+			.clock      (clock     ), 
+			.reset      (reset     ), 
+			.req_valid  (req_valid ), 
+			.req_addr   (req_addr  ), 
+			.req_op     (req_op    ), 
+			.req_data   (req_data  ), 
+			.ack_valid  (ack_valid ), 
+			.ack_data   (ack_data  ), 
+			.dvalid     (dvalid    ), 
+			.daddr      (daddr     ), 
+			.dwdata     (dwdata    ), 
+			.dwstb      (dwstb     ), 
+			.dwrite     (dwrite    ), 
+			.drdata     (drdata    ), 
+			.dready     (dready    )			
 		);
 			
 endmodule

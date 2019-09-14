@@ -19,7 +19,11 @@ module fwrisc_exec_formal_arith_test(
 		output reg[31:0]		op_b,
 		output reg[5:0]			op,
 		output reg[31:0]		op_c,
-		output reg[5:0]			rd
+		output reg[5:0]			rd,
+		
+		input				dvalid,
+		output reg[31:0]	drdata,
+		output reg			dready
 		);
 	`include "fwrisc_op_type.svh"
 	`include "fwrisc_alu_op.svh"

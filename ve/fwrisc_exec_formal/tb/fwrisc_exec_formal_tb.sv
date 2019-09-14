@@ -57,6 +57,13 @@ module fwrisc_exec_formal_tb(input clock);
 	wire				rd_wen;
 	wire[31:0]			pc;
 	wire				pc_seq;
+	wire[31:0]			daddr;
+	wire				dvalid;
+	wire				dwrite;
+	wire[31:0]			dwdata;
+	wire[3:0]			dwstb;
+	wire[31:0]			drdata;
+	wire				dready;
 
 	// TODO: instance checker, test, and DUT
 	
@@ -72,7 +79,10 @@ module fwrisc_exec_formal_tb(input clock);
 			.op_b            (op_b           ), 
 			.op              (op             ), 
 			.op_c            (op_c           ),
-			.rd              (rd             )
+			.rd              (rd             ),
+			.dvalid          (dvalid         ),
+			.drdata          (drdata         ),
+			.dready          (dready         )
 			);
 	
 	
@@ -94,7 +104,15 @@ module fwrisc_exec_formal_tb(input clock);
 		.rd_wdata        (rd_wdata       ), 
 		.rd_wen          (rd_wen         ), 
 		.pc              (pc             ), 
-		.pc_seq          (pc_seq         ));
+		.pc_seq          (pc_seq         ),
+		.daddr           (daddr          ),
+		.dvalid          (dvalid         ),
+		.dwrite          (dwrite         ),
+		.dwdata          (dwdata         ),
+		.dwstb           (dwstb          ),
+		.drdata          (drdata         ),
+		.dready          (dready         )
+		);
 
 	// TODO: instance DUT
 	
@@ -114,7 +132,14 @@ module fwrisc_exec_formal_tb(input clock);
 			.rd_wdata        (rd_wdata       ), 
 			.rd_wen          (rd_wen         ), 
 			.pc              (pc             ), 
-			.pc_seq          (pc_seq         )
+			.pc_seq          (pc_seq         ),
+			.daddr           (daddr          ),
+			.dvalid          (dvalid         ),
+			.dwrite          (dwrite         ),
+			.dwdata          (dwdata         ),
+			.dwstb           (dwstb          ),
+			.drdata          (drdata         ),
+			.dready          (dready         )
 		);
 			
 endmodule

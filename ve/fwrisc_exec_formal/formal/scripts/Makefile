@@ -34,6 +34,7 @@ endif
 CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_exec.sv
 CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_mul_div_shift.sv
 CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_alu.sv
+CORE_SRC_FILES += $(VE_DIR)/../../rtl/fwrisc_mem.sv
 CORE_SRC_FILES += $(VE_DIR)/tb/fwrisc_exec_formal_tb.sv
 CORE_SRC_FILES += $(VE_DIR)/tb/$(CHECKER).sv
 CORE_SRC_FILES += $(VE_DIR)/tests/$(TESTNAME)_test.sv
@@ -45,13 +46,17 @@ VE_DIR := $(abspath $(SIM_DIR)/..)
 # List of variables to substitute in the .sby file
 SBY_VARS += CHECKER TESTNAME DEPTH VE_DIR MODE CORE_SRC_FILES
 
-run-sby :
+run-sby : fwrisc_exec_formal_tb_defines.svh
 	$(Q)sed $(SIM_DIR)/scripts/fwrisc_exec_formal.sby \
 		$(foreach v,$(SBY_VARS),-e 's%{$(v)}%$($(v))%g') > fwrisc_exec_formal.sby
 	$(Q)sby -f fwrisc_exec_formal.sby $(REDIRECT)
 
-run-sim :
+run-sim : fwrisc_exec_formal_tb_defines.svh
 	$(Q)iverilog $(IVL_FLAGS) $(CORE_SRC_FILES)
 	$(Q)vvp -l simx.log a.out
+
+fwrisc_exec_formal_tb_defines.svh :
+	$(Q)echo "\`define TEST_MODULE $(TESTNAME)_test" > $@
+	$(Q)echo "\`define CHECKER_MODULE $(CHECKER)" >> $@
 
 include $(PACKAGES_DIR)/packages.mk

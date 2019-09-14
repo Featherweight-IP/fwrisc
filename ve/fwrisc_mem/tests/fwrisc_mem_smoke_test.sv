@@ -24,6 +24,7 @@ module fwrisc_mem_test(
 	reg[3:0]				dwait;
 	reg[1:0]				dstate;
 	reg[3:0]				op_r;
+	reg[1:0]				addr_low;
 	
 	// Manage the read state
 	always @(posedge clock) begin
@@ -67,6 +68,24 @@ module fwrisc_mem_test(
 			case (state)
 				0: begin
 					req_valid <= 1;
+					case (op_r % OP_NUM_MEM)
+						OP_LB, OP_LBU, OP_SB: begin
+							`cover(addr_low[1:0] == 0);
+							`cover(addr_low[1:0] == 1);
+							`cover(addr_low[1:0] == 2);
+							`cover(addr_low[1:0] == 3);
+							req_addr[1:0] <= addr_low;
+						end
+						OP_LH, OP_LHU, SH: begin
+							`cover(addr_low[0] == 0);
+							`cover(addr_low[0] == 1);
+							req_addr[0] <= 0;
+							req_addr[1] <= addr_low[0];
+						end
+						OP_LW, OP_SW: begin
+							req_addr[1:0] <= 0;
+						end
+					endcase
 					req_addr <= 0;
 					req_op <= (op_r % OP_NUM_MEM);
 					req_data <= 0;

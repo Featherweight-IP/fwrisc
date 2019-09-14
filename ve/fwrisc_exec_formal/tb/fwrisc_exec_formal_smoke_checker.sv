@@ -23,8 +23,14 @@ module fwrisc_exec_formal_checker(
 		
 		input[31:1]			pc,
 		// Indicates that the PC is sequential to the last PC
-		input				pc_seq		
-		// TODO: fill in port list
+		input				pc_seq,
+		input[31:0]			daddr,
+		input				dvalid,
+		input				dwrite,
+		input[31:0]			dwdata,
+		input[3:0]			dwstb,
+		input[31:0]			drdata,
+		input				dready		
 		);
 	
 	reg[7:0] count = 0;
