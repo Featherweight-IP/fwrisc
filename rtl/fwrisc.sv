@@ -52,12 +52,29 @@ module fwrisc #(
 	wire					instr_complete;
 	wire[31:0]				instr;
 	wire					instr_c;
+	wire					int_reset;
+	wire					soft_reset_req;
+	reg[4:0]				soft_reset_count;
+	
+	assign int_reset = (reset | soft_reset_count != 0);
+	
+	always @(posedge clock) begin
+		if (reset) begin
+			soft_reset_count <= 0;
+		end else begin
+			if (soft_reset_req) begin
+				soft_reset_count <= 5'h1f;
+			end else if (soft_reset_count != 0) begin
+				soft_reset_count <= soft_reset_count - 1;
+			end
+		end
+	end
 
 	fwrisc_fetch #(
 		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED )
 		) u_fetch (
 		.clock              (clock             ), 
-		.reset              (reset             ), 
+		.reset              (int_reset         ), 
 		.next_pc            (pc                ), 
 		.next_pc_seq        (pc_seq            ), 
 		.iaddr              (iaddr             ), 
@@ -85,7 +102,7 @@ module fwrisc #(
 		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED )
 		) u_decode (
 		.clock              (clock             ), 
-		.reset              (reset             ), 
+		.reset              (int_reset         ), 
 		.fetch_valid        (fetch_valid       ), 
 		.decode_complete    (decode_complete   ), 
 		.instr_i            (instr             ), 
@@ -111,7 +128,7 @@ module fwrisc #(
 		.ENABLE_MUL_DIV  (ENABLE_MUL_DIV )
 		) u_exec (
 		.clock           (clock          ), 
-		.reset           (reset          ), 
+		.reset           (int_reset      ), 
 		.decode_valid    (decode_valid   ),
 		.instr_complete  (instr_complete ), 
 		.instr_c         (instr_c        ), 
@@ -140,7 +157,8 @@ module fwrisc #(
 		.ENABLE_DEP       (ENABLE_DEP      )
 		) u_regfile (
 		.clock            (clock           ), 
-		.reset            (reset           ), 
+		.reset            (int_reset       ), 
+		.soft_reset_req   (soft_reset_req  ),
 		.instr_complete   (instr_complete  ), 
 		.ra_raddr         (ra_raddr        ), 
 		.ra_rdata         (ra_rdata        ), 

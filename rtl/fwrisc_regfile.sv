@@ -30,6 +30,7 @@ module fwrisc_regfile #(
 		) (
 		input				clock,
 		input				reset,
+		output				soft_reset_req,
 		input				instr_complete,
 		// TODO: 
 		input[5:0]			ra_raddr,
@@ -52,7 +53,7 @@ module fwrisc_regfile #(
 	reg[5:0]			ra_raddr_r;
 	reg[5:0]			rb_raddr_r;
 	reg[31:0]			regs['h3f:0];
-
+	
 `ifdef FORMAL
 	initial regs[0] = 0;
 `else
@@ -61,18 +62,26 @@ module fwrisc_regfile #(
 	end
 `endif
 	
+	// Assert the soft-reset request
+	assign soft_reset_req = (rd_wen && rd_waddr == CSR_SOFT_RESET);
+	
 	always @(posedge clock) begin
-		case ({rd_wen, rd_waddr})
-			{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
-			{1'b1, CSR_MCYCLEH}: cycle_count <= {rd_wdata, cycle_count[31:0]};
-			default: cycle_count <= cycle_count + 1;
-		endcase
+		if (reset) begin
+			cycle_count <= 0;
+			instr_count <= 0;
+		end else begin
+			case ({rd_wen, rd_waddr})
+				{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
+				{1'b1, CSR_MCYCLEH}: cycle_count <= {rd_wdata, cycle_count[31:0]};
+				default: cycle_count <= cycle_count + 1;
+			endcase
 		
-		case ({rd_wen, rd_waddr})
-			{1'b1, CSR_MINSTRET}: instr_count <= {instr_count[63:32], rd_wdata};
-			{1'b1, CSR_MINSTRETH}: instr_count <= {rd_wdata, instr_count[31:0]};
-			default: instr_count <= (instr_complete)?(instr_count + 1):instr_count;
-		endcase
+			case ({rd_wen, rd_waddr})
+				{1'b1, CSR_MINSTRET}: instr_count <= {instr_count[63:32], rd_wdata};
+				{1'b1, CSR_MINSTRETH}: instr_count <= {rd_wdata, instr_count[31:0]};
+				default: instr_count <= (instr_complete)?(instr_count + 1):instr_count;
+			endcase
+		end
 	end
 
 	always @(posedge clock) begin
