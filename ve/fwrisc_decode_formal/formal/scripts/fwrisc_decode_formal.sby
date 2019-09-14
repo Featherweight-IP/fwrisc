@@ -29,6 +29,7 @@ prep -top fwrisc_decode_formal_tb
 {VE_DIR}/../../rtl/fwrisc_op_type.svh
 {VE_DIR}/../../rtl/fwrisc_alu_op.svh
 {VE_DIR}/../../rtl/fwrisc_mul_div_shift_op.svh
+{VE_DIR}/../../rtl/fwrisc_csr_addr.svh
 fwrisc_decode_formal_checker.sv {VE_DIR}/tb/{CHECKER}.sv
 fwrisc_decode_formal_test.sv {VE_DIR}/tests/{TESTNAME}_test.sv
 {VE_DIR}/tests/fwrisc_decode_formal_opcode_defines.svh

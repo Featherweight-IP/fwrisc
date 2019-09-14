@@ -29,7 +29,6 @@ module fwrisc_fetch #(
 		output reg[31:0]	instr,
 		output reg			instr_c
 		);
-
 	
 	reg[2:0]		state;
 	reg[15:0]		instr_cache;

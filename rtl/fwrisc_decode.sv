@@ -43,6 +43,7 @@ module fwrisc_decode #(
 	`include "fwrisc_alu_op.svh"
 	`include "fwrisc_mul_div_shift_op.svh"
 	`include "fwrisc_mem_op.svh"
+	`include "fwrisc_csr_addr.svh"
 
 	// Compute various immediate outputs
 	wire[31:0]		jal_off = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
@@ -206,7 +207,29 @@ module fwrisc_decode #(
 			// RS1 and RS2 are always in the same place
 			// TODO: integrate CSR addressing
 			ra_raddr = instr[19:15];
-			rb_raddr = instr[24:20];
+					
+			case (op_type_w)
+				OP_TYPE_CSR: begin
+					case (instr[31:24])
+						8'hF1: rb_raddr = (CSR_BASE_Q0 | instr[23:20]);
+						8'h30: rb_raddr = (CSR_BASE_Q1 | instr[23:20]);
+						8'h34: rb_raddr = (CSR_BASE_Q2 | instr[23:20]);
+						8'hB0: rb_raddr = (instr[21])?CSR_MINSTRET:CSR_MCYCLE;
+						8'hB8: begin
+							rb_raddr = (instr[21])?CSR_MINSTRETH:CSR_MCYCLEH;
+						end
+						8'hBC: begin // custom CSRs
+							case (instr[21:20])
+								2'b00: rb_raddr = CSR_DEP_LO;
+								2'b01: rb_raddr = CSR_DEP_HI;
+								default: rb_raddr = CSR_SOFT_RESET;
+							endcase
+						end
+						default: rb_raddr = 0; // ?
+					endcase
+				end
+				default: rb_raddr = instr[24:20];
+			endcase
 			
 			case (i_type) 
 				I_TYPE_R, I_TYPE_I, I_TYPE_B: op_a = ra_rdata;
