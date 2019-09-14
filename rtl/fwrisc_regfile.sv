@@ -32,14 +32,17 @@ module fwrisc_regfile #(
 		input				reset,
 		output				soft_reset_req,
 		input				instr_complete,
-		// TODO: 
+
 		input[5:0]			ra_raddr,
 		output reg[31:0]	ra_rdata,
 		input[5:0]			rb_raddr,
 		output reg[31:0]	rb_rdata,
 		input[5:0]			rd_waddr,
 		input[31:0]			rd_wdata,
-		input				rd_wen
+		input				rd_wen,
+		
+		output[31:0]		dep_lo,
+		output[31:0]		dep_hi
 		);
 	
 	`include "fwrisc_csr_addr.svh"
@@ -47,8 +50,8 @@ module fwrisc_regfile #(
 	// CSRs
 	reg[63:0]			cycle_count;
 	reg[63:0]			instr_count;
-	reg[31:0]			dep_low_r;
-	reg[31:0]			dep_high_r;
+	reg[31:0]			dep_lo_r;
+	reg[31:0]			dep_hi_r;
 
 	reg[5:0]			ra_raddr_r;
 	reg[5:0]			rb_raddr_r;
@@ -69,6 +72,8 @@ module fwrisc_regfile #(
 		if (reset) begin
 			cycle_count <= 0;
 			instr_count <= 0;
+			dep_lo_r <= 0;
+			dep_hi_r <= 0;
 		end else begin
 			case ({rd_wen, rd_waddr})
 				{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
@@ -81,12 +86,19 @@ module fwrisc_regfile #(
 				{1'b1, CSR_MINSTRETH}: instr_count <= {rd_wdata, instr_count[31:0]};
 				default: instr_count <= (instr_complete)?(instr_count + 1):instr_count;
 			endcase
+	
+			// Once the DEP registers have been written and enabled,
+			// they are locked out until the next reset
+			if (rd_wen && rd_waddr == CSR_DEP_LO && !dep_lo_r[1]) begin
+				dep_lo_r <= rd_wdata;
+			end
+			if (rd_wen && rd_waddr == CSR_DEP_HI && !dep_hi_r[1]) begin
+				dep_hi_r <= rd_wdata;
+			end
 		end
 	end
 
 	always @(posedge clock) begin
-//		ra_raddr_r <= ra_raddr;
-//		rb_raddr_r <= rb_raddr;
 		// Gate off writing to r0 and read-only CSRs
 		if (rd_wen && |rd_waddr && rd_wdata[5:3] != 3'b101) begin
 			regs[rd_waddr] <= rd_wdata;

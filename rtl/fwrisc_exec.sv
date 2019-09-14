@@ -60,7 +60,10 @@ module fwrisc_exec #(
 	reg [3:0]				exec_state;
 	reg[31:0]				pc_next;
 	reg						pc_seq_next;
-	wire					mds_in_valid = (op_type == OP_TYPE_MDS && exec_state == STATE_EXECUTE);
+	wire					mds_in_valid = (
+			(op_type == OP_TYPE_MDS && exec_state == STATE_EXECUTE)
+			&& decode_valid
+			);
 	wire					mds_out_valid;
 	wire[31:0]				mds_out;
 
@@ -262,6 +265,7 @@ module fwrisc_exec #(
 					|| (exec_state == STATE_LDST_COMPLETE 
 						&& (op == OP_LB || op == OP_LH || op == OP_LW
 							|| op == OP_LBU || op == OP_LHU) && mem_ack_valid)
+					|| (exec_state == STATE_MDS_COMPLETE && mds_out_valid)
 				)
 				
 		);
@@ -269,7 +273,7 @@ module fwrisc_exec #(
 
 	// TODO: rd_wdata input selector
 	always @* begin
-		rd_wdata = alu_out;
+		rd_wdata = (exec_state == STATE_MDS_COMPLETE)?mds_out:alu_out;
 		if (exec_state == STATE_EXECUTE && op_type == OP_TYPE_CSR) begin
 			rd_waddr = op_c[5:0];
 		end else begin
