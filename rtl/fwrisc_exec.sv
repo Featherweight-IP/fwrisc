@@ -111,7 +111,7 @@ module fwrisc_exec #(
 	always @* begin
 		// TODO:
 		if (exec_state == STATE_BRANCH_TAKEN || exec_state == STATE_JUMP) begin
-			pc_next = alu_out;
+			pc_next = {alu_out[31:1], 1'b0};
 			pc_seq_next = 0;
 		end else begin
 			pc_next = next_pc_seq;
@@ -205,7 +205,8 @@ module fwrisc_exec #(
 				end
 				
 				STATE_JUMP: begin
-					pc <= alu_out;
+					// Jumps automatically filter out byte-aligned addresses
+					pc <= {alu_out[31:1], 1'b0};
 					pc_seq <= pc_seq_next;
 					exec_state <= STATE_EXECUTE;
 					instr_complete <= 1;

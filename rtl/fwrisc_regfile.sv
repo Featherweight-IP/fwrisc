@@ -115,7 +115,9 @@ module fwrisc_regfile #(
 			if (|rd_waddr && rd_waddr[5:3] != 3'b100) begin
 				regs[rd_waddr] <= rd_wdata;
 			end else begin
-				$display("Warning: skipping write");
+				if (rd_waddr != 0) begin
+					$display("Warning: skipping write to %0d", rd_waddr);
+				end
 			end
 		end
 		ra_rdata <= regs[ra_raddr];

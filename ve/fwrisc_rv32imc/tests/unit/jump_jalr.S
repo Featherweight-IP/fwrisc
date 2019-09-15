@@ -3,7 +3,7 @@
 
 		entry:
 			la		x2, 1f // la is a two-word instruction (0x08, 0x0C)
-			jalr	x1, x2 // 0x10: R[1] <= 0x14
+			jalr		x1, x2 // 0x10: R[1] <= 0x14
 			lui		x2, 26
 			lui		x2, 26
 		1:
