@@ -58,6 +58,8 @@ module fwrisc #(
 	wire[31:0]				mtvec;
 	reg[31:0]				tracer_pc;
 	reg[31:0]				tracer_instr;
+	wire[31:0]				dep_lo;
+	wire[31:0]				dep_hi;
 	
 	assign int_reset = (reset | soft_reset_count != 0);
 	
@@ -184,6 +186,8 @@ module fwrisc #(
 		.rd_waddr         (rd_waddr           ), 
 		.rd_wdata         (rd_wdata           ), 
 		.rd_wen           (rd_wen             ),
+		.dep_lo           (dep_lo             ),
+		.dep_hi           (dep_hi             ),
 		.mtvec            (mtvec              )
 		);
 	
@@ -199,7 +203,7 @@ module fwrisc #(
 		.rb_rdata  (rb_rdata                  ), 
 		.rd_waddr  (rd_waddr                  ), 
 		.rd_wdata  (rd_wdata                  ), 
-		.rd_write  (rd_write                  ), 
+		.rd_write  (rd_wen                    ), 
 		.maddr     (daddr                     ), 
 		.mdata     ((dwrite)?dwdata:drdata    ), 
 		.mstrb     (dwstb                     ), 

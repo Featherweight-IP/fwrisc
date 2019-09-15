@@ -26,5 +26,4 @@ ${FWRISC}/rtl/fwrisc_alu.sv
 ${FWRISC}/rtl/fwrisc_mem.sv
 ${FWRISC}/rtl/fwrisc_exec.sv
 ${FWRISC}/rtl/fwrisc.sv
-${FWRISC}/rtl/fwrisc_fpga_top.sv
 

@@ -1,5 +1,9 @@
 
+// +define+MINIMIZE_COMM
 
 -f ${MEMORY_PRIMITIVES}/rtl/sim/sim.f
+
 -f ${FWRISC}/rtl/fwrisc.f
--F ${SIM_DIR}/../tb/tb_hdl.F
++incdir+${FWRISC}/ve/fwrisc_tracer_bfm
+${FWRISC}/ve/fwrisc_tracer_bfm/fwrisc_tracer_bfm.sv
+-F ${FWRISC}/ve/fwrisc_rv32imc/tb/tb.F

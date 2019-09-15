@@ -87,7 +87,7 @@ module fwrisc_exec #(
 	wire[31:0]				next_pc_seq = pc + next_pc_seq_incr;
 	
 	always @* begin
-		if (exec_state == STATE_BRANCH_TAKEN) begin
+		if (exec_state == STATE_BRANCH_TAKEN || exec_state == STATE_JUMP) begin
 			next_pc_seq_incr = 0;
 		end else begin
 			next_pc_seq_incr = (instr_c)?2:4;
@@ -274,17 +274,21 @@ module fwrisc_exec #(
 	wire alu_op_sel_opb = (
 			(exec_state == STATE_CSR)
 			);
+	wire alu_op_sel_opa = (
+			(exec_state == STATE_EXECUTE && op_type == OP_TYPE_JUMP)
+			|| (exec_state == STATE_JUMP)
+		);
 	wire [31:0]	alu_op_a = (alu_op_a_sel_pc)?next_pc_seq:op_a;
 	wire [31:0]	alu_op_b = (alu_op_b_sel_c)?op_c:op_b;
 	reg [3:0]   alu_op;
 	
 	always @* begin
-		case ({alu_op_sel_add,alu_op_sel_opb})
-			2'b10: alu_op = OP_ADD;
-			2'b01: alu_op = OP_OPB;
+		case ({alu_op_sel_add,alu_op_sel_opb,alu_op_sel_opa})
+			3'b100: alu_op = OP_ADD;
+			3'b010: alu_op = OP_OPB;
+			3'b001: alu_op = OP_OPA;
 			default: alu_op = op;
 		endcase
-		
 	end
 	
 	wire [31:0]	alu_out;

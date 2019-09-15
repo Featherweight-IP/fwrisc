@@ -1,2 +1,4 @@
 
--F ${SIM_DIR}/../tb/tb_hvl.F
+${PACKAGES_DIR}/googletest-hdl/src/sv/googletest_sv_pkg.sv
+${FWRISC}/ve/fwrisc/tb/fwrisc_tb_hvl.sv
+

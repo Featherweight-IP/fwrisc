@@ -2,7 +2,7 @@
 GCC_ARCH:=riscv32-unknown-elf
 
 MK_INCLUDES += $(PACKAGES_DIR)/simscripts/mkfiles/common_tool_gcc.mk
-MK_INCLUDES += $(FWRISC)/ve/fwrisc/tests/fwrisc_tests.mk
+MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc/tests/fwrisc_tests.mk
 
 include $(MK_INCLUDES)
 

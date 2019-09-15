@@ -18,7 +18,7 @@ module fwrisc_fetch #(
 		input				next_pc_seq, // The next instruction follows the previous
 		
 		// Instruction-fetch interface
-		output[31:0]		iaddr,
+		output reg[31:0]	iaddr,
 		input[31:0]			idata,
 		output 				ivalid,
 		input				iready,
@@ -51,7 +51,6 @@ module fwrisc_fetch #(
 
 	reg fetch_valid_r;	
 	// Always perform aligned fetches
-	assign iaddr = (state == STATE_FETCH1)?{next_pc[31:2], 2'b0}:{next_pc[31:2]+1'b1, 2'b0};
 	assign fetch_valid = (fetch_valid_r && !decode_complete);
 	reg ivalid_r;
 	assign ivalid = (ivalid_r /*&& iready == 0*/); 
@@ -67,7 +66,8 @@ module fwrisc_fetch #(
 			// 
 			case (state)
 				STATE_FETCH1: begin // Wait for fetch to complete
-					if (iready) begin
+					iaddr <= {next_pc[31:2], 2'b0};
+					if (iready && ivalid_r) begin
 						instr_c <= instr_c_next;
 						// Decide what to do based on alignment and fetched data
 						case ({next_pc[1], instr_c_next})
@@ -144,6 +144,7 @@ module fwrisc_fetch #(
 				end
 				
 				STATE_FETCH2: begin // Wait for fetch of upper half-word to complete
+					iaddr <= {next_pc[31:2]+1, 2'b0};
 					if (iready) begin
 						ivalid_r <= 0;
 						// Fetch of upper half-word is complete

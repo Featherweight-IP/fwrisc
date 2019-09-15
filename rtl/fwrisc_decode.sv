@@ -34,7 +34,7 @@ module fwrisc_decode #(
 		output reg[31:0]	op_b, 		// operand b (immediate or register)
 		output reg[31:0]	op_c, 		// operand b (immediate or register)
 		// Instruction
-		output reg[3:0]		op,
+		output[3:0]			op,
 		output reg[5:0]		rd_raddr, 	// Destination register address
 		output reg[4:0]		op_type
 		);
@@ -47,14 +47,15 @@ module fwrisc_decode #(
 	`include "fwrisc_system_op.svh"
 
 	// Compute various immediate outputs
-	wire[31:0]		jal_off = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
+	wire[31:0]		imm_jump = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
 	wire[31:0]		auipc_imm_31_12 = {instr[31:12], {12{1'b0}}};
 	wire[31:0]		imm_11_0 = $signed({instr[31:20]});
 	wire[31:0]		st_imm_11_0 = $signed({instr[31:25], instr[11:7]});
 	
-	wire[31:0]		imm_lui = {instr[31:12], 12'h000};
+	reg[31:0]		imm_lui;
 	wire[31:0]		imm_branch = $signed({instr[31], instr[7], instr[30:25], instr[11:8], 1'b0});	
 	reg[4:0]		op_type_w;
+	reg[3:0]		op_w;
 	wire[31:0]		instr; // 32-bit instruction
 	reg				decode_valid_r;
 
@@ -107,60 +108,26 @@ module fwrisc_decode #(
 	wire[5:0]		c_rd_rs1     = instr[11:7];
 	reg[5:0]		rd_raddr_w;
 	
+	assign op = op_w;
+	
 	always @* begin
-		op = 0; // TODO
+		op_w = 0; // TODO
 		
-//		if (instr_c && ENABLE_COMPRESSED) begin
-//			// TODO:
-//			op_type_w = 0;
-//			op_a = 0;
-//			op_b = 0;
-//			op_c = 0;
-//			ra_raddr = 0;
-//			rb_raddr = 0;
-//			
-//			// Select i_type
-//			case (instr[15:13])
-//				3'b000,3'b011: i_type = CI_TYPE_CI;
-//				3'b001, 3'b101: i_type = CI_TYPE_CJ;
-//				3'b010: i_type = CI_TYPE_CL;
-//				3'b100: i_type = (&instr[11:10])?CI_TYPE_CR_P:CI_TYPE_CI_P;
-//				default /*3'b110,3'b111*/: i_type = CI_TYPE_CB;
-//			endcase
-//
-//			// Select ra_raddr/rb_raddr
-//			case (i_type)
-//				CI_TYPE_CR: ra_raddr = c_rd_rs1;
-//				CI_TYPE_CR_P: ra_raddr = c_rs1_rd_p;
-//				default: ra_raddr = 0;
-//			endcase
-//			
-//			// Select rd_raddr
-//			case (i_type)
-//				CI_TYPE_CI_P, CI_TYPE_CR_P: rd_raddr_w = c_rs1_rd_p;
-//				default: rd_raddr_w = 0;
-//			endcase
-//			
-//			// Select op_type
-//			// Select op_a/op_b
-//			
-////			case (instr[1:0])
-////			endcase
-//			// TODO:
-//		end else begin // RV32 instructions
 			rd_raddr_w = instr[11:7];
 			
 			case (instr[6:4])
 				3'b001: i_type = (instr[2])?I_TYPE_U:I_TYPE_I;
+				// ??
 				3'b010: i_type = I_TYPE_S;
 				3'b011: i_type = (instr[2])?I_TYPE_U:I_TYPE_R;
 				3'b110: begin
 					case (instr[3:2])
 						2'b11: i_type = I_TYPE_J; // JAL
-						2'b01: i_type = I_TYPE_U; // JALR
+						2'b01: i_type = I_TYPE_I; // JALR
 						default: i_type = I_TYPE_B; 
 					endcase
 				end
+				3'b111: i_type = I_TYPE_S; // SYSTEM
 //				3'b110: op_type = I_TYPE_U; // Assume instr[6:2] == 5'b01101
 				default /*3'b110*/: i_type = (instr[2])?I_TYPE_J:I_TYPE_B;
 			endcase
@@ -193,19 +160,9 @@ module fwrisc_decode #(
 				end
 				3'b110: op_type_w = (instr[2])?OP_TYPE_JUMP:OP_TYPE_BRANCH;
 				default /*3'b111*/: begin
-					op_type_w = (|instr[14:12])?OP_TYPE_CSR:OP_TYPE_CALL;
+					op_type_w = (|instr[14:12])?OP_TYPE_CSR:OP_TYPE_SYSTEM;
 				end
 			endcase
-			
-//			r_type = (instr[6:4] == 3'b110);
-//			i_type = (instr[6:4] == 3'b001 && instr[2] == 0);
-//			s_type = (instr[6:4] == 3'b010);
-//			b_type = (instr[6:4] == 3'b110 && instr[2] == 0);
-//			u_type = (instr[6:2] == 5'b01101 || instr[6:2] == 5'b00101);
-//			j_type = (instr[6:2] == 5'b11011);
-			
-			
-			// RS1 and RS2 are always in the same place
 			
 			case (op_type_w)
 				// Read MEPC for MRET
@@ -237,7 +194,14 @@ module fwrisc_decode #(
 			endcase
 			
 			case (i_type) 
-				I_TYPE_R, I_TYPE_I, I_TYPE_B: op_a = ra_rdata;
+				I_TYPE_R, I_TYPE_I, I_TYPE_B, I_TYPE_S: begin
+					if (i_type == I_TYPE_S && instr[14]) begin
+						op_a = instr[19:15];
+					end else begin
+						op_a = ra_rdata;
+					end
+				end
+				I_TYPE_J: op_a = pc;
 				I_TYPE_U: op_a = imm_lui;
 				default: op_a = 0;
 			endcase
@@ -269,70 +233,79 @@ module fwrisc_decode #(
 			endcase
 
 			case (i_type)
-				I_TYPE_B: begin // branch
-					op_c = imm_branch;
-				end
-				default:
-					op_c = 32'b0; 
+				I_TYPE_B: op_c = imm_branch;
+				I_TYPE_I: op_c = imm_11_0;
+				I_TYPE_J: op_c = imm_jump;
+				// CSR instructions pass through the CSR
+				// register address as op_c
+				I_TYPE_S: op_c = rb_raddr;
+				default: op_c = 32'b0; 
 			endcase
 			
 			case (op_type) 
 				OP_TYPE_ARITH: begin
 					if (instr[2]) begin // AUIPC or LUI
-						op = (instr[5])?OP_OPA:OP_ADD;
+						op_w = (instr[5])?OP_OPA:OP_ADD;
 					end else begin
 						case (instr[14:12]) 
 							3'b000: begin
 								if (i_type == I_TYPE_R && instr[30]) begin
-									op = OP_SUB;
+									op_w = OP_SUB;
 								end else begin
-									op = OP_ADD;
+									op_w = OP_ADD;
 								end
 							end
-							3'b010: op = OP_LT;
-							3'b011: op = OP_LTU;
-							3'b100: op = OP_XOR;
-							3'b110: op = OP_OR;
-							default /*3'b111*/ : op = OP_AND;
+							3'b010: op_w = OP_LT;
+							3'b011: op_w = OP_LTU;
+							3'b100: op_w = OP_XOR;
+							3'b110: op_w = OP_OR;
+							default /*3'b111*/ : op_w = OP_AND;
 						endcase
 					end
 				end
 				OP_TYPE_BRANCH: begin
 					case (instr[14:12])
-						3'b000: op = OP_EQ;
-						3'b001: op = OP_NE;
-						3'b100: op = OP_LT;
-						3'b101: op = OP_GE;
-						3'b110: op = OP_LTU;
-						default /*3'b111*/: op = OP_GEU;
+						3'b000: op_w = OP_EQ;
+						3'b001: op_w = OP_NE;
+						3'b100: op_w = OP_LT;
+						3'b101: op_w = OP_GE;
+						3'b110: op_w = OP_LTU;
+						default /*3'b111*/: op_w = OP_GEU;
 					endcase
 				end
 				OP_TYPE_LDST: begin
 					case ({instr[5], instr[14:12]})
-						4'b0000: op = OP_LB;
-						4'b0001: op = OP_LH;
-						4'b0010: op = OP_LW;
-						4'b0100: op = OP_LBU;
-						4'b0101: op = OP_LHU;
-						4'b1000: op = OP_SB;
-						4'b1001: op = OP_SH;
-						default /*4'b1010*/: op = OP_SW;
+						4'b0000: op_w = OP_LB;
+						4'b0001: op_w = OP_LH;
+						4'b0010: op_w = OP_LW;
+						4'b0100: op_w = OP_LBU;
+						4'b0101: op_w = OP_LHU;
+						4'b1000: op_w = OP_SB;
+						4'b1001: op_w = OP_SH;
+						default /*4'b1010*/: op_w = OP_SW;
 					endcase
 				end
 				OP_TYPE_MDS: begin
 					case (instr[14:12])
-						3'b001: op = OP_SLL;
-						3'b101: op = (instr[30])?OP_SRA:OP_SRL;
+						3'b001: op_w = OP_SLL;
+						3'b101: op_w = (instr[30])?OP_SRA:OP_SRL;
 						
+					endcase
+				end
+				OP_TYPE_CSR: begin
+					case (instr[13:12])
+						2'b01: op_w = OP_OPA;
+						2'b10: op_w = OP_OR;
+						2'b11: op_w = OP_CLR;
 					endcase
 				end
 				OP_TYPE_SYSTEM: begin
 					case (instr[31:28])
-						4'b0000: op = (instr[20])?OP_TYPE_EBREAK:OP_TYPE_ECALL;
-						default /*4'b0001*/: op = OP_TYPE_ERET;
+						4'b0000: op_w = (instr[20])?OP_TYPE_EBREAK:OP_TYPE_ECALL;
+						default /*4'b0001*/: op_w = OP_TYPE_ERET;
 					endcase
 				end
-				default: op = 0; // TODO:
+				default: op_w = 0; // TODO:
 				
 			endcase
 			
@@ -358,8 +331,10 @@ module fwrisc_decode #(
 				STATE_DECODE: begin // Wait for data to be valid
 					if (fetch_valid) begin
 						decode_state <= STATE_REG;
+						imm_lui <= {instr[31:12], 12'h000};
 						rd_raddr <= rd_raddr_w;
 						op_type <= op_type_w;
+//						op <= op_w;
 						decode_valid_r <= 1'b1;
 					end else begin
 						decode_valid_r <= 1'b0;

@@ -131,7 +131,7 @@ module fwrisc_mul_div_shift #(
 					end
 					OP_SRA: begin // sra
 						if (|shift_amt_r) begin
-							out <= (out >>> 1);
+							out <= ($signed(out) >>> 1);
 						end
 					end
 					

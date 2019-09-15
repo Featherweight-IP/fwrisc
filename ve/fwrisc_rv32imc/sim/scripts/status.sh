@@ -3,7 +3,6 @@
 #* status.sh
 #****************************************************************************
 
-
 testname=$1
 seed=$2
 
@@ -21,3 +20,4 @@ else
     echo "FAILED: $testname ($n_passed $n_failed)"
   fi
 fi
+
