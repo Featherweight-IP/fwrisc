@@ -84,7 +84,9 @@ module fwrisc_decode #(
 		I_TYPE_S = (I_TYPE_I+4'd1),	// 2
 		I_TYPE_B = (I_TYPE_S+4'd1),	// 3
 		I_TYPE_U = (I_TYPE_B+4'd1),	// 4
-		I_TYPE_J = (I_TYPE_U+4'd1)	// 5
+		I_TYPE_J = (I_TYPE_U+4'd1), // 5
+		I_TYPE_L = (I_TYPE_J+4'd1), // 6 -- Load/Store Immediate
+		I_TYPE_SY = (I_TYPE_L+4'd1) // System
 		;
 	parameter[3:0]
 		CI_TYPE_CR   = 4'd0,
@@ -116,6 +118,7 @@ module fwrisc_decode #(
 			rd_raddr_w = instr[11:7];
 			
 			case (instr[6:4])
+				3'b000: i_type = I_TYPE_L;
 				3'b001: i_type = (instr[2])?I_TYPE_U:I_TYPE_I;
 				// ??
 				3'b010: i_type = I_TYPE_S;
@@ -127,7 +130,7 @@ module fwrisc_decode #(
 						default: i_type = I_TYPE_B; 
 					endcase
 				end
-				3'b111: i_type = I_TYPE_S; // SYSTEM
+				3'b111: i_type = I_TYPE_SY; // SYSTEM
 //				3'b110: op_type = I_TYPE_U; // Assume instr[6:2] == 5'b01101
 				default /*3'b110*/: i_type = (instr[2])?I_TYPE_J:I_TYPE_B;
 			endcase
@@ -195,12 +198,16 @@ module fwrisc_decode #(
 			
 			case (i_type) 
 				I_TYPE_R, I_TYPE_I, I_TYPE_B, I_TYPE_S: begin
-					if (i_type == I_TYPE_S && instr[14]) begin
+					op_a = ra_rdata;
+				end
+				I_TYPE_SY: begin // System
+					if (instr[14]) begin
 						op_a = instr[19:15];
 					end else begin
 						op_a = ra_rdata;
 					end
 				end
+				I_TYPE_L: op_a = ra_rdata; // LD/ST
 				I_TYPE_J: op_a = pc;
 				I_TYPE_U: op_a = imm_lui;
 				default: op_a = 0;
@@ -208,7 +215,7 @@ module fwrisc_decode #(
 			
 			// Select output for OP-B (rs2)
 			case (i_type)
-				I_TYPE_R, I_TYPE_S, I_TYPE_B: begin // R-Type/S-Type/B-Type instruction (rs2)
+				I_TYPE_R, I_TYPE_S, I_TYPE_SY, I_TYPE_B: begin // R-Type/S-Type/B-Type instruction (rs2)
 					op_b = rb_rdata;
 				end
 				I_TYPE_I: begin // I-Type (imm_11_0)
@@ -222,6 +229,7 @@ module fwrisc_decode #(
 						default: op_b = imm_11_0;
 					endcase
 				end
+				I_TYPE_L: op_b = rb_rdata;
 				I_TYPE_U: begin
 					if (instr[5]) begin // LUI
 						op_b = 32'b0;
@@ -234,11 +242,14 @@ module fwrisc_decode #(
 
 			case (i_type)
 				I_TYPE_B: op_c = imm_branch;
-				I_TYPE_I: op_c = imm_11_0;
+				I_TYPE_I,I_TYPE_L: op_c = imm_11_0;
+				I_TYPE_S: op_c = st_imm_11_0;
 				I_TYPE_J: op_c = imm_jump;
 				// CSR instructions pass through the CSR
 				// register address as op_c
-				I_TYPE_S: op_c = rb_raddr;
+				I_TYPE_SY: begin // System
+					op_c = rb_raddr;
+				end
 				default: op_c = 32'b0; 
 			endcase
 			

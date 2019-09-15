@@ -111,8 +111,12 @@ module fwrisc_regfile #(
 
 	always @(posedge clock) begin
 		// Gate off writing to r0 and read-only CSRs
-		if (rd_wen && |rd_waddr && rd_wdata[5:3] != 3'b101) begin
-			regs[rd_waddr] <= rd_wdata;
+		if (rd_wen) begin
+			if (|rd_waddr && rd_waddr[5:3] != 3'b100) begin
+				regs[rd_waddr] <= rd_wdata;
+			end else begin
+				$display("Warning: skipping write");
+			end
 		end
 		ra_rdata <= regs[ra_raddr];
 		

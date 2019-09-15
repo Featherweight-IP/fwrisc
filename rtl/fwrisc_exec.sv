@@ -76,8 +76,8 @@ module fwrisc_exec #(
 	wire					mds_out_valid;
 	wire[31:0]				mds_out;
 
-	reg						mem_req_valid;
-	reg[31:0]				mem_req_addr;
+	wire					mem_req_valid;
+	wire[31:0]				mem_req_addr;
 	wire					mem_ack_valid;
 	wire[31:0]				mem_ack_data;
 	
@@ -161,8 +161,6 @@ module fwrisc_exec #(
 							OP_TYPE_LDST: begin
 								// alu_out holds the data address
 								// TODO: handle misaligne accesses
-								mem_req_addr <= alu_out;
-								mem_req_valid <= 1;
 								exec_state <= STATE_LDST_COMPLETE;
 							end
 							OP_TYPE_MDS: begin
@@ -265,6 +263,7 @@ module fwrisc_exec #(
 	wire alu_op_b_sel_c = (
 			(exec_state == STATE_BRANCH_TAKEN)
 			|| (exec_state == STATE_JUMP)
+			|| (exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST)
 			);
 	wire alu_op_sel_add = (
 			(exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST)
@@ -318,6 +317,7 @@ module fwrisc_exec #(
 			// STATE_EXCEPTION_2: rd_wdata = alu_out;
 			STATE_EXCEPTION_3: rd_wdata = {28'd0, mcause};
 			STATE_MDS_COMPLETE: rd_wdata = mds_out;
+			STATE_LDST_COMPLETE: rd_wdata = mem_ack_data;
 			default: rd_wdata = alu_out;
 		endcase
 		case (exec_state)
@@ -349,7 +349,12 @@ module fwrisc_exec #(
 		.in_valid        (mds_in_valid   ), 
 		.out             (mds_out        ), 
 		.out_valid       (mds_out_valid  ));
-	
+
+	assign mem_req_addr = alu_out;
+	assign mem_req_valid = (
+			exec_state == STATE_EXECUTE 
+			&& op_type == OP_TYPE_LDST
+			&& decode_valid);
 	fwrisc_mem u_mem (
 		.clock      (clock         ), 
 		.reset      (reset         ), 

@@ -16,7 +16,8 @@
 start_expected:
 .word 0x01,  0
 .word 0x02,  25
-.word 0x2d,  0 			// MTVEC
-.word 0x29,  0x80000014 // MEPC
-.word 0x2a,  0x0000000b // MCAUSE
+.word (0x28+5),  0 			// MTVEC
+.word (0x30+1),  0x80000014 // MEPC
+.word (0x30+2),  0x0000000b // MCAUSE
+.word (0x30+3),  0x00000000
 end_expected:

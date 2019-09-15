@@ -56,21 +56,30 @@ module fwrisc_mem (
 					ack_valid <= 0;
 					if (req_valid && !ack_valid) begin
 						dvalid <= 1;
+						daddr <= req_addr;
 						mem_state <= STATE_WAIT_RSP;
 						dwrite <= (req_op == OP_SB || req_op == OP_SH || req_op == OP_SW);
 						
 						case (req_op)
 							OP_SB: begin
-								dwstb <= (1 << req_addr[1:0]);
+								case (req_addr[1:0])
+									2'b00: dwstb <= 4'b0001;
+									2'b01: dwstb <= 4'b0010;
+									2'b10: dwstb <= 4'b0100;
+									2'b11: dwstb <= 4'b1000;
+								endcase
 								dwdata <= {4{req_data[7:0]}};
 							end
 							OP_SH: begin
-								dwstb <= (3 << req_addr[1:0]);
+								case (req_addr[1])
+									0: dwstb <= 4'b0011;
+									1: dwstb <= 4'b1100;
+								endcase
 								dwdata <= {2{req_data[15:0]}};
 							end
 							OP_SW: begin
 								dwstb <= 4'b1111;
-								dwdata <= req_data[15:0];
+								dwdata <= req_data;
 							end
 							default: begin
 								dwstb <= 4'b0000;
@@ -83,18 +92,37 @@ module fwrisc_mem (
 					if (dready) begin
 						ack_valid <= 1;
 						dvalid <= 0;
+						dwrite <= 0;
+						dwstb <= 0;
 						case (req_op)
 							OP_LB: begin
-								ack_data <= $signed(drdata[7:0]);
+								case (daddr[1:0])
+									2'b00: ack_data <= $signed(drdata[7:0]);
+									2'b01: ack_data <= $signed(drdata[15:8]);
+									2'b10: ack_data <= $signed(drdata[23:16]);
+									2'b11: ack_data <= $signed(drdata[31:24]);
+								endcase
 							end
 							OP_LBU: begin
+								case (daddr[1:0])
+									2'b00: ack_data <= drdata[7:0];
+									2'b01: ack_data <= drdata[15:8];
+									2'b10: ack_data <= drdata[23:16];
+									2'b11: ack_data <= drdata[31:24];
+								endcase
 								ack_data <= drdata[7:0];
 							end
 							OP_LH: begin
-								ack_data <= $signed(drdata[15:0]);
+								case (daddr[1])
+									0: ack_data <= $signed(drdata[15:0]);
+									1: ack_data <= $signed(drdata[31:16]);
+								endcase
 							end
 							OP_LHU: begin
-								ack_data <= drdata[15:0];
+								case (daddr[1])
+									0: ack_data <= drdata[15:0];
+									1: ack_data <= drdata[31:16];
+								endcase
 							end
 							default /*OP_LW*/: begin
 								ack_data <= drdata;

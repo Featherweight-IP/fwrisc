@@ -16,5 +16,5 @@
 start_expected:
 .word 0x01,  0
 .word 0x02,  25
-.word 0x29,  0x00000000 // MEPC
+.word (0x30+1),  0x00000000 // MEPC
 end_expected:

@@ -2,11 +2,11 @@
 #include "unit_header.h"
 
 		entry:
-			li			x1, 5
+			li		x1, 5
 			csrw		medeleg, x1
 			csrr		x2, medeleg
 
-			j			done
+			j		done
 
 
 start_expected:
