@@ -9,6 +9,10 @@ libraries to be installed on a 64-bit Linux distribution.
 Bourne shell was used for development. A C-Shell setup script is provided, but
 has little to no testing. 
 
+### Java 1.8+
+The FWRISC-S dependencies include some Scala/CHISEL which must be run using Java.
+Java 1.8 or higher is required.
+
 ### Libero 11.9
 Libero 11.9 was used to performa synthesis for Microsemi IGLOO2/Fusion2 devices. The synthesis scripts
 assume that you have the 'libero' on your search path, and that your licensing environment
@@ -30,7 +34,8 @@ ensure that you have ZEPHR_TOOLCHAIN_VARIANT and ZEPHYR_SDK_INSTALL_DIR properly
 Several scripts used by FWRISC require Python2 to be installed. Python 2.7.5 is provided by Centos7
 
 ### Python 3.6
-Zephyr requires Python3, as well as several additional Python modules.
+Zephyr requires Python3, as well as several additional Python modules. You must install 
+these required modules in your Python3 installation.
 
 ### Verilator 4.010 
 Verilator 4.010 was used for verification of the FWRISC core. Verilator must be compiled 
