@@ -32,7 +32,7 @@ module fwrisc_c_decode(
 		case (instr_i[1:0])
 			// C0
 			2'b00: begin
-				unique case (instr_i[15:13])
+				case (instr_i[15:13])
 					3'b000: begin
 						// c.addi4spn -> addi rd', x2, imm
 						instr = {2'b0, instr_i[10:7], instr_i[12:11], instr_i[5],
@@ -60,7 +60,7 @@ module fwrisc_c_decode(
 			// If this check fails, an illegal instruction exception is triggered and the controller
 			// writes the actual faulting instruction to mtval.
 			2'b01: begin
-				unique case (instr_i[15:13])
+				case (instr_i[15:13])
 					3'b000: begin
 						// c.addi -> addi rd, rd, nzimm
 						// c.nop
@@ -97,7 +97,7 @@ module fwrisc_c_decode(
 					end
 
 					3'b100: begin
-						unique case (instr_i[11:10])
+						case (instr_i[11:10])
 							2'b00,
 							2'b01: begin
 								// 00: c.srli -> srli rd, rd, shamt
@@ -114,7 +114,7 @@ module fwrisc_c_decode(
 							end
 
 							2'b11: begin
-								unique case ({instr_i[12], instr_i[6:5]})
+								case ({instr_i[12], instr_i[6:5]})
 									3'b000: begin
 										// c.sub -> sub rd', rd', rs2'
 										instr = {2'b01, 5'b0, 2'b01, instr_i[4:2], 2'b01, instr_i[9:7],
@@ -160,7 +160,7 @@ module fwrisc_c_decode(
 			// If this check fails, an illegal instruction exception is triggered and the controller
 			// writes the actual faulting instruction to mtval.
 			2'b10: begin
-				unique case (instr_i[15:13])
+				case (instr_i[15:13])
 					3'b000: begin
 						// c.slli -> slli rd, rd, shamt
 						// (c.ssli hints are translated into a slli hint)

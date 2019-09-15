@@ -32,9 +32,9 @@ Several scripts used by FWRISC require Python2 to be installed. Python 2.7.5 is 
 ### Python 3.6
 Zephyr requires Python3, as well as several additional Python modules.
 
-### Verilator 4.002 
-Verilator 4.002 was used for verification of the FWRISC core. Verilator must be compiled 
-with LXT support enabled. Please ensure that 'verilator' is on your search path.
+### Verilator 4.010 
+Verilator 4.010 was used for verification of the FWRISC core. Verilator must be compiled 
+with FST support enabled. Please ensure that 'verilator' is on your search path.
 
 ### GTKWave
 GTKWave was used for viewing waveforms.
@@ -47,3 +47,8 @@ GCC 7.3.0 was used for the cross-compiler used for all non-Zephyr tests. The cro
 created using [cross-tool-scripts](http://github.com/mballance/cross-tools-scripts). Other cross
 compilers may be used, provided the executable names have a riscv32-unknown-elf- prefix (eg riscv32-unknown-elf-gcc).
 Please ensure riscv32-unknown-elf-gcc is on your search path.
+
+### Symbiyosys
+The open-source Symbiyosys tool was used for formal analysis of several sub-blocks
+in the FWRISC-S core. Using the latest Symbiyosys built from GitHub is recommended.
+

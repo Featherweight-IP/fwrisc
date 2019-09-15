@@ -12,13 +12,23 @@ new_project \
 
 # open_project -file libero/fwrisc_fpga
 import_files -hdl_source $env(FWRISC)/rtl/fwrisc_alu.sv 
-import_files -hdl_source $env(FWRISC)/rtl/fwrisc_comparator.sv 
-import_files -hdl_source $env(FWRISC)/rtl/fwrisc_dbus_if.sv 
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_alu_op.svh
 import_files -hdl_source $env(FWRISC)/rtl/fwrisc_regfile.sv 
 import_files -hdl_source $env(FWRISC)/rtl/fwrisc_tracer.sv 
 import_files -hdl_source $env(FWRISC)/rtl/fwrisc.sv 
 import_files -hdl_source $env(FWRISC)/rtl/fwrisc_defines.vh 
-import_files -hdl_source $env(FWRISC)/rtl/fwrisc_fpga_top.sv
+import_files -hdl_source $env(FWRISC)/soc/fwrisc_fpga_top.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_c_decode.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_csr_addr.svh
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_decode.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_exec.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_fetch.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_mem.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_mem_op.svh
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_mul_div_shift.sv
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_mul_div_shift_op.svh
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_op_type.svh
+import_files -hdl_source $env(FWRISC)/rtl/fwrisc_system_op.svh
 
 set_root fwrisc_fpga_top
 

@@ -88,7 +88,7 @@ module fwrisc_mem (
 						endcase
 					end
 				end
-				STATE_WAIT_RSP: begin
+				default /*STATE_WAIT_RSP*/: begin
 					if (dready) begin
 						ack_valid <= 1;
 						dvalid <= 0;

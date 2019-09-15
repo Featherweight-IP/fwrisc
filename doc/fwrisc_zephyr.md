@@ -38,6 +38,35 @@ void k_cpu_idle(void)
 }
 ```
 
+### Security Features
+The FWRISC port uses a kernel-startup hook to enable data-execution prevention
+just after the kernel boots and before the main application runs. See 
+soc/riscv32/fwrisc/common/soc.c for the code.
+
+```
+static int soc_init(struct device *dev) {
+  intptr_t start = (intptr_t)&_image_rom_start;
+  intptr_t end = (intptr_t)&_image_text_end;
+
+  start |= 1;
+  end |= 1;
+
+  __asm__ ( "csrw 0xBC0, %[value]" 
+	: 
+	:[value]"r" (start)
+	:
+  );
+  __asm__ ( "csrw 0xBC1, %[value]" 
+	: 
+	:[value]"r" (end)
+	:
+  );
+}
+
+SYS_INIT(soc_init, PRE_KERNEL_1, 99);
+```
+
+
 ### Boards
 
 The FWRISC port of Zephyr defines two boards:

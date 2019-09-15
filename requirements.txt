@@ -1,6 +1,8 @@
 
 pyelftools
 pyyaml
--e git+ssh://git@github.com/fvutils/py-hpi.git#egg=hpi
--e git+ssh://git@github.com/fvutils/vte.git#egg=vte
+# -e git+ssh://git@github.com/fvutils/py-hpi.git#egg=hpi
+-e git://git@github.com/fvutils/py-hpi.git#egg=hpi
+# -e git+ssh://git@github.com/fvutils/vte.git#egg=vte
+-e ssh://git@github.com/fvutils/vte.git#egg=vte
 

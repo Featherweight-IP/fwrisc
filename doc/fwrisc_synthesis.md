@@ -16,7 +16,7 @@ placed inside the 'libero' subdirectory.
 
 A cached version of the top-level bitstream is stored in the bitstream/fwrisc_fpga_top.stp file.
 This bitstream contains a ROM image that alternates flashing the LEDs on the Future Electronics 
-CREATIVE board.
+CREATIVE board (P/N FUTUREM2SF-EVB).
 
 
 Resource measurements for the FWRISC core on its own are done using a standalone Synplify project.

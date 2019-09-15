@@ -1,4 +1,4 @@
-# FWRISC Verification
+# FWRISC-S Verification
 
 FWRISC uses Verilator as the HDL simulator, and uses a [Googletest](https://github.com/abseil/googletest)-based testbench environment. The HDL top-level is written 
 in Verilog, while the testbench and tests are implemented in C++.
@@ -159,7 +159,7 @@ Note how the ELF file and reference file are specified as plusargs to the test.
 The example below shows how to run the 'ECALL' unit test:
 
 ```
-% cd fwrisc/ve/fwrisc/sim
+% cd fwrisc-s/ve/fwrisc_rv32imc/sim
 % runtest.pl -test tests/fwrisc_instr_tests_system_ecall.f
 ```
 
@@ -170,7 +170,7 @@ Test suites are captured using testlists. Running a testlist is also done using 
 Here is an example of how to run the RISCV Compliance Tests testlist:
 
 ```
-% cd fwrisc/ve/fwrisc/sim
+% cd fwrisc-s/ve/fwrisc_rv32imc/sim
 % runtest.pl -testlist testlists/fwrisc_riscv_compliance_tests.tl
 ```
 
@@ -178,7 +178,7 @@ Here is an example of how to run the RISCV Compliance Tests testlist:
 The full test suite is run with the fwrisc_riscv_all_tests.tl testlist:
 
 ```
-% cd fwrisc/ve/fwrisc/sim
+% cd fwrisc-s/ve/fwrisc/sim
 % runtest.pl -testlist testlists/fwrisc_riscv_all_tests.tl
 ```
 

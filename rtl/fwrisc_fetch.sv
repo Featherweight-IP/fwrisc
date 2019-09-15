@@ -65,7 +65,7 @@ module fwrisc_fetch #(
 		end else begin 
 			// 
 			case (state)
-				STATE_FETCH1: begin // Wait for fetch to complete
+				default /*STATE_FETCH1*/: begin // Wait for fetch to complete
 					iaddr <= {next_pc[31:2], 2'b0};
 					if (iready && ivalid_r) begin
 						instr_c <= instr_c_next;
@@ -144,7 +144,7 @@ module fwrisc_fetch #(
 				end
 				
 				STATE_FETCH2: begin // Wait for fetch of upper half-word to complete
-					iaddr <= {next_pc[31:2]+1, 2'b0};
+					iaddr <= {next_pc[31:2]+1'd1, 2'b0};
 					if (iready) begin
 						ivalid_r <= 0;
 						// Fetch of upper half-word is complete

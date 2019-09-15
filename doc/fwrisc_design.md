@@ -1,4 +1,4 @@
-# FWRISC Design Notes
+# FWRISC-S Design Notes
 
 ## Execution State Machine
 fwrisc uses a state machine to implement instruction execution. Most logical and arithmetic instructions execute in three cycles (Fetch, Decode, Execute). Memory instructions have an additional MEMR or MEMW state. CSR instructions use several states to implement the atomic read/modify/write
@@ -17,28 +17,12 @@ is also high.
 fwrisc uses FPGA blockram to implement the core RISC-V registers, as well as the CSRs. Currently, dual-port
 full-width RAM is used to increase performance.
 
-## Performance Counters
-Compliance with the RISC-V spec requires that MCYCLE and MINSTR counters be implemented that track, respectively, the number of cycles since some point in the past, and the number of instructions executed since some point in the past. Limiting the size of an FPGA implementation requires minimizing the number of required flip-flops. As a consequence, these counters are maintained within the register memory block. Updating these 
-registers every cycle would impose an extraordinary overhead on performance, so two small 8-bit counters are used to maintain an intermediate 
-cycle and instruction count. When the cycle count exceeds half its capacity, the copy of the MCYCLE and MINSTR registers are updated with the
-number of cycles and instructions executed since the last update. This minimizes the resource overhead of maintaining these counters, while
-maintaining adequate performance.
-
-
-
-# CSR Instructions
-The CSR instructions require several steps to execute: 
-- reading the target CSR and (optionally) storing the unmodified version to the destination register
-- (optionally) Modifying the target CSR based on rs1 and the instruction type
-- (optionally) Writing the modified CSR value back to the CSR. 
-
-In all cases, a temporary register (CSR_tmp) is used to store intermediate values during the read/modify/write operation.
-
-The following diagram shows how a basic CSRRW instruction is implemented
-![alt text](imgs/csrrw.png "CSRRW Timing Diagram")
-![alt text](imgs/csrrs.png "CSRRS Timing Diagram")
-
-The CSRRC instruction is implemented by AND-ing the CSRRC argument with the CSR value to form a clear mask, then
-XOR-ing that mask with the CSR value to derive the new CSR value.
-![alt text](imgs/csrrc.png "CSRRC Timing Diagram")
+## Data-Execution Prevention
+FWRISC-S implements a lightweight version of data execution prevention. The RISC-V spec defines and optional
+set of Physical Memory Protection (PMP) registers. This approach is very appropriate for more-complex
+systems, but does have more flexibility and complexity than is required for simple deeply-embedded systems.
+The data-execution prevention mechanism implemented by FWRISC-S supports a single executable region, 
+bounded by two addresses aligned on 16-byte boundaries stored in two custom CSR registers. 
+Data-execution prevention is enabled once the 0th bit of both registers is set to 1. 
+Once data-execution prevention is enabled, these registers cannot be written again until the core is reset.
 

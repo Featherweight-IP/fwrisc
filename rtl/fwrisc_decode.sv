@@ -300,15 +300,14 @@ module fwrisc_decode #(
 				OP_TYPE_MDS: begin
 					case (instr[14:12])
 						3'b001: op_w = OP_SLL;
-						3'b101: op_w = (instr[30])?OP_SRA:OP_SRL;
-						
+						default /*3'b101*/: op_w = (instr[30])?OP_SRA:OP_SRL;
 					endcase
 				end
 				OP_TYPE_CSR: begin
 					case (instr[13:12])
 						2'b01: op_w = OP_OPA;
 						2'b10: op_w = OP_OR;
-						2'b11: op_w = OP_CLR;
+						default /*2'b11*/: op_w = OP_CLR;
 					endcase
 				end
 				OP_TYPE_SYSTEM: begin

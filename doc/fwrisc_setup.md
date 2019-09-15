@@ -1,4 +1,4 @@
-# FWRISC Setup
+# FWRISC-S Setup
 
 Before proceeding, please ensure that the tools listed on the [Tools](fwrisc_tools.md) page are installed and configured.
 
@@ -7,7 +7,7 @@ Before proceeding, please ensure that the tools listed on the [Tools](fwrisc_too
 First things first: you must clone the FWRISC Git repository:
 
 ```
-% git clone http://github.com/mballance/fwrisc.git
+% git clone http://github.com/mballance/fwrisc-s.git
 ```
 
 

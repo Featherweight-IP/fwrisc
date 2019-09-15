@@ -31,8 +31,7 @@ module fwrisc_fpga_top (
 		output			led1,
 		output			tx,
 		output			d0_p,
-		output			d0_n,
-		output			clk_o);
+		output			d0_n);
 
 	wire				reset;
 	wire				iaddr_ok;
@@ -69,7 +68,7 @@ module fwrisc_fpga_top (
 	wire[31:0]			daddr;
 	wire[31:0]			dwdata;
 	reg[31:0]			drdata;
-	wire[3:0]			dstrb;
+	wire[3:0]			dwstb;
 	wire				dwrite;
 	wire				dvalid;
 	wire				dready;
@@ -84,7 +83,7 @@ module fwrisc_fpga_top (
 		.daddr   (daddr  ), 
 		.dwdata  (dwdata ), 
 		.drdata  (drdata ), 
-		.dstrb   (dstrb  ), 
+		.dwstb   (dwstb  ), 
 		.dwrite  (dwrite ), 
 		.dvalid  (dvalid ), 
 		.dready  (dready ));
@@ -110,8 +109,6 @@ module fwrisc_fpga_top (
 	assign led0 = led[0];
 	assign led1 = led[1];
 
-	assign clk_o = led[2];
-	
 	initial begin
 		$readmemh("rom.hex", rom);
 	end
@@ -126,10 +123,10 @@ module fwrisc_fpga_top (
 		if (dvalid && dready && dwrite) begin
 			if (daddr[31:28] == 4'h8 && 
 				daddr[15:12] == 4'h2) begin
-				if (dstrb[0]) ram_0[daddr[13:2]]<=dwdata[7:0];
-				if (dstrb[1]) ram_1[daddr[13:2]]<=dwdata[15:8];
-				if (dstrb[2]) ram_2[daddr[13:2]]<=dwdata[23:16];
-				if (dstrb[3]) ram_3[daddr[13:2]]<=dwdata[31:24];
+				if (dwstb[0]) ram_0[daddr[13:2]]<=dwdata[7:0];
+				if (dwstb[1]) ram_1[daddr[13:2]]<=dwdata[15:8];
+				if (dwstb[2]) ram_2[daddr[13:2]]<=dwdata[23:16];
+				if (dwstb[3]) ram_3[daddr[13:2]]<=dwdata[31:24];
 			end else if (daddr[31:28] == 4'hc) begin
 				if (daddr[3:2] == 4'h0) begin
 					led <= dwdata;

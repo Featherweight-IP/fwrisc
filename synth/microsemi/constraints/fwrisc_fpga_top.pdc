@@ -25,11 +25,6 @@ set_io d0_n \
   -fixed yes \
   -DIRECTION OUTPUT 
 
-set_io clk_o \
-  -pinname T8 \
-  -fixed yes \
-  -DIRECTION OUTPUT 
-
 set_io tx \
   -pinname T13 \
   -fixed yes \

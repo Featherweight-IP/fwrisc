@@ -19,7 +19,7 @@ The block-level regression tests can be run using the following steps. Note that
 FWRISC environment-setup script must have previously been sourced:
 
 ```
-% cd fwrisc/ve/fwrisc/sim
+% cd fwrisc-s/ve/fwrisc_rv32imc/sim
 % runtest.pl -testlist testlists/fwrisc_riscv_all_tests.tl
 ```
 
@@ -37,57 +37,88 @@ something like the following after the test run completes:
 
 
 
-## Run Zephyr Examples
-Two of the Zephyr examples, synchronization and philosophers, are much more visual and do not terminate.
-Running these tests interactively is recommended.
+## Run the RIPE Tests
 
-### Run "philosophers":
-
-```
-% cd fwrisc/ve/fwrisc/sim
-% runtest.pl -test tests/fwrisc_zephyr_philosophers.f
-```
-
-You should see something like what is seen below:
-
-![alt text](imgs/Philosophers.gif "Philosophers")
-
-
-### Run "synchronization"
+The five intrusion techniques that are part of the 2019 contest can be run using
+the fwrisc_riscv_ripe_tests.tl testlist. There are five tests in this
+testlist, each of which configures the 'NV' define to run one of the intrusion 
+techniques.
 
 ```
-% cd fwrisc/ve/fwrisc/sim
-% runtest.pl -test tests/fwrisc_zephyr_synchronization.f
+% cd fwrisc-s/ve/fwrisc_rv32imc/sim
+% runtest.pl -tl testlists/fwrisc_riscv_ripe_tests.tl
 ```
 
-You will see several messages from threadA and threadB, which the testbench monitors to determine
-when the test has passed. Note that the test specifies special flags to the test compilation
-to shorten the test run.
-
-### Run "dhrystone"
+Expected output is:
 
 ```
-% cd fwrisc/ve/fwrisc/sim
-% runtest.pl -test tests/fwrisc_zephyr_dhrystone.f
+PASSED: fwrisc_ripe_4
+PASSED: fwrisc_ripe_2
+PASSED: fwrisc_ripe_3
+PASSED: fwrisc_ripe_1
+PASSED: fwrisc_ripe_5
+make: Entering directory `/project/fun/fwrisc/fwrisc-s/ve/fwrisc_rv32imc/sim/rundir/fwrisc_rv32imc/vl'
+make: Nothing to be done for `post-run'.
+make: Leaving directory `/project/fun/fwrisc/fwrisc-s/ve/fwrisc_rv32imc/sim/rundir/fwrisc_rv32imc/vl'
+#*********************************************************************
+# PASSED:  5
+# FAILED:  0
+# UNKNOWN: 0
+# TOTAL:   5
+#*********************************************************************
 ```
 
-You should see the following:
+Individual RIPE tests can be run using a tests/fwrisc_ripe_X.f test files. The output 
+from the first RIPE test is:
+
 ```
-# ***** Booting Zephyr OS zephyr-v1.13.0-1808-gd18ff80 *****
-# start=70458 ; end=1873006
-# Microseconds for one run through Dhrystone: 72
-# Dhrystones per Second:                      13500
+# RIPE is alive! fwrisc_sim
+# -t direct -i shellcode -c longjmpstackparam -l stack -f homebrew----------------
+# Shellcode instructions:
+# lui t1,  0x00000               00000000
+# addi t1, t1, 0x00                  00000000
+# jalr t1000300e7
+# ----------------
+# target_addr == 0x80009ed0
+# buffer == 0x80009aa0
+# payload size == 1077
+# bytes to pad: 1060
+# 
+# overflow_ptr: 0x80009aa0
+# payload: 
+# 
+hit halt address 0x80003e04
+--> m_engine=0xde7870
+<-- m_engine=0xde7870
+[       OK ] fwrisc_ripe_tests.ripe (94 ms)
+[----------] 1 test from fwrisc_ripe_tests (94 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test case ran. (94 ms total)
+[  PASSED  ] 1 test.
+plusarg +TESTNAME=fwrisc_ripe_1 matches pattern +TESTNAME
+PASSED: fwrisc_ripe_1
+PASSED: fwrisc_ripe_1
+make: Entering directory `/project/fun/fwrisc/fwrisc-s/ve/fwrisc_rv32imc/sim/rundir/fwrisc_rv32imc/vl'
+make: Nothing to be done for `post-run'.
+make: Leaving directory `/project/fun/fwrisc/fwrisc-s/ve/fwrisc_rv32imc/sim/rundir/fwrisc_rv32imc/vl'
+#*********************************************************************
+# PASSED:  1
+# FAILED:  0
+# UNKNOWN: 0
+# TOTAL:   1
+#*********************************************************************
 ```
 
-Note that the clock for this test is 50Mhz, resulting in 0.15 DMIPS/Mhz.
+The test terminates when the core hits the instruction access fault exception
+occurs, as a result of the intrusion code.
 
 ## Run Synthesis
 Please see the [Synthesis](fwrisc_synthesis.md) document for more information on running synthesis. The short version is:
 
 - Ensure your environment is properly configured
 - cd fwrisc/synth/microsemi
-- make
-- cd fwrisc/synth/lattice
+- make clean
 - make
 
 
