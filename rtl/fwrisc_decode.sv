@@ -224,7 +224,7 @@ module fwrisc_decode #(
 							op_b = instr[24:20];
 						end
 						3'b011: begin // SLTIU
-							op_b = {12'b0, instr[31:20]};
+							op_b = $signed(instr[31:20]);
 						end
 						default: op_b = imm_11_0;
 					endcase
@@ -281,6 +281,7 @@ module fwrisc_decode #(
 						3'b100: op_w = OP_LT;
 						3'b101: op_w = OP_GE;
 						3'b110: op_w = OP_LTU;
+						3'b111: op_w = OP_GEU;
 						default /*3'b111*/: op_w = OP_GEU;
 					endcase
 				end

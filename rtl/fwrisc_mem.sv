@@ -110,7 +110,6 @@ module fwrisc_mem (
 									2'b10: ack_data <= drdata[23:16];
 									2'b11: ack_data <= drdata[31:24];
 								endcase
-								ack_data <= drdata[7:0];
 							end
 							OP_LH: begin
 								case (daddr[1])
