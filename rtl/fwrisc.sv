@@ -162,6 +162,8 @@ module fwrisc #(
 		.pc              (pc             ), 
 		.pc_seq          (pc_seq         ),
 		.mtvec           (mtvec          ),
+		.dep_lo          (dep_lo         ),
+		.dep_hi          (dep_hi         ),
 		.dvalid          (dvalid         ),
 		.daddr           (daddr          ),
 		.dwrite          (dwrite         ),

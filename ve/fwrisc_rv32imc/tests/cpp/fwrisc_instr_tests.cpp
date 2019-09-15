@@ -201,7 +201,7 @@ void fwrisc_instr_tests::check(reg_val_s *regs, uint32_t n_regs) {
 	}
 
 	for (uint32_t i=0; i<63; i++) { // r63 is the CSR temp register
-		if (i == 54 || i == 55 || i == 0) { // ignore the counter registers
+		if (i == 54 || i == 55 || i == 0 || i >= 60) { // ignore the counter registers
 			continue;
 		}
 		if (m_regs[i].second != accessed[i]) {

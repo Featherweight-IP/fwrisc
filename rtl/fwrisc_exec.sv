@@ -36,6 +36,10 @@ module fwrisc_exec #(
 		
 		// Exception Vector
 		input[31:0]			mtvec,
+		
+		// DEP
+		input[31:0]			dep_lo,
+		input[31:0]			dep_hi,
 	
 		// Data interface
 		output[31:0]		daddr,
@@ -85,6 +89,13 @@ module fwrisc_exec #(
 	reg[2:0]				next_pc_seq_incr;
 	reg[3:0]				mcause;
 	wire[31:0]				next_pc_seq = pc + next_pc_seq_incr;
+
+	// dep_violation determines if execution goes
+	// outside the valid region
+	wire					dep_violation = (
+			dep_lo[0] && dep_hi[0] &&
+			!(alu_out[31:3] >= dep_lo[31:3] && alu_out[31:3] <= dep_hi[31:3])
+		);
 	
 	always @* begin
 		if (exec_state == STATE_BRANCH_TAKEN || exec_state == STATE_JUMP) begin
@@ -206,10 +217,15 @@ module fwrisc_exec #(
 				
 				STATE_JUMP: begin
 					// Jumps automatically filter out byte-aligned addresses
-					pc <= {alu_out[31:1], 1'b0};
-					pc_seq <= pc_seq_next;
-					exec_state <= STATE_EXECUTE;
-					instr_complete <= 1;
+					if (dep_violation) begin
+						mcause <= 1; // instruction access fault
+						exec_state <= STATE_EXCEPTION_1;
+					end else begin
+						pc <= {alu_out[31:1], 1'b0};
+						pc_seq <= 0;
+						exec_state <= STATE_EXECUTE;
+						instr_complete <= 1;
+					end
 				end
 				
 				STATE_BRANCH_TAKEN: begin
