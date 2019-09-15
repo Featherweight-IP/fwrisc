@@ -1,0 +1,13 @@
+#--  Synopsys, Inc.
+#--  Version L-2016.09M-SP1-5
+#--  Project file /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/fwrisc.prd
+#--  Written on Sun Sep 15 07:02:00 2019
+
+#
+### Watch Implementation type ###
+#
+watch_impl -all
+#
+### Watch Implementation properties ###
+#
+watch_prop -clear

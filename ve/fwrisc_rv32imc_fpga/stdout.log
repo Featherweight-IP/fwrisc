@@ -1,0 +1,74 @@
+
+Starting:    /project/tools/libero/11.9/Synplify/linux_a_64/mbin/synplify
+Install:     /project/tools/libero/11.9/Synplify
+Hostname:    localhost.localdomain
+Date:        Sun Sep 15 07:42:44 2019
+Version:     L-2016.09M-SP1-5
+
+Arguments:   -product synplify_pro
+ProductType: synplify_pro
+
+License checkout: synplifypro_actel
+License: synplifypro_actel from server localhost.localdomain 
+Licensed Vendor: actel
+License Option: actel_oem
+
+
+auto_infer_blackbox is not supported in current product.
+New HDL Analyst: enabled
+log file: "/project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/fwrisc_area.srr"
+Running: rev_1 in foreground
+
+Running fwrisc|rev_1
+
+Running: compile (Compile) on fwrisc|rev_1
+# Sun Sep 15 07:42:52 2019
+
+Running: compile_flow (Compile Process) on fwrisc|rev_1
+# Sun Sep 15 07:42:52 2019
+
+Running: compiler (Compile Input) on fwrisc|rev_1
+# Sun Sep 15 07:42:52 2019
+Copied /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/synwork/fwrisc_area_comp.srs to /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/fwrisc_area.srs
+
+compiler completed
+# Sun Sep 15 07:42:54 2019
+
+Return Code: 0
+Run Time:00h:00m:02s
+
+Running: multi_srs_gen (Multi-srs Generator) on fwrisc|rev_1
+# Sun Sep 15 07:42:54 2019
+
+multi_srs_gen completed
+# Sun Sep 15 07:42:54 2019
+
+Return Code: 0
+Run Time:00h:00m:00s
+Copied /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/synwork/fwrisc_area_mult.srs to /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/fwrisc_area.srs
+Complete: Compile Process on fwrisc|rev_1
+
+Running: premap (Pre-mapping) on fwrisc|rev_1
+# Sun Sep 15 07:42:54 2019
+
+premap completed with warnings
+# Sun Sep 15 07:42:55 2019
+
+Return Code: 1
+Run Time:00h:00m:01s
+Complete: Compile on fwrisc|rev_1
+
+Running: map (Map) on fwrisc|rev_1
+# Sun Sep 15 07:42:55 2019
+
+Running: fpga_mapper (Map & Optimize) on fwrisc|rev_1
+# Sun Sep 15 07:42:55 2019
+Copied /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/synwork/fwrisc_area_m.srm to /project/fun/fwrisc/fwrisc-s/synth/microsemi/synplify/fwrisc/rev_1/fwrisc_area.srm
+
+fpga_mapper completed with warnings
+# Sun Sep 15 07:43:03 2019
+
+Return Code: 1
+Run Time:00h:00m:08s
+Complete: Map on fwrisc|rev_1
+Complete: Logic Synthesis on fwrisc|rev_1
