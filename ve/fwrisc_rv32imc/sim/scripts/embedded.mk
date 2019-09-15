@@ -34,6 +34,7 @@ ripe_1/zephyr/zephyr.elf : $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe/CMakeLists.tx
 	$(Q)mkdir -p ripe_1
 	$(Q)cp -r $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe ripe_src_1 
 	$(Q)sed -i -e 's/#define ATTACK_NR.*\$$/#define ATTACK_NR 1/g' ripe_src_1/src/ripe_attack_generator.c
+	$(Q)sed -i -e 's/3.13.1/3.12.4/g' ripe_src_1/CMakeLists.txt
 	$(Q)cd ripe_1 ; cmake -DBOARD=fwrisc_sim ../ripe_src_1
 	$(Q)cd ripe_1 ; $(MAKE)
 
@@ -42,6 +43,7 @@ ripe_2/zephyr/zephyr.elf : $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe/CMakeLists.tx
 	$(Q)mkdir -p ripe_2
 	$(Q)cp -r $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe ripe_src_2 
 	$(Q)sed -i -e 's/#define ATTACK_NR.*\$$/#define ATTACK_NR 1/g' ripe_src_2/src/ripe_attack_generator.c
+	$(Q)sed -i -e 's/3.13.1/3.12.4/g' ripe_src_2/CMakeLists.txt
 	$(Q)cd ripe_2 ; cmake -DBOARD=fwrisc_sim ../ripe_src_2
 	$(Q)cd ripe_2 ; $(MAKE)
 
@@ -50,6 +52,7 @@ ripe_3/zephyr/zephyr.elf : $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe/CMakeLists.tx
 	$(Q)mkdir -p ripe_3
 	$(Q)cp -r $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe ripe_src_3 
 	$(Q)sed -i -e 's/#define ATTACK_NR.*\$$/#define ATTACK_NR 1/g' ripe_src_3/src/ripe_attack_generator.c
+	$(Q)sed -i -e 's/3.13.1/3.12.4/g' ripe_src_3/CMakeLists.txt
 	$(Q)cd ripe_3 ; cmake -DBOARD=fwrisc_sim ../ripe_src_3
 	$(Q)cd ripe_3 ; $(MAKE)
 
@@ -58,6 +61,7 @@ ripe_4/zephyr/zephyr.elf : $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe/CMakeLists.tx
 	$(Q)mkdir -p ripe_4
 	$(Q)cp -r $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe ripe_src_4 
 	$(Q)sed -i -e 's/#define ATTACK_NR.*\$$/#define ATTACK_NR 1/g' ripe_src_4/src/ripe_attack_generator.c
+	$(Q)sed -i -e 's/3.13.1/3.12.4/g' ripe_src_4/CMakeLists.txt
 	$(Q)cd ripe_4 ; cmake -DBOARD=fwrisc_sim ../ripe_src_4
 	$(Q)cd ripe_4 ; $(MAKE)
 
@@ -66,6 +70,7 @@ ripe_5/zephyr/zephyr.elf : $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe/CMakeLists.tx
 	$(Q)mkdir -p ripe_5
 	$(Q)cp -r $(PACKAGES_DIR)/RISC-V-IoT-Contest/ripe ripe_src_5 
 	$(Q)sed -i -e 's/#define ATTACK_NR.*\$$/#define ATTACK_NR 1/g' ripe_src_5/src/ripe_attack_generator.c
+	$(Q)sed -i -e 's/3.13.1/3.12.4/g' ripe_src_5/CMakeLists.txt
 	$(Q)cd ripe_5 ; cmake -DBOARD=fwrisc_sim ../ripe_src_5
 	$(Q)cd ripe_5 ; $(MAKE)
 	

@@ -93,8 +93,9 @@ module fwrisc_exec #(
 	// dep_violation determines if execution goes
 	// outside the valid region
 	wire					dep_violation = (
-			dep_lo[0] && dep_hi[0] &&
-			!(alu_out[31:3] >= dep_lo[31:3] && alu_out[31:3] <= dep_hi[31:3])
+			dep_lo[0] && dep_hi[0]
+			&& (exec_state == STATE_JUMP) 
+			&& !(alu_out[31:3] >= dep_lo[31:3] && alu_out[31:3] <= dep_hi[31:3])
 		);
 	
 	always @* begin

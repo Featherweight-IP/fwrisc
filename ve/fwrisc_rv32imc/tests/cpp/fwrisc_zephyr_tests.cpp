@@ -77,7 +77,6 @@ void fwrisc_zephyr_tests::exec(uint32_t addr, uint32_t instr) {
 }
 
 void fwrisc_zephyr_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data) {
-	fprintf(stdout, "WRITE: 0x%08x (0x%02x) 0x%08x\n", addr, mask, data);
 	if (addr >= m_ram_console && addr < (m_ram_console+1024)) {
 		char ch;
 		switch (mask) {
