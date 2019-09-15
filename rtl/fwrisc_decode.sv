@@ -44,6 +44,7 @@ module fwrisc_decode #(
 	`include "fwrisc_mul_div_shift_op.svh"
 	`include "fwrisc_mem_op.svh"
 	`include "fwrisc_csr_addr.svh"
+	`include "fwrisc_system_op.svh"
 
 	// Compute various immediate outputs
 	wire[31:0]		jal_off = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
@@ -205,8 +206,12 @@ module fwrisc_decode #(
 			
 			
 			// RS1 and RS2 are always in the same place
-			// TODO: integrate CSR addressing
-			ra_raddr = instr[19:15];
+			
+			case (op_type_w)
+				// Read MEPC for MRET
+				OP_TYPE_SYSTEM: ra_raddr = CSR_MEPC;
+				default: ra_raddr = instr[19:15];
+			endcase
 					
 			case (op_type_w)
 				OP_TYPE_CSR: begin
@@ -321,6 +326,13 @@ module fwrisc_decode #(
 						
 					endcase
 				end
+				OP_TYPE_SYSTEM: begin
+					case (instr[31:28])
+						4'b0000: op = (instr[20])?OP_TYPE_EBREAK:OP_TYPE_ECALL;
+						default /*4'b0001*/: op = OP_TYPE_ERET;
+					endcase
+				end
+				default: op = 0; // TODO:
 				
 			endcase
 			

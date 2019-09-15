@@ -52,7 +52,11 @@ parameter [4:0]
    * op_c = offset of jump base
    */
   OP_TYPE_JUMP   = (OP_TYPE_MDS+5'd1),
-  OP_TYPE_CALL   = (OP_TYPE_JUMP+5'd1),
+  
+  /**
+   * 
+   */
+  OP_TYPE_SYSTEM = (OP_TYPE_JUMP+5'd1),
   /**
    * OP_TYPE_CSR (6)
    * op_a = regs[rs1]
@@ -61,5 +65,5 @@ parameter [4:0]
    * rd_raddr = csr
    * op = alu_op_type - OPA, OR, CLR
    */
-  OP_TYPE_CSR    = (OP_TYPE_CALL+5'd1)
+  OP_TYPE_CSR    = (OP_TYPE_SYSTEM+5'd1)
   ;

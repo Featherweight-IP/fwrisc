@@ -33,6 +33,9 @@ module fwrisc_exec #(
 		output reg[31:0]	pc,
 		// Indicates that the PC is sequential to the last PC
 		output reg			pc_seq,
+		
+		// Exception Vector
+		input[31:0]			mtvec,
 	
 		// Data interface
 		output[31:0]		daddr,
@@ -47,6 +50,8 @@ module fwrisc_exec #(
 	`include "fwrisc_alu_op.svh"
 	`include "fwrisc_mem_op.svh"
 	`include "fwrisc_op_type.svh"
+	`include "fwrisc_csr_addr.svh"
+	`include "fwrisc_system_op.svh"
 	
 	parameter [3:0] 
 		STATE_EXECUTE = 4'd0,
@@ -54,7 +59,11 @@ module fwrisc_exec #(
 		STATE_JUMP         = (STATE_BRANCH_TAKEN + 4'd1),
 		STATE_CSR          = (STATE_JUMP + 4'd1),
 		STATE_MDS_COMPLETE = (STATE_CSR + 4'd1),
-		STATE_LDST_COMPLETE = (STATE_MDS_COMPLETE + 4'd1)
+		STATE_LDST_COMPLETE = (STATE_MDS_COMPLETE + 4'd1),
+		// Store the PC to EPC
+		STATE_EXCEPTION_1   = (STATE_LDST_COMPLETE + 4'd1),
+		STATE_EXCEPTION_2   = (STATE_EXCEPTION_1 + 4'd1),
+		STATE_EXCEPTION_3   = (STATE_EXCEPTION_2 + 4'd1)
 		;
 
 	reg [3:0]				exec_state;
@@ -74,6 +83,7 @@ module fwrisc_exec #(
 	
 	// Holds the next PC if execution is sequential
 	reg[2:0]				next_pc_seq_incr;
+	reg[3:0]				mcause;
 	wire[31:0]				next_pc_seq = pc + next_pc_seq_incr;
 	
 	always @* begin
@@ -115,6 +125,7 @@ module fwrisc_exec #(
 			instr_complete <= 0;
 			pc <= 'h8000_0000;
 			pc_seq <= 1;
+			mcause <= 0;
 		end else begin
 //			instr_complete <= instr_complete_w;
 			case (exec_state)
@@ -164,8 +175,16 @@ module fwrisc_exec #(
 							OP_TYPE_JUMP: begin
 								exec_state <= STATE_JUMP;
 							end
-							OP_TYPE_CALL: begin
-								// TODO:
+							OP_TYPE_SYSTEM: begin
+								if (op == OP_TYPE_ERET) begin
+									instr_complete <= 1;
+									pc <= op_a; 
+									pc_seq <= 0;
+									exec_state <= STATE_EXECUTE;
+								end else begin
+									mcause <= (op == OP_TYPE_EBREAK)?3:11; // MCALL/MBREAK
+									exec_state <= STATE_EXCEPTION_1;
+								end
 							end
 							/**
 							 * STATE_EXECUTE: regs[csr] <= op_a [op] op_b
@@ -215,6 +234,22 @@ module fwrisc_exec #(
 						pc_seq <= pc_seq_next;
 						instr_complete <= 1;
 					end
+				end
+				STATE_EXCEPTION_1: begin
+					// Write MEPC
+					exec_state <= STATE_EXCEPTION_2;
+				end
+				STATE_EXCEPTION_2: begin
+					// Write MTVAL
+					exec_state <= STATE_EXCEPTION_3;
+				end
+				STATE_EXCEPTION_3: begin
+					// Write MCAUSE
+					// TODO: change pc to exception base
+					pc <= mtvec;
+					pc_seq <= 0;
+					instr_complete <= 1;
+					exec_state <= STATE_EXECUTE;
 				end
 			endcase
 		end
@@ -266,6 +301,7 @@ module fwrisc_exec #(
 						&& (op == OP_LB || op == OP_LH || op == OP_LW
 							|| op == OP_LBU || op == OP_LHU) && mem_ack_valid)
 					|| (exec_state == STATE_MDS_COMPLETE && mds_out_valid)
+					|| (exec_state == STATE_EXCEPTION_1 || exec_state == STATE_EXCEPTION_2 || exec_state == STATE_EXCEPTION_3)
 				)
 				
 		);
@@ -273,12 +309,20 @@ module fwrisc_exec #(
 
 	// TODO: rd_wdata input selector
 	always @* begin
-		rd_wdata = (exec_state == STATE_MDS_COMPLETE)?mds_out:alu_out;
-		if (exec_state == STATE_EXECUTE && op_type == OP_TYPE_CSR) begin
-			rd_waddr = op_c[5:0];
-		end else begin
-			rd_waddr = rd;
-		end
+		case (exec_state)
+			STATE_EXCEPTION_1: rd_wdata = pc;
+			// STATE_EXCEPTION_2: rd_wdata = alu_out;
+			STATE_EXCEPTION_3: rd_wdata = {28'd0, mcause};
+			STATE_MDS_COMPLETE: rd_wdata = mds_out;
+			default: rd_wdata = alu_out;
+		endcase
+		case (exec_state)
+			STATE_EXECUTE: rd_waddr = (op_type == OP_TYPE_CSR)?op_c[5:0]:rd;
+			STATE_EXCEPTION_1: rd_waddr = CSR_MEPC;
+			STATE_EXCEPTION_2: rd_waddr = CSR_MTVAL;
+			STATE_EXCEPTION_3: rd_waddr = CSR_MCAUSE;
+			default: rd_waddr = rd;
+		endcase
 	end
 
 	fwrisc_alu u_alu (

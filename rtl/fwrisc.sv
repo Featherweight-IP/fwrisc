@@ -55,6 +55,9 @@ module fwrisc #(
 	wire					int_reset;
 	wire					soft_reset_req;
 	reg[4:0]				soft_reset_count;
+	wire[31:0]				mtvec;
+	reg[31:0]				tracer_pc;
+	reg[31:0]				tracer_instr;
 	
 	assign int_reset = (reset | soft_reset_count != 0);
 	
@@ -69,6 +72,8 @@ module fwrisc #(
 			end
 		end
 	end
+	
+	wire					decode_complete;
 
 	fwrisc_fetch #(
 		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED )
@@ -91,7 +96,6 @@ module fwrisc #(
 	wire[31:0]				rb_raddr;
 	wire[31:0]				rb_rdata;
 	wire					decode_valid;
-	wire					decode_complete;
 	wire[31:0]				op_a;
 	wire[31:0]				op_b;
 	wire[31:0]				op_c;
@@ -120,6 +124,18 @@ module fwrisc #(
 		.op                 (op                ), 
 		.rd_raddr           (rd_raddr          ), 
 		.op_type            (op_type           ));
+	
+	always @(posedge clock) begin
+		if (reset) begin
+			tracer_pc <= 0;
+			tracer_instr <= 0;
+		end else begin
+			if (decode_valid) begin
+				tracer_pc <= pc;
+				tracer_instr <= instr;
+			end
+		end
+	end
 
 	wire[5:0]				rd_waddr;
 	wire[31:0]				rd_wdata;
@@ -143,6 +159,7 @@ module fwrisc #(
 		.rd_wen          (rd_wen         ), 
 		.pc              (pc             ), 
 		.pc_seq          (pc_seq         ),
+		.mtvec           (mtvec          ),
 		.dvalid          (dvalid         ),
 		.daddr           (daddr          ),
 		.dwrite          (dwrite         ),
@@ -156,17 +173,38 @@ module fwrisc #(
 		.ENABLE_COUNTERS  (ENABLE_COUNTERS ),
 		.ENABLE_DEP       (ENABLE_DEP      )
 		) u_regfile (
-		.clock            (clock           ), 
-		.reset            (int_reset       ), 
-		.soft_reset_req   (soft_reset_req  ),
-		.instr_complete   (instr_complete  ), 
-		.ra_raddr         (ra_raddr        ), 
-		.ra_rdata         (ra_rdata        ), 
-		.rb_raddr         (rb_raddr        ), 
-		.rb_rdata         (rb_rdata        ), 
-		.rd_waddr         (rd_waddr        ), 
-		.rd_wdata         (rd_wdata        ), 
-		.rd_wen           (rd_wen          ));
+		.clock            (clock              ), 
+		.reset            (int_reset          ), 
+		.soft_reset_req   (soft_reset_req     ),
+		.instr_complete   (instr_complete     ), 
+		.ra_raddr         (ra_raddr           ), 
+		.ra_rdata         (ra_rdata           ), 
+		.rb_raddr         (rb_raddr           ), 
+		.rb_rdata         (rb_rdata           ), 
+		.rd_waddr         (rd_waddr           ), 
+		.rd_wdata         (rd_wdata           ), 
+		.rd_wen           (rd_wen             ),
+		.mtvec            (mtvec              )
+		);
+	
+	fwrisc_tracer u_tracer (
+		.clock     (clock                     ), 
+		.reset     (reset                     ), 
+		.pc        (tracer_pc                 ), 
+		.instr     (tracer_instr              ), 
+		.ivalid    (instr_complete            ), 
+		.ra_raddr  (ra_raddr                  ), 
+		.ra_rdata  (ra_rdata                  ), 
+		.rb_raddr  (rb_raddr                  ), 
+		.rb_rdata  (rb_rdata                  ), 
+		.rd_waddr  (rd_waddr                  ), 
+		.rd_wdata  (rd_wdata                  ), 
+		.rd_write  (rd_write                  ), 
+		.maddr     (daddr                     ), 
+		.mdata     ((dwrite)?dwdata:drdata    ), 
+		.mstrb     (dwstb                     ), 
+		.mwrite    (dwrite                    ), 
+		.mvalid    ((dready && dvalid)        ));
 
 
 endmodule

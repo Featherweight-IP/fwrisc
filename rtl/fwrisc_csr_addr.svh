@@ -14,7 +14,7 @@ parameter [5:0]
   CSR_MTVEC     = (CSR_MIE + 1'd1),
   CSR_MCOUNTEREN= (CSR_MTVEC + 1'd1),
   CSR_BASE_Q2   = 6'h30,
-  CSR_MSCRATCH  = (CSR_BASE_Q3 + 1'd0),
+  CSR_MSCRATCH  = (CSR_BASE_Q2 + 1'd0),
   CSR_MEPC      = (CSR_MSCRATCH + 1'd1),
   CSR_MCAUSE    = (CSR_MEPC + 1'd1),
   CSR_MTVAL     = (CSR_MCAUSE + 1'd1),

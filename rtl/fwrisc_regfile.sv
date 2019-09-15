@@ -42,7 +42,8 @@ module fwrisc_regfile #(
 		input				rd_wen,
 		
 		output[31:0]		dep_lo,
-		output[31:0]		dep_hi
+		output[31:0]		dep_hi,
+		output[31:0]		mtvec
 		);
 	
 	`include "fwrisc_csr_addr.svh"
@@ -52,10 +53,16 @@ module fwrisc_regfile #(
 	reg[63:0]			instr_count;
 	reg[31:0]			dep_lo_r;
 	reg[31:0]			dep_hi_r;
+	// In case we need a writable mtvec
+	reg[31:0]			mtvec_r;
 
 	reg[5:0]			ra_raddr_r;
 	reg[5:0]			rb_raddr_r;
 	reg[31:0]			regs['h3f:0];
+	
+	assign dep_lo = dep_lo_r;
+	assign dep_hi = dep_hi_r;
+	assign mtvec  = mtvec_r;
 	
 `ifdef FORMAL
 	initial regs[0] = 0;
@@ -74,6 +81,7 @@ module fwrisc_regfile #(
 			instr_count <= 0;
 			dep_lo_r <= 0;
 			dep_hi_r <= 0;
+			mtvec_r <= 0;
 		end else begin
 			case ({rd_wen, rd_waddr})
 				{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
@@ -95,6 +103,9 @@ module fwrisc_regfile #(
 			if (rd_wen && rd_waddr == CSR_DEP_HI && !dep_hi_r[1]) begin
 				dep_hi_r <= rd_wdata;
 			end
+			if (rd_wen && rd_waddr == CSR_MTVEC) begin
+				mtvec_r <= rd_wdata;
+			end
 		end
 	end
 
@@ -111,6 +122,8 @@ module fwrisc_regfile #(
 			CSR_MCYCLEH:   rb_rdata <= cycle_count[63:32];
 			CSR_MINSTRET:  rb_rdata <= instr_count[31:0];
 			CSR_MINSTRETH: rb_rdata <= instr_count[63:32];
+			// TODO: DEP (?)
+			CSR_MTVEC:     rb_rdata <= mtvec_r;
 			default:       rb_rdata <= regs[rb_raddr];
 		endcase
 	end
