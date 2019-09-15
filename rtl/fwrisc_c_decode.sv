@@ -1,12 +1,36 @@
 /****************************************************************************
  * fwrisc_c_decode.sv
+ *
+ * This implementation significantly borrows from the Ibex core 
+ * implementation, so the lowRISC copyright and license information is
+ * shown below. 
+ *
+ * Copyright lowRISC contributors.
+ * Copyright 2018 ETH Zurich and University of Bologna, see also CREDITS.md.
+ * Licensed under the Apache License, Version 2.0, see LICENSE for details.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modifications and adaptations are: Copyright 2019 Matthew Ballance
+ * 
+ * Licensed under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in
+ * writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied.  See
+ * the License for the specific language governing
+ * permissions and limitations under the License.
  ****************************************************************************/
 
 /**
  * Module: fwrisc_c_decode
  * 
  * Expands a RISC-V compressed instruction to a 32-bit instruction
- * This implementation significantly borrows from the Ibex core implementation
  */
 module fwrisc_c_decode(
 		input				clock,

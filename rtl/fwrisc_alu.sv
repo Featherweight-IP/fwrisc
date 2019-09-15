@@ -1,7 +1,7 @@
 /****************************************************************************
  * fwrisc_alu.sv
  * 
- * Copyright 2018 Matthew Ballance
+ * Copyright 2018-2019 Matthew Ballance
  * 
  * Licensed under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in
