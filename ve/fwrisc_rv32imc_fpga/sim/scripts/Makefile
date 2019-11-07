@@ -4,7 +4,9 @@ include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc_fpga/tests/fwrisc_fpga_tests.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc_fpga/tb/vl/fwrisc_fpga_tb_vl.mk
+MK_INCLUDES += $(FWRISC)/ve/fwrisc_tracer_bfm/gvm/fwrisc_tracer_bfm.mk
 SRC_DIRS += $(FWRISC)/ve/fwrisc_rv32imc/tests
+SRC_DIRS += $(FWRISC)/ve/fwrisc_rv32imc/tests/cpp
 
 MK_INCLUDES += $(GOOGLETEST_HDL)/src/sv/googletest_hdl_sv.mk
 MK_INCLUDES += $(GOOGLETEST_HDL)/src/vl/googletest_hdl_vl.mk

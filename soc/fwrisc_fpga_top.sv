@@ -91,10 +91,10 @@ module fwrisc_fpga_top (
 	// ROM: 'h8000_0000
 	// RAM: 'h8000_8000
 	// LED: 'hC000_0000
-	reg[31:0]			ram_0[1023:0]; // 16k ram
-	reg[31:0]			ram_1[1023:0]; // 16k ram
-	reg[31:0]			ram_2[1023:0]; // 16k ram
-	reg[31:0]			ram_3[1023:0]; // 16k ram
+	reg[7:0]			ram_0[1023:0]; // 16k ram
+	reg[7:0]			ram_1[1023:0]; // 16k ram
+	reg[7:0]			ram_2[1023:0]; // 16k ram
+	reg[7:0]			ram_3[1023:0]; // 16k ram
 	reg[31:0]			rom[4095:0];   // 16k rom
 	reg[31:0]			led;
 	reg[31:0]			tx_r;
@@ -122,11 +122,12 @@ module fwrisc_fpga_top (
 
 		if (dvalid && dready && dwrite) begin
 			if (daddr[31:28] == 4'h8 && 
-				daddr[15:12] == 4'h2) begin
-				if (dwstb[0]) ram_0[daddr[13:2]]<=dwdata[7:0];
-				if (dwstb[1]) ram_1[daddr[13:2]]<=dwdata[15:8];
-				if (dwstb[2]) ram_2[daddr[13:2]]<=dwdata[23:16];
-				if (dwstb[3]) ram_3[daddr[13:2]]<=dwdata[31:24];
+				daddr[15:12] == 4'h8) begin
+//				$display("Write to RAM: 'h%08h", daddr[13:2]);
+				if (dwstb[0]) ram_0[daddr[13:2]] <= dwdata[7:0];
+				if (dwstb[1]) ram_1[daddr[13:2]] <= dwdata[15:8];
+				if (dwstb[2]) ram_2[daddr[13:2]] <= dwdata[23:16];
+				if (dwstb[3]) ram_3[daddr[13:2]] <= dwdata[31:24];
 			end else if (daddr[31:28] == 4'hc) begin
 				if (daddr[3:2] == 4'h0) begin
 					led <= dwdata;
@@ -152,18 +153,26 @@ module fwrisc_fpga_top (
 	end
 
 	always @* begin
-		if (addr_d[31:28] == 4'h8 && addr_d[15:12] == 4'h2) begin 
+		if (addr_d[31:28] == 4'h8 && addr_d[15:12] == 4'h8) begin 
 			drdata = {
 				ram_3[addr_d[13:2]],
 				ram_2[addr_d[13:2]],
 				ram_1[addr_d[13:2]],
 				ram_0[addr_d[13:2]]
 				};
+			/*
+			$display("read 'h%08h 'h%0h", addr_d[13:2], 
+					{ram_3[addr_d[13:2]],
+				ram_2[addr_d[13:2]],
+				ram_1[addr_d[13:2]],
+				ram_0[addr_d[13:2]]
+				});
+			 */
 		end else begin
 			drdata = rom[addr_d[13:2]];
 		end
 		
-		if (addr_i[31:28] == 4'h8 && addr_i[15:12] == 4'h2) begin
+		if (addr_i[31:28] == 4'h8 && addr_i[15:12] == 4'h8) begin
 			idata = {
 				ram_3[addr_d[13:2]],
 				ram_2[addr_d[13:2]],

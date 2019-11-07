@@ -8,4 +8,5 @@ chiselscripts@https://github.com/mballance/chiselscripts/releases/download/0.0.3
 RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 # fwuart@ssh://github.com:Featherweight-IP/fwuart.git
 fwuart@http://github.com/Featherweight-IP/fwuart.git
+fwprotocol-defs@http://github.com/Featherweight-IP/fwprotocol-defs.git
 

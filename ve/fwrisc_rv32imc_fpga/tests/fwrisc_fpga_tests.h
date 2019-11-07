@@ -8,14 +8,15 @@
 #ifndef INCLUDED_FWRISC_FPGA_TESTS_H
 #define INCLUDED_FWRISC_FPGA_TESTS_H
 #include "Vfwrisc_fpga_tb_hdl.h"
+#include "fwrisc_tracer_bfm.h"
 #include "GoogletestHdl.h"
 #include <stack>
 #include <set>
 #include <string>
 #include <functional>
-// #include "../../fwrisc/tests/cpp/ElfSymtabReader.h"
+#include "ElfSymtabReader.h"
 
-class fwrisc_fpga_tests : public ::testing::Test {
+class fwrisc_fpga_tests : public ::testing::Test, public virtual fwrisc_tracer_bfm_rsp_if {
 public:
 	fwrisc_fpga_tests();
 
@@ -33,16 +34,25 @@ public:
 
 	void filter_func(const std::string &func) { m_filter_funcs.insert(func); }
 
+	virtual void enter_func(uint32_t addr, const std::string &name);
+
+	virtual void leave_func(uint32_t addr, const std::string &name);
+
+
 public:
 	static fwrisc_fpga_tests		*test;
 
 protected:
-//	ElfSymtabReader										m_symtab;
+	ElfSymtabReader										m_symtab;
 
 	bool												m_trace_funcs;
 	bool												m_trace_instr;
+	bool												m_trace_writes;
 
-//	std::stack<std::pair<Elf32_Addr,Elf32_Addr>>		m_call_stack;
+	int32_t												m_max_instr;
+	uint32_t											m_instr_count;
+
+	std::stack<std::pair<Elf32_Addr,Elf32_Addr>>		m_call_stack;
 	std::set<std::string>								m_filter_funcs;
 	std::string											m_indent;
 	std::function<void (uint8_t,uint8_t)>				m_led;

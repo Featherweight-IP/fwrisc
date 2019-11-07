@@ -7,7 +7,7 @@ int main(void) {
 
 
   while (1) {
-    *led = count;
+    *led = (count >> 16);
     count++;
   }
 

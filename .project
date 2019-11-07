@@ -49,6 +49,10 @@
 			<value>$%7BPROJECT_LOC%7D</value>
 		</variable>
 		<variable>
+			<name>FWUART</name>
+			<value>$%7BPROJECT_LOC%7D/packages/fwuart</value>
+		</variable>
+		<variable>
 			<name>PACKAGES_DIR</name>
 			<value>$%7BPROJECT_LOC%7D/packages</value>
 		</variable>

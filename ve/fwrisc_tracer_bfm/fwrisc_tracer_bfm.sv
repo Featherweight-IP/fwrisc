@@ -140,6 +140,7 @@ end
 
 	always @(posedge clock) begin
 		if (rd_write) begin
+			$display("regwrite %d <= 'h%08h", rd_waddr, rd_wdata);
 			if (trace_reg_writes) begin
 				regwrite(rd_waddr, rd_wdata);
 			end

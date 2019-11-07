@@ -35,6 +35,26 @@ module fwrisc_fpga_tb_hdl(input clock);
 		end
 	end
 
+	// Connect the tracer BFM to 
+	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
+			.clock(clock),
+			.reset(reset),
+			.pc(pc),
+			.instr(instr),
+			.ivalid(ivalid),
+			.ra_raddr(ra_raddr),
+			.ra_rdata(ra_rdata),
+			.rb_raddr(rb_raddr),
+			.rb_rdata(rb_rdata),
+			.rd_waddr(rd_waddr),
+			.rd_wdata(rd_wdata),
+			.rd_write(rd_write),
+			.maddr(maddr),
+			.mdata(mdata),
+			.mstrb(mstrb),
+			.mwrite(mwrite),
+			.mvalid(mvalid)
+		);
 	/*
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),

@@ -26,6 +26,7 @@ void fwrisc_ctest_base::SetUp() {
 
 	m_trace_funcs = clp.has_plusarg("+TRACE_FUNCS");
 	m_trace_instr = clp.has_plusarg("+TRACE_INSTR");
+	m_trace_regs  = clp.has_plusarg("+TRACE_REGS");
 
 
 	clp.get_plusarg_value("+SW_IMAGE", elf_file);
@@ -119,6 +120,12 @@ void fwrisc_ctest_base::exec(uint32_t addr, uint32_t instr) {
 		fprintf(stdout, "hit halt address 0x%08x\n", m_halt_addr);
 		m_end_of_test = true;
 		GoogletestHdl::dropObjection();
+	}
+}
+
+void fwrisc_ctest_base::regwrite(uint32_t raddr, uint32_t rdata) {
+	if (m_trace_regs) {
+		fprintf(stdout, "regwrite 0x%02x <= 0x%08x\n", raddr, rdata);
 	}
 }
 
