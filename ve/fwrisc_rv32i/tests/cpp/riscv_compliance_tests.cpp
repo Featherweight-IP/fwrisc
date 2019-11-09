@@ -42,6 +42,7 @@ void riscv_compliance_tests::memwrite(uint32_t addr, uint8_t mask, uint32_t data
 		fprintf(stdout, "Note: end of test\n");
 		GoogletestHdl::dropObjection();
 	} else {
+		fprintf(stdout, "memwrite 0x%08x <= 0x%08x", addr, data);
 		fwrisc_instr_tests::memwrite(addr, mask, data);
 	}
 }
@@ -79,22 +80,19 @@ void riscv_compliance_tests::check() {
 
 	addr = (begin_signature & 0xFFFF)/4;
 	while (fgets(line, sizeof(line), ref_file_fp)) {
-		char *p = line + strlen(line) - 2;
+//		char *p = line + strlen(line) - 2;
 
-		while (p > line) {
-			char *old_p = p;
-			p -= 8;
-			*old_p = 0;
+//			char *old_p = p;
+//			p -= 8;
+//			*old_p = 0;
 
-			exp = strtoul(p, 0, 16);
+		exp = strtoul(line, 0, 16);
+		actual = m_mem[addr].first;
 
-			actual = m_mem[addr].first;
+		fprintf(stdout, "0x%08x: exp=0x%08x actual=0x%08x\n", 4*addr, exp, actual);
+		ASSERT_EQ(exp, actual);
 
-			fprintf(stdout, "0x%08x: exp=0x%08x actual=0x%08x\n", 4*addr, exp, actual);
-			ASSERT_EQ(exp, actual);
-
-			addr++;
-		}
+		addr++;
 	}
 }
 

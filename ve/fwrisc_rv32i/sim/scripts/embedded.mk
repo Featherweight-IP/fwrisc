@@ -2,7 +2,7 @@
 GCC_ARCH:=riscv32-unknown-elf
 
 MK_INCLUDES += $(PACKAGES_DIR)/simscripts/mkfiles/common_tool_gcc.mk
-MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc/tests/fwrisc_tests.mk
+MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32i/tests/fwrisc_tests.mk
 
 include $(MK_INCLUDES)
 
@@ -15,7 +15,7 @@ RULES := 1
 %.elf : %.o
 	$(Q)$(CC) -o $@ $^ \
 		-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
-		-T$(FWRISC_TESTS_DIR)/riscv-compliance/riscv-test-env/p/link.ld
+		-T$(PACKAGES_DIR)/riscv-compliance/riscv-test-env/p/link.ld
 		
 zephyr/%/zephyr/zephyr.elf : $(ZEPHYR_BASE)/samples/%/CMakeLists.txt $(wildcard $(ZEPHYR_BASE)/samples/%/src/%.c)
 	$(Q)rm -rf zephyr/$*
