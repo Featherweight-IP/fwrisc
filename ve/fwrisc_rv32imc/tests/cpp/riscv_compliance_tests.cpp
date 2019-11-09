@@ -79,22 +79,14 @@ void riscv_compliance_tests::check() {
 
 	addr = (begin_signature & 0xFFFF)/4;
 	while (fgets(line, sizeof(line), ref_file_fp)) {
-		char *p = line + strlen(line) - 2;
+		exp = strtoul(line, 0, 16);
 
-		while (p > line) {
-			char *old_p = p;
-			p -= 8;
-			*old_p = 0;
+		actual = m_mem[addr].first;
 
-			exp = strtoul(p, 0, 16);
+		fprintf(stdout, "0x%08x: exp=0x%08x actual=0x%08x\n", 4*addr, exp, actual);
+		ASSERT_EQ(exp, actual);
 
-			actual = m_mem[addr].first;
-
-			fprintf(stdout, "0x%08x: exp=0x%08x actual=0x%08x\n", 4*addr, exp, actual);
-			ASSERT_EQ(exp, actual);
-
-			addr++;
-		}
+		addr++;
 	}
 }
 

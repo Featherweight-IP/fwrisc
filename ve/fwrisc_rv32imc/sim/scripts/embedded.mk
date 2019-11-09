@@ -15,7 +15,7 @@ RULES := 1
 %.elf : %.o
 	$(Q)$(CC) -o $@ $^ \
 		-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
-		-T$(FWRISC_TESTS_DIR)/riscv-compliance/riscv-test-env/p/link.ld
+		-T$(PACKAGES_DIR)/riscv-compliance/riscv-test-env/p/link.ld
 		
 zephyr/%/zephyr/zephyr.elf : $(ZEPHYR_BASE)/samples/%/CMakeLists.txt $(wildcard $(ZEPHYR_BASE)/samples/%/src/%.c)
 	$(Q)rm -rf zephyr/$*
