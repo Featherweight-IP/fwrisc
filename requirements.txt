@@ -4,6 +4,12 @@ pyyaml
 # -e git+ssh://git@github.com/fvutils/py-hpi.git#egg=hpi
 -e git+ssh://git@github.com/fvutils/py-hpi.git#egg=hpi
 # -e git+ssh://git@github.com/fvutils/vte.git#egg=vte
+-e git+http://github.com/mballance/vlsim.git#egg=vlsim
 -e git+ssh://git@github.com/fvutils/vte.git#egg=vte
--e git+ssh://git@github.com/fvutils/testsuite-runner.git#egg=testsuite-runner
+# -e git+ssh://git@github.com/fvutils/testsuite-runner.git#egg=testsuite-runner
+-e git+https://github.com/fvutils/cocotb.git@task_bfm#egg=cocotb
+-e git+https://github.com/pybfms/bfm_core.git#egg=bfm_core
+-e git+https://github.com/pybfms/rv_bfms.git#egg=rv_bfms
+-e git+https://github.com/fvutils/fltools.git#egg=fltools
+
 

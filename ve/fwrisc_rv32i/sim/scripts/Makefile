@@ -2,6 +2,11 @@
 include $(PACKAGES_DIR)/packages.mk
 include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 
+PYTHONPATH:=$(FWRISC)/ve/fwrisc_rv32i/tests/cocotb:$(PYTHONPATH)
+PYTHONPATH:=$(FWRISC)/ve/fwrisc_tracer_bfm/src:$(PYTHONPATH)
+
+COCOTB_BFM_MODULES += fwrisc_tracer_bfm
+
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32i/tests/fwrisc_tests.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32i/tb/vl/fwrisc_tb_vl.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_tracer_bfm/gvm/fwrisc_tracer_bfm.mk
@@ -15,7 +20,7 @@ SRC_DIRS += $(FWRISC)/ve/fwrisc_rv32i/tb
 PY_SRC_DIRS += $(FWRISC)/ve/fwrisc_rv32i/tests/pyfv-hpi
 PY_SRC_DIRS += $(FWRISC)/ve/fwrisc_tracer_bfm/pyfv-hpi
 
-TB_MODULES_HDL=fwrisc_tb_hdl
+TB_MODULES_HDL=fwrisc_rv32i_tb_hdl
 TB_MODULES_HVL=fwrisc_tb_hvl
 PYHPI_CLOCKSPEC=-clk clock=10ns
 PYHPI_MODULES += fwrisc_tests
@@ -47,6 +52,8 @@ DPI_OBJS_LIBS += libfwrisc_tests.o libgoogletest-hdl.o libgoogletest.o
 ifeq (ms,$(SIM))
 DPI_OBJS_LIBS += libgoogletest-hdl-sv.o
 endif
+
+# RUN_ARGS += +cocotb.module=fwrisc_rv32i_tests.instr_tests
 
 
 include $(PACKAGES_DIR)/simscripts/mkfiles/common_sim.mk

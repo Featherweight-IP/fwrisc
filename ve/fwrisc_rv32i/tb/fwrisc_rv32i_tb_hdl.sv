@@ -1,6 +1,9 @@
 /****************************************************************************
  * fwrisc_tb.sv
  ****************************************************************************/
+`ifdef IVERILOG
+`timescale 1ns/1ns
+`endif
 
 /**
  * Module: fwrisc_rv32i_tb_hdl
@@ -21,6 +24,26 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	
 	assign clock = clk_r;
 `endif
+
+`ifdef IVERILOG
+	// Icarus requires help with timeout 
+	// and wave capture
+        reg[31:0]               timeout;
+        initial begin
+                if ($test$plusargs("dumpvars")) begin
+                        $dumpfile("simx.vcd");
+                        $dumpvars(0, fwrisc_rv32i_tb_hdl);
+                end
+                if (!$value$plusargs("timeout=%d", timeout)) begin
+                        timeout=1000;
+                end
+                $display("--> Wait for timeout");
+                # timeout;
+                $display("<-- Wait for timeout");
+                $finish();
+        end
+`endif
+
 	
 	reg reset = 1;
 	reg [7:0] reset_cnt = 0;
@@ -81,6 +104,45 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	
 
 	// Connect the tracer BFM to 
+	wire [31:0]		tracer_pc = u_dut.u_tracer.pc;
+	wire [31:0]		tracer_instr = u_dut.u_tracer.instr;
+	wire			tracer_ivalid = u_dut.u_tracer.ivalid;
+	// ra, rb
+	wire [5:0]		tracer_ra_raddr = u_dut.u_tracer.ra_raddr;
+	wire [31:0]		tracer_ra_rdata = u_dut.u_tracer.ra_rdata;
+	wire [5:0]		tracer_rb_raddr = u_dut.u_tracer.rb_raddr;
+	wire [31:0]		tracer_rb_rdata = u_dut.u_tracer.rb_rdata;
+	// rd
+	wire [5:0]		tracer_rd_waddr = u_dut.u_tracer.rd_waddr;
+	wire [31:0]		tracer_rd_wdata = u_dut.u_tracer.rd_wdata;
+	wire			tracer_rd_write = u_dut.u_tracer.rd_write;
+	
+	wire [31:0]		tracer_maddr = u_dut.u_tracer.maddr;
+	wire [31:0]		tracer_mdata = u_dut.u_tracer.mdata;
+	wire [3:0]		tracer_mstrb = u_dut.u_tracer.mstrb;
+	wire			tracer_mwrite = u_dut.u_tracer.mwrite;
+	wire 			tracer_mvalid = u_dut.u_tracer.mvalid;
+
+	fwrisc_tracer_bfm u_tracer(
+			.clock(clock),
+			.reset(reset),
+			.pc(tracer_pc),
+			.instr(tracer_instr),
+			.ivalid(tracer_ivalid),
+			.ra_raddr(tracer_ra_raddr),
+			.ra_rdata(tracer_ra_rdata),
+			.rb_raddr(tracer_rb_raddr),
+			.rb_rdata(tracer_rb_rdata),
+			.rd_waddr(tracer_rd_waddr),
+			.rd_wdata(tracer_rd_wdata),
+			.rd_write(tracer_rd_write),
+			.maddr(tracer_maddr),
+			.mdata(tracer_mdata),
+			.mstrb(tracer_mstrb),
+			.mwrite(tracer_mwrite),
+			.mvalid(tracer_mvalid)
+		);
+/*
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),
 			.reset(reset),
@@ -100,6 +162,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 			.mwrite(mwrite),
 			.mvalid(mvalid)
 		);
+ */
 
 endmodule
 

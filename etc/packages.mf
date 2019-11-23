@@ -3,11 +3,11 @@ simscripts@http://github.com/mballance/simscripts.git
 memory_primitives@http://github.com/mballance/memory_primitives.git
 googletest-ivpm@http://github.com/mballance/googletest-ivpm.git
 googletest-hdl@http://github.com/mballance/googletest-hdl.git
-fwrisc-zephyr@http://github.com/mballance/fwrisc-zephyr.git
+fwrisc-zephyr@http://github.com/mballance/fwrisc-zephyr.git depth=1
 chiselscripts@https://github.com/mballance/chiselscripts/releases/download/0.0.3/chiselscripts-0.0.3.tar.gz
 RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 # fwuart@ssh://github.com:Featherweight-IP/fwuart.git
 fwuart@http://github.com/Featherweight-IP/fwuart.git
 fwprotocol-defs@http://github.com/Featherweight-IP/fwprotocol-defs.git
-riscv-compliance@http://github.com/riscv/riscv-compliance.git
+riscv-compliance@http://github.com/riscv/riscv-compliance.git depth=1
 

@@ -47,6 +47,7 @@ module fwrisc_tracer_bfm(
 		input			mwrite,
 		input 			mvalid		
 		);
+`ifdef UNDEFINED
 `ifdef HAVE_UVM
 		import uvm_pkg::*;
 `endif
@@ -77,8 +78,10 @@ module fwrisc_tracer_bfm(
 				uvm_top, "", "tracer", u_core);
 	end
 `endif
+`endif
 endmodule
 
+`ifdef UNDEFINED
 interface fwrisc_tracer_core(
 	input		clock,
 	input		reset);
@@ -169,5 +172,6 @@ end
 	end	
 
 endinterface
+`endif
 
 

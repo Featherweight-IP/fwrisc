@@ -9,6 +9,7 @@ SRC_DIRS += $(PACKAGES_DIR)/riscv-compliance/riscv-target/spike
 SRC_DIRS += $(PACKAGES_DIR)/riscv-compliance/riscv-test-env/p
 SRC_DIRS += $(PACKAGES_DIR)/riscv-compliance/riscv-test-env
 SRC_DIRS += $(PACKAGES_DIR)/riscv-compliance/riscv-test-suite/rv32i/src
+SRC_DIRS += $(PACKAGES_DIR)/riscv-compliance/riscv-test-suite/rv32imc/src
 
 FWRISC_TESTS_SRC := $(notdir $(wildcard $(FWRISC_TESTS_DIR)/cpp/*.cpp))
 

@@ -7,8 +7,8 @@ MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc/tests/fwrisc_tests.mk
 include $(MK_INCLUDES)
 
 
-CFLAGS += -march=rv32i -mabi=ilp32
-ASFLAGS += -march=rv32i -mabi=ilp32
+CFLAGS += -march=rv32imc -mabi=ilp32
+ASFLAGS += -march=rv32imc -mabi=ilp32
 
 RULES := 1
 

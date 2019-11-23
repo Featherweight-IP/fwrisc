@@ -3,11 +3,11 @@ include $(PACKAGES_DIR)/packages.mk
 include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc/tests/fwrisc_tests.mk
-MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc/tb/vl/fwrisc_tb_vl.mk
+# MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32imc/tb/vl/fwrisc_tb_vl.mk
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_tracer_bfm/gvm/fwrisc_tracer_bfm.mk
 
-MK_INCLUDES += $(GOOGLETEST_HDL)/src/sv/googletest_hdl_sv.mk
-MK_INCLUDES += $(GOOGLETEST_HDL)/src/vl/googletest_hdl_vl.mk
+# MK_INCLUDES += $(GOOGLETEST_HDL)/src/sv/googletest_hdl_sv.mk
+# MK_INCLUDES += $(GOOGLETEST_HDL)/src/vl/googletest_hdl_vl.mk
 
 RUN_PRE_TARGETS += ram.hex regs.hex
 
@@ -17,6 +17,7 @@ PY_SRC_DIRS += $(FWRISC)/ve/fwrisc_tracer_bfm/pyfv-hpi
 
 TB_MODULES_HDL=fwrisc_tb_hdl
 TB_MODULES_HVL=fwrisc_tb_hvl
+VLSIM_CLOCKSPEC += clock=10ns
 PYHPI_CLOCKSPEC=-clk clock=10ns
 PYHPI_MODULES += fwrisc_tests
 
@@ -37,11 +38,15 @@ endif
 ifeq (vl,$(SIM))
 #  VL_TB_OBJS_LIBS += libfwrisc_tests.o libgoogletest-vl.o libgoogletest.o
   CXXFLAGS += -I$(BUILDDIR)/obj_dir
-  DPI_OBJS_LIBS += libgoogletest-hdl-vl.o libfwrisc_tb_vl.o
+#  DPI_OBJS_LIBS += libgoogletest-hdl-vl.o libfwrisc_tb_vl.o
 endif
 
-DPI_OBJS_LIBS += $(GVM_OBJS_LIBS)
-DPI_OBJS_LIBS += libfwrisc_tests.o libgoogletest-hdl.o libgoogletest.o
+#ifeq (vlsim,$(SIM))
+#  DPI_OBJS_LIBS += libgoogletest-hdl-vl.o
+#endif
+
+#DPI_OBJS_LIBS += $(GVM_OBJS_LIBS)
+# DPI_OBJS_LIBS += libfwrisc_tests.o # libgoogletest-hdl.o libgoogletest.o
 
 #ifeq (true,$(HAVE_UVM))
 ifeq (ms,$(SIM))
