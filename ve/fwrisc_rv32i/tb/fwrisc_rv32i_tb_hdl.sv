@@ -123,6 +123,8 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	wire			tracer_mwrite = u_dut.u_tracer.mwrite;
 	wire 			tracer_mvalid = u_dut.u_tracer.mvalid;
 
+/*
+ */
 	fwrisc_tracer_bfm u_tracer(
 			.clock(clock),
 			.reset(reset),
