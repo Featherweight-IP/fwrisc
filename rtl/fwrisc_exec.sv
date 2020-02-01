@@ -24,7 +24,9 @@
  * TODO: Add module documentation
  */
 module fwrisc_exec #(
-		parameter 			ENABLE_MUL_DIV=1
+		parameter			ENABLE_COMPRESSED=1,
+		parameter 			ENABLE_MUL_DIV=1,
+		parameter			ENABLE_DEP=1
 		)(
 		input				clock,
 		input				reset,
@@ -108,11 +110,28 @@ module fwrisc_exec #(
 
 	// dep_violation determines if execution goes
 	// outside the valid region
-	wire					dep_violation = (
+	wire					dep_violation;
+	if (ENABLE_DEP) begin
+		assign dep_violation = (
 			dep_lo[0] && dep_hi[0]
 			&& (exec_state == STATE_JUMP) 
 			&& !(alu_out[31:3] >= dep_lo[31:3] && alu_out[31:3] <= dep_hi[31:3])
 		);
+	end else begin
+		assign dep_violation = 0;
+	end
+
+	// Without compressed-instruction support, branches to addresses 
+	// that are not word aligned must trigger an execption
+	wire					instr_alignment_violation;
+	if (!ENABLE_COMPRESSED) begin
+		assign instr_alignment_violation = (
+			(exec_state == STATE_JUMP || exec_state == STATE_BRANCH_TAKEN) 
+			&& alu_out[1]
+		);
+	end else begin
+		assign instr_alignment_violation = 0;
+	end
 	
 	always @* begin
 		if (exec_state == STATE_BRANCH_TAKEN || exec_state == STATE_JUMP) begin
@@ -246,11 +265,17 @@ module fwrisc_exec #(
 				end
 				
 				STATE_BRANCH_TAKEN: begin
-					pc <= alu_out;
-					pc_seq <= pc_seq_next;
-					exec_state <= STATE_EXECUTE;
-					instr_complete <= 1;
+					if (instr_alignment_violation) begin
+						mcause <= 1; // instruction access fault
+						exec_state <= STATE_EXCEPTION_1;
+					end else begin
+						pc <= alu_out;
+						pc_seq <= pc_seq_next;
+						exec_state <= STATE_EXECUTE;
+						instr_complete <= 1;
+					end
 				end
+				
 				STATE_MDS_COMPLETE: begin
 					if (mds_out_valid) begin
 						exec_state <= STATE_EXECUTE;
@@ -259,6 +284,7 @@ module fwrisc_exec #(
 						instr_complete <= 1;
 					end
 				end
+				
 				STATE_LDST_COMPLETE: begin
 					if (mem_ack_valid) begin
 						exec_state <= STATE_EXECUTE;
@@ -267,6 +293,7 @@ module fwrisc_exec #(
 						instr_complete <= 1;
 					end
 				end
+				
 				STATE_EXCEPTION_1: begin
 					// Write MEPC
 					exec_state <= STATE_EXCEPTION_2;

@@ -143,6 +143,7 @@ module fwrisc #(
 	wire[31:0]				rd_wdata;
 	wire					rd_wen;
 	fwrisc_exec #(
+		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED ),
 		.ENABLE_MUL_DIV  (ENABLE_MUL_DIV )
 		) u_exec (
 		.clock           (clock          ), 

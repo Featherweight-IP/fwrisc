@@ -21,7 +21,11 @@ class InstrTests(FwriscTracerBfmIF):
         self.complete = False
         self.tracer_bfm = tracer_bfm
 
+        self.trace_instr = "+trace_instr" in cocotb.plusargs
+
     def instr_exec(self, pc, instr):
+        if self.trace_instr:
+            print("[InstrExec] addr=" + hex(pc) + " instr=" + hex(instr))
         self.instr_count += 1
         
         if self.halt_addr != -1 and pc == self.halt_addr:
@@ -36,7 +40,7 @@ class InstrTests(FwriscTracerBfmIF):
     @cocotb.coroutine
     def run(self):
         self.tracer_bfm.set_trace_reg_writes(0)
-        self.tracer_bfm.set_trace_instr(0, 0, 1)
+        self.tracer_bfm.set_trace_instr(1, 1, 1)
         self.tracer_bfm.set_trace_all_memwrite(0)
 
         yield self.test_done_ev.wait()

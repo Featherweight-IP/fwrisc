@@ -24,9 +24,9 @@
  * TODO: Add module documentation
  */
 module fwrisc_regfile #(
-		parameter ENABLE_COUNTERS = 1,
+		parameter ENABLE_COUNTERS=1,
 		// Enable Data Execution Protection
-		parameter ENABLE_DEP = 1
+		parameter ENABLE_DEP=1
 		) (
 		input				clock,
 		input				reset,
@@ -59,9 +59,14 @@ module fwrisc_regfile #(
 	reg[5:0]			ra_raddr_r;
 	reg[5:0]			rb_raddr_r;
 	reg[31:0]			regs['h3f:0];
-	
-	assign dep_lo = dep_lo_r;
-	assign dep_hi = dep_hi_r;
+
+	if (ENABLE_DEP) begin
+		assign dep_lo = dep_lo_r;
+		assign dep_hi = dep_hi_r;
+	end else begin
+		assign dep_lo = 0;
+		assign dep_hi = 0;
+	end
 	assign mtvec  = mtvec_r;
 	
 `ifdef FORMAL
