@@ -24,6 +24,11 @@ class InstrTests(FwriscTracerBfmIF):
         
         self.trace_instr = "trace_instr" in cocotb.plusargs
         self.trace_memwrite = "trace_memwrite" in cocotb.plusargs
+        
+    def configure_tracer(self):
+        self.tracer_bfm.set_trace_reg_writes(0)
+        self.tracer_bfm.set_trace_instr(1, 1, 1)
+        self.tracer_bfm.set_trace_all_memwrite(1)
 
     def instr_exec(self, pc, instr):
         if self.trace_instr:
@@ -35,7 +40,7 @@ class InstrTests(FwriscTracerBfmIF):
             self.complete = True
             self.test_done_ev.set()
         
-        if self.instr_count >= self.max_instr:
+        if self.max_instr != 0 and self.instr_count >= self.max_instr:
             print("TIMEOUT")
             self.test_done_ev.set()
             
@@ -56,9 +61,7 @@ class InstrTests(FwriscTracerBfmIF):
             
     @cocotb.coroutine
     def run(self):
-        self.tracer_bfm.set_trace_reg_writes(0)
-        self.tracer_bfm.set_trace_instr(1, 1, 1)
-        self.tracer_bfm.set_trace_all_memwrite(1)
+        self.configure_tracer()
 
         yield self.test_done_ev.wait()
         

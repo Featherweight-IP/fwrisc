@@ -1,4 +1,4 @@
-
++cocotb.module=fwrisc_rv32i_tests.zephyr_synchronization_test
 +SW_IMAGE=${BUILD_DIR}/esw/zephyr/synchronization/zephyr/zephyr.elf
-+gtest-filter=fwrisc_zephyr_tests.synchronization
++TIMEOUT=40ms
 

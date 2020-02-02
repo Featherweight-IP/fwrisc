@@ -18,6 +18,9 @@ class ZephyrTests(InstrTests):
     def __init__(self, tracer_bfm):
         super().__init__(tracer_bfm)
         
+        self.max_instr = 0
+        self.halt_addr = -1
+        
         tracer_bfm.add_listener(self)
         
         sw_image = cocotb.plusargs["SW_IMAGE"]
@@ -32,14 +35,16 @@ class ZephyrTests(InstrTests):
             
             self.ram_console_addr = symtab.get_symbol_by_name("ram_console")[0]["st_value"]
             tracer_bfm.add_addr_region(self.ram_console_addr, self.ram_console_addr+1023)
+            
+    def configure_tracer(self):
+        self.tracer_bfm.set_trace_reg_writes(0)
+        self.tracer_bfm.set_trace_instr(0, 0, 0)
+        self.tracer_bfm.set_trace_all_memwrite(0)
         
-
-    def instr_exec(self, pc, instr):
-#        print("instr_exec: " + hex(pc))
-#        print("instr_exec: " + hex(pc))
-#        InstrTests.instr_exec(self, pc, instr)
-        pass
-    
+        self.tracer_bfm.add_addr_region(
+            self.ram_console_addr,
+            self.ram_console_addr+1023)
+        
     def mem_write(self, maddr, mstrb, mdata):
         if maddr >= self.ram_console_addr and maddr < self.ram_console_addr+1024 and mdata != 0:
             ch = 0
@@ -53,16 +58,18 @@ class ZephyrTests(InstrTests):
                 ch = ((mdata >> 24) & 0xFF)
                 
             ch = str(chr(ch))
+            if ch == '\n':
+                self.console_line(self.console_buffer)
+                if not self.raw_console:
+                    print(self.console_buffer)
+                    stdout.flush()
+                self.console_buffer = ""
+            else:
+                self.console_buffer += ch
+                
             if self.raw_console:
                 stdout.write(ch)
                 stdout.flush()
-            elif ch == "\n":
-                print(self.console_buffer)
-                self.console_line(self.console_buffer)
-                self.console_buffer = ""
-                stdout.flush()
-            else:
-                self.console_buffer += ch
 
     def console_line(self, line):
         self.console_output.append(line)
@@ -71,13 +78,7 @@ class ZephyrTests(InstrTests):
     @cocotb.coroutine
     def run(self):
         # Configure the tracer BFM
-        self.tracer_bfm.set_trace_reg_writes(0)
-        self.tracer_bfm.set_trace_instr(0, 0, 1)
-        self.tracer_bfm.set_trace_all_memwrite(0)
-        
-        self.tracer_bfm.add_addr_region(
-            self.ram_console_addr,
-            self.ram_console_addr+1023)
+        self.configure_tracer()
         
         yield self.test_done_ev.wait()
         pass
@@ -94,9 +95,6 @@ def runtest(dut):
    
     if use_tf_bfm: 
         tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
-        tracer_bfm.set_trace_reg_writes(0)
-        tracer_bfm.set_trace_instr(0, 0, 1)
-        tracer_bfm.set_trace_all_memwrite(0)
     else:
         tracer_bfm = FwriscTracerSignalBfm(dut.u_dut.u_core.u_tracer)
     test = ZephyrTests(tracer_bfm)
