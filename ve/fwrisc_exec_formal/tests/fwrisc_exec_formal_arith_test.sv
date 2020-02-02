@@ -20,6 +20,7 @@ module fwrisc_exec_formal_arith_test(
 		output reg[5:0]			op,
 		output reg[31:0]		op_c,
 		output reg[5:0]			rd,
+		output reg[31:0]		mtvec,
 		
 		input				dvalid,
 		output reg[31:0]	drdata,
@@ -49,6 +50,7 @@ module fwrisc_exec_formal_arith_test(
 			op <= 0;
 			op_c <= 0;
 			decode_valid_r <= 0;
+			mtvec <= 0;
 			rd <= 0;
 		end else begin
 			case (state)

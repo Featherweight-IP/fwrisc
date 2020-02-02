@@ -25,6 +25,7 @@ module fwrisc_exec_formal_jump_checker(
 		input[31:0]			pc,
 		// Indicates that the PC is sequential to the last PC
 		input				pc_seq,
+		input[31:0]			mtvec,
 		input[31:0]			daddr,
 		input				dvalid,
 		input				dwrite,
@@ -46,6 +47,8 @@ module fwrisc_exec_formal_jump_checker(
 	reg[5:0]		rd_addr;
 	reg[31:0]		rd_val;
 	
+	wire[31:0]		opa_plus_opc = $signed(op_a) + $signed(op_c);
+	
 	always @(posedge clock) begin
 		if (reset) begin
 			count <= 0;
@@ -66,7 +69,7 @@ module fwrisc_exec_formal_jump_checker(
 			if (instr_complete) begin
 				`cover(1);
 				// op_a is jump_base
-				`assert(pc == (op_a + op_c));
+				`assert(pc == opa_plus_opc);
 				`assert(rd_wr_count == 1);
 				if (instr_c) begin
 					`assert(rd_val == (pc_last + 2));

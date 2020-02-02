@@ -25,6 +25,7 @@ module fwrisc_exec_formal_csr_checker(
 		input[31:0]			pc,
 		// Indicates that the PC is sequential to the last PC
 		input				pc_seq,
+		input[31:0]			mtvec,
 		input[31:0]			daddr,
 		input				dvalid,
 		input				dwrite,
