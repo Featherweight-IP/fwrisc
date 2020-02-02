@@ -19,7 +19,40 @@ class ComplianceTests(InstrTests):
 
     def instr_exec(self, pc, instr):
         InstrTests.instr_exec(self, pc, instr)
-
+        
+    def init_mem(self):
+        print("init_mem")
+        sw_image = cocotb.plusargs["SW_IMAGE"]
+        with open(sw_image, "rb") as f:
+            elffile = ELFFile(f)
+            symtab = elffile.get_section_by_name('.symtab')
+            
+            begin_signature = symtab.get_symbol_by_name("begin_signature")[0]["st_value"]
+            end_signature = symtab.get_symbol_by_name("end_signature")[0]["st_value"]
+            
+            addr = begin_signature
+            
+            # Find the section that contains the data we need
+            section = None
+            for i in range(elffile.num_sections()):
+                shdr = elffile._get_section_header(i)
+                if begin_signature >= shdr['sh_addr'] and begin_signature <= (shdr['sh_addr'] + shdr['sh_size']):
+                    section = elffile.get_section(i)
+                    begin_signature_offset = begin_signature - shdr['sh_addr']
+                    break
+                
+            data = section.data()
+            for addr in range(begin_signature, end_signature, 4):
+                word = (
+                    (data[begin_signature_offset+0] << (8*0))
+                    | (data[begin_signature_offset+1] << (8*1))
+                    | (data[begin_signature_offset+2] << (8*2))
+                    | (data[begin_signature_offset+3] << (8*3))
+                    );
+                self.mem[(addr & 0xFFFF) >> 2] = word
+                
+                begin_signature_offset += 4
+            
     @cocotb.coroutine
     def check(self):
         sw_image = cocotb.plusargs["SW_IMAGE"]
@@ -44,7 +77,6 @@ class ComplianceTests(InstrTests):
                 
                 for cnt,line in enumerate(ref_fp):
                     addr = ((begin_signature & 0xFFFF) >> 2) + cnt
-                    print("addr=" + str(addr))
                     exp = int(line, 16)
                     actual = self.mem[addr]
                     
@@ -52,10 +84,7 @@ class ComplianceTests(InstrTests):
                     
                     if exp != actual:
                         raise Exception("Test Failed")
-                
-            
         
-        print("TODO: ComplianceTests.check()")
         yield Timer(0)
         pass
         

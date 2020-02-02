@@ -1,8 +1,6 @@
 
 simscripts@http://github.com/mballance/simscripts.git
 memory_primitives@http://github.com/mballance/memory_primitives.git
-googletest-ivpm@http://github.com/mballance/googletest-ivpm.git
-googletest-hdl@http://github.com/mballance/googletest-hdl.git
 fwrisc-zephyr@http://github.com/mballance/fwrisc-zephyr.git depth=1
 chiselscripts@https://github.com/mballance/chiselscripts/releases/download/0.0.3/chiselscripts-0.0.3.tar.gz
 RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git

@@ -25,6 +25,10 @@ class InstrTests(FwriscTracerBfmIF):
         self.trace_instr = "trace_instr" in cocotb.plusargs
         self.trace_memwrite = "trace_memwrite" in cocotb.plusargs
         
+
+    def init_mem(self):
+        pass
+            
     def configure_tracer(self):
         self.tracer_bfm.set_trace_reg_writes(0)
         self.tracer_bfm.set_trace_instr(1, 1, 1)
@@ -62,6 +66,7 @@ class InstrTests(FwriscTracerBfmIF):
     @cocotb.coroutine
     def run(self):
         self.configure_tracer()
+        self.init_mem()
 
         yield self.test_done_ev.wait()
         
