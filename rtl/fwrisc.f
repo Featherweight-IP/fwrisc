@@ -27,4 +27,6 @@ ${FWRISC}/rtl/fwrisc_mem.sv
 ${FWRISC}/rtl/fwrisc_exec.sv
 ${FWRISC}/rtl/fwrisc.sv
 ${FWRISC}/rtl/fwrisc_rv32i.sv
+${FWRISC}/rtl/fwrisc_rv32im.sv
+${FWRISC}/rtl/fwrisc_rv32imc.sv
 
