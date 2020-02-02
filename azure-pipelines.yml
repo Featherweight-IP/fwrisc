@@ -1,0 +1,42 @@
+variables:
+  build_num: $(Build.BuildNumber)
+  
+jobs:
+- job: PyPi_Linux
+  pool:
+   vmImage: 'ubuntu-18.04'
+  steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
+    
+  - script: |
+      sudo apt-get install zlib1g-dev
+      echo "Which Conda: `which conda`"
+      conda create --yes --name BuildEnv
+      source activate BuildEnv
+      echo "Conda: `which conda`"
+      echo "Conda version: `conda --version`"
+      python -m pip install wheel
+      python -m pip install twine
+    displayName: 'Install wheel+twine'
+    
+  - script: |
+      source activate BuildEnv
+      conda install -y -c litex-hub --name BuildEnv iverilog verilator gcc-riscv32-elf-newlib
+    displayName: 'Setup Test Tools'
+
+  - script: |
+      source activate BuildEnv
+      ./scripts/ivpm.py update
+      source etc/fwrisc_env.sh
+      which_conda=`which conda`
+      conda_bindir=`dirname $which_conda`
+      conda_dir=`dirname $conda_bindir`
+      export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
+      cd ve/fwrisc_rv32i/sim
+      echo "** Running Icarus Verilog Test"
+      runtest.pl -tl testlists/fwrisc_riscv_all_tests.tl -sim ivl
+      echo "** Running Verilator Test"
+      runtest.pl -tl testlists/fwrisc_riscv_all_tests.tl -sim vlsim +tool.vlsim.tracevcd
+    displayName: 'Run Tests'
+
