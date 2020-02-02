@@ -18,10 +18,13 @@ class ZephyrTests(InstrTests):
     def __init__(self, tracer_bfm):
         super().__init__(tracer_bfm)
         
+        tracer_bfm.add_listener(self)
+        
         sw_image = cocotb.plusargs["SW_IMAGE"]
 
         self.raw_console = False
         self.console_buffer = ""        
+        self.console_output = []
         with open(sw_image, "rb") as f:
             elffile = ELFFile(f)
             
@@ -32,6 +35,7 @@ class ZephyrTests(InstrTests):
         
 
     def instr_exec(self, pc, instr):
+#        print("instr_exec: " + hex(pc))
 #        print("instr_exec: " + hex(pc))
 #        InstrTests.instr_exec(self, pc, instr)
         pass
@@ -54,14 +58,27 @@ class ZephyrTests(InstrTests):
                 stdout.flush()
             elif ch == "\n":
                 print(self.console_buffer)
+                self.console_line(self.console_buffer)
                 self.console_buffer = ""
                 stdout.flush()
             else:
                 self.console_buffer += ch
-                
+
+    def console_line(self, line):
+        self.console_output.append(line)
+        
 
     @cocotb.coroutine
     def run(self):
+        # Configure the tracer BFM
+        self.tracer_bfm.set_trace_reg_writes(0)
+        self.tracer_bfm.set_trace_instr(0, 0, 1)
+        self.tracer_bfm.set_trace_all_memwrite(0)
+        
+        self.tracer_bfm.add_addr_region(
+            self.ram_console_addr,
+            self.ram_console_addr+1023)
+        
         yield self.test_done_ev.wait()
         pass
 
@@ -81,9 +98,8 @@ def runtest(dut):
         tracer_bfm.set_trace_instr(0, 0, 1)
         tracer_bfm.set_trace_all_memwrite(0)
     else:
-        tracer_bfm = FwriscTracerSignalBfm(dut.u_dut.u_tracer)
+        tracer_bfm = FwriscTracerSignalBfm(dut.u_dut.u_core.u_tracer)
     test = ZephyrTests(tracer_bfm)
-    tracer_bfm.add_listener(test)
     
     
     yield test.run()

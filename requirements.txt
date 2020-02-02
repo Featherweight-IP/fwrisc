@@ -10,6 +10,8 @@ pyyaml
 -e git+https://github.com/fvutils/cocotb.git@task_bfm#egg=cocotb
 -e git+https://github.com/pybfms/bfm_core.git#egg=bfm_core
 -e git+https://github.com/pybfms/rv_bfms.git#egg=rv_bfms
+-e git+https://github.com/pybfms/generic_sram_bfms.git#egg=generic_sram_bfms
+-e git+https://github.com/pybfms/mem_bfms_core.git#egg=mem_bfms_core
 -e git+https://github.com/fvutils/fltools.git#egg=fltools
 
 

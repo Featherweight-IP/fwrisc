@@ -62,12 +62,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	wire [3:0]			dwstb;
 	wire				dwrite, dvalid, dready;
 	
-	fwrisc #(
-			.ENABLE_COMPRESSED(0),
-			.ENABLE_MUL_DIV(0),
-			.ENABLE_DEP(0),
-			.ENABLE_COUNTERS(1)
-		) u_dut (
+	fwrisc_rv32i u_dut(
 		.clock   (clock  ), 
 		.reset   (reset  ), 
 		.iaddr   (iaddr  ), 
@@ -104,24 +99,24 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	
 
 	// Connect the tracer BFM to 
-	wire [31:0]		tracer_pc = u_dut.u_tracer.pc;
-	wire [31:0]		tracer_instr = u_dut.u_tracer.instr;
-	wire			tracer_ivalid = u_dut.u_tracer.ivalid;
+	wire [31:0]		tracer_pc = u_dut.u_core.u_tracer.pc;
+	wire [31:0]		tracer_instr = u_dut.u_core.u_tracer.instr;
+	wire			tracer_ivalid = u_dut.u_core.u_tracer.ivalid;
 	// ra, rb
-	wire [5:0]		tracer_ra_raddr = u_dut.u_tracer.ra_raddr;
-	wire [31:0]		tracer_ra_rdata = u_dut.u_tracer.ra_rdata;
-	wire [5:0]		tracer_rb_raddr = u_dut.u_tracer.rb_raddr;
-	wire [31:0]		tracer_rb_rdata = u_dut.u_tracer.rb_rdata;
+	wire [5:0]		tracer_ra_raddr = u_dut.u_core.u_tracer.ra_raddr;
+	wire [31:0]		tracer_ra_rdata = u_dut.u_core.u_tracer.ra_rdata;
+	wire [5:0]		tracer_rb_raddr = u_dut.u_core.u_tracer.rb_raddr;
+	wire [31:0]		tracer_rb_rdata = u_dut.u_core.u_tracer.rb_rdata;
 	// rd
-	wire [5:0]		tracer_rd_waddr = u_dut.u_tracer.rd_waddr;
-	wire [31:0]		tracer_rd_wdata = u_dut.u_tracer.rd_wdata;
-	wire			tracer_rd_write = u_dut.u_tracer.rd_write;
+	wire [5:0]		tracer_rd_waddr = u_dut.u_core.u_tracer.rd_waddr;
+	wire [31:0]		tracer_rd_wdata = u_dut.u_core.u_tracer.rd_wdata;
+	wire			tracer_rd_write = u_dut.u_core.u_tracer.rd_write;
 	
-	wire [31:0]		tracer_maddr = u_dut.u_tracer.maddr;
-	wire [31:0]		tracer_mdata = u_dut.u_tracer.mdata;
-	wire [3:0]		tracer_mstrb = u_dut.u_tracer.mstrb;
-	wire			tracer_mwrite = u_dut.u_tracer.mwrite;
-	wire 			tracer_mvalid = u_dut.u_tracer.mvalid;
+	wire [31:0]		tracer_maddr = u_dut.u_core.u_tracer.maddr;
+	wire [31:0]		tracer_mdata = u_dut.u_core.u_tracer.mdata;
+	wire [3:0]		tracer_mstrb = u_dut.u_core.u_tracer.mstrb;
+	wire			tracer_mwrite = u_dut.u_core.u_tracer.mwrite;
+	wire 			tracer_mvalid = u_dut.u_core.u_tracer.mvalid;
 
 /*
  */

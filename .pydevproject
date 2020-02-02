@@ -14,5 +14,7 @@
 <path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32imc/tests/cocotb</path>
 <path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32i/tests/cocotb</path>
 <path>/${PROJECT_DIR_NAME}/packages/fltools/src</path>
+<path>/${PROJECT_DIR_NAME}/packages/generic-sram-bfms/src</path>
+<path>/${PROJECT_DIR_NAME}/packages/mem-bfms-core/src</path>
 </pydev_pathproperty>
 </pydev_project>

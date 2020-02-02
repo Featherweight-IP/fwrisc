@@ -28,12 +28,25 @@ class FwriscTracerSignalBfm():
             
             if self.scope.rd_write and self.scope.rd_waddr != 0:
 #                print("reg_write")
-                self.reg_write(self.scope.rd_waddr, self.scope.rd_wdata)
+                self.reg_write(int(self.scope.rd_waddr), int(self.scope.rd_wdata))
             
             if self.scope.ivalid:
 #                print("instr_exec")
-                self.instr_exec(self.scope.pc, self.scope.instr)
+                self.instr_exec(int(self.scope.pc), int(self.scope.instr))
         pass
+    
+    def add_addr_region(self, base, limit):
+        # NOP
+        pass
+    
+    def set_trace_all_memwrite(self, t):
+        pass
+    
+    def set_trace_instr(self, all_instr, jump_instr, call_instr):
+        pass
+    
+    def set_trace_reg_writes(self, t):
+        pass    
     
     def add_listener(self, l):
         self.listener_l.append(l)
