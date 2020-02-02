@@ -22,7 +22,7 @@ jobs:
     
   - script: |
       source activate BuildEnv
-      conda install -y -c litex-hub --name BuildEnv iverilog verilator gcc-riscv32-elf-newlib
+      conda install -y -c litex-hub --name BuildEnv iverilog verilator gcc-riscv32-elf-newlib dtc
     displayName: 'Setup Test Tools'
 
   - script: |
