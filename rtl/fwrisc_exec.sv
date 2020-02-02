@@ -139,7 +139,7 @@ module fwrisc_exec #(
 	always @* begin
 		if (exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST) begin
 			case (op)
-				OP_LH, OP_LHU, OP_SH: ldst_addr_misaligned = alu_out[1];
+				OP_LH, OP_LHU, OP_SH: ldst_addr_misaligned = alu_out[0];
 				OP_LW, OP_SW: ldst_addr_misaligned = |alu_out[1:0];
 				default: ldst_addr_misaligned = 0;
 			endcase
@@ -238,7 +238,11 @@ module fwrisc_exec #(
 								// alu_out holds the data address
 								// TODO: handle misaligne accesses
 								if (ldst_addr_misaligned) begin
-									mcause <= 4; 
+									if (op == OP_SB || op == OP_SH || op == OP_SW) begin
+										mcause <= 6; 
+									end else begin
+										mcause <= 4; 
+									end
 									exec_state <= STATE_EXCEPTION_1;
 								end else begin
 									exec_state <= STATE_LDST_COMPLETE;
@@ -458,7 +462,7 @@ module fwrisc_exec #(
 	assign mem_req_valid = (
 			exec_state == STATE_EXECUTE 
 			&& op_type == OP_TYPE_LDST
-			&& decode_valid);
+			&& decode_valid && !ldst_addr_misaligned);
 	fwrisc_mem u_mem (
 		.clock      (clock         ), 
 		.reset      (reset         ), 
