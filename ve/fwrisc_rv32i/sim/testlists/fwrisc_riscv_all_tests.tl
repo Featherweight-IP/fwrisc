@@ -10,17 +10,10 @@ tests/fwrisc_riscv_compliance_rv32i_I-BGEU-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-BLT-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-BLTU-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-BNE-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-CSRRC-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-CSRRCI-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-CSRRS-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-CSRRSI-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-CSRRW-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-CSRRWI-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-DELAY_SLOTS-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-EBREAK-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-ECALL-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-ENDIANESS-01.f
-tests/fwrisc_riscv_compliance_rv32i_I-FENCE.f
 tests/fwrisc_riscv_compliance_rv32i_I-IO.f
 tests/fwrisc_riscv_compliance_rv32i_I-JAL-01.f
 tests/fwrisc_riscv_compliance_rv32i_I-JALR-01.f
