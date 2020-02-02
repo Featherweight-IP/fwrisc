@@ -13,7 +13,7 @@ class ZephyrSynchronizationTest(ZephyrTests):
         super().__init__(tracer_bfm)
         self.threada_count = 0
         self.threadb_count = 0
-        self.sync_limit = 64
+        self.sync_limit = 32
         
     def configure_tracer(self):
         super().configure_tracer()
