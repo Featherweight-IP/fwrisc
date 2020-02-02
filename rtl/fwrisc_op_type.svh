@@ -67,12 +67,13 @@ parameter [4:0]
    * op = OPA
    * op_c = offset of jump base
    */
-  OP_TYPE_JUMP   = (OP_TYPE_MDS+5'd1),
+  OP_TYPE_JUMP   = (OP_TYPE_MDS+5'd1), // 4
   
   /**
    * 
    */
   OP_TYPE_SYSTEM = (OP_TYPE_JUMP+5'd1),
+
   /**
    * OP_TYPE_CSR (6)
    * op_a = regs[rs1]
