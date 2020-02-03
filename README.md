@@ -1,5 +1,8 @@
 # FWRISC
 
+[![Build Status](https://dev.azure.com/mballance/mballance/_apis/build/status/mballance.fwrisc?branchName=master)](https://dev.azure.com/mballance/mballance/_build/latest?definitionId=8&branchName=master)
+
+
 FWRISC-S is a _Featherweight RISC-V_ implementation of the RV32IMC instruction set with
 IoT-appropriate security features. This implementation supports the integer instructions,
 registers, CSRs, and exceptions as required by the RISC-V spec.
