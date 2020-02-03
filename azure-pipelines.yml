@@ -36,8 +36,8 @@ jobs:
       cd ve/fwrisc_rv32i/sim
       echo "** Running Icarus Verilog Test"
       runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim ivl
-      echo "** Running Verilator Test"
-      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
+#      echo "** Running Verilator Test"
+#      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
     displayName: 'Run Tests'
 
   - task: PublishTestResults@2
