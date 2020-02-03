@@ -40,8 +40,8 @@ jobs:
       runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
     displayName: 'Run Tests'
 
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/result.xml'
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/result.xml'
 
