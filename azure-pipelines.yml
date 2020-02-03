@@ -35,8 +35,8 @@ jobs:
       export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
       cd ve/fwrisc_rv32i/sim
       echo "** Running Icarus Verilog Test"
-      runtest.pl -tl testlists/fwrisc_riscv_unit_tests.tl -sim ivl
+      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim ivl
       echo "** Running Verilator Test"
-      runtest.pl -tl testlists/fwrisc_riscv_unit_tests.tl -sim vlsim +tool.vlsim.tracevcd
+      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
     displayName: 'Run Tests'
 
