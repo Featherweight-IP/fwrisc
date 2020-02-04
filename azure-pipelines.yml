@@ -45,8 +45,8 @@ jobs:
       export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
       cd ve/fwrisc_rv32i/sim
       echo "** Running Icarus Verilog Test"
-      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim ivl
-    displayName: 'Run Tests (Icarus)'
+      runtest.pl -j1 -tl testlists/fwrisc_riscv_azure_tests.tl -sim ivl
+    displayName: 'RV32I (Icarus)'
 
   - script: |
       source activate BuildEnv
@@ -57,8 +57,8 @@ jobs:
       export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
       cd ve/fwrisc_rv32i/sim
       echo "** Running Verilator Test"
-      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
-    displayName: 'Run Tests (Verilator)'
+      runtest.pl -j1 -tl testlists/fwrisc_riscv_azure_tests.tl -sim vlsim +tool.vlsim.tracevcd
+    displayName: 'RV32I (Verilator)'
 
   - task: PublishTestResults@2
     inputs:
