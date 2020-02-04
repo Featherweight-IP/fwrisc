@@ -31,6 +31,10 @@ jobs:
       source etc/fwrisc_env.sh
       which_conda=`which conda`
       conda_bindir=`dirname $which_conda`
+      echo "#!/bin/sh" > $conda_bindir/gcc
+      echo "echo 'Hello from gcc'" >> $conda_bindir/gcc
+      echo "exec \$CC \$*" >> $conda_bindir/gcc
+      chmod +x $conda_bindir/gcc
       conda_dir=`dirname $conda_bindir`
       export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
       cd ve/fwrisc_rv32i/sim
