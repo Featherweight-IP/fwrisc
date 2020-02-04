@@ -2,7 +2,7 @@ variables:
   build_num: $(Build.BuildNumber)
   
 jobs:
-- job: PyPi_Linux
+- job: FWRISC
   pool:
    vmImage: 'ubuntu-18.04'
   steps:
@@ -36,9 +36,21 @@ jobs:
       cd ve/fwrisc_rv32i/sim
       echo "** Running Icarus Verilog Test"
       runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim ivl
+    displayName: 'Run Tests (Icarus)'
+
+  - script: |
+      source activate BuildEnv
+      source etc/fwrisc_env.sh
+      which_conda=`which conda`
+      conda_bindir=`dirname $which_conda`
+      conda_dir=`dirname $conda_bindir`
+      export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
+      cd ve/fwrisc_rv32i/sim
+      echo "** Running Icarus Verilog Test"
+      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim ivl
       echo "** Running Verilator Test"
       runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
-    displayName: 'Run Tests'
+    displayName: 'Run Tests (Verilator)'
 
   - task: PublishTestResults@2
     inputs:
