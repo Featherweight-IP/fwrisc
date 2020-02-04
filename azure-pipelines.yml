@@ -19,6 +19,16 @@ jobs:
   - script: |
       source activate BuildEnv
       conda install -y -c litex-hub --name BuildEnv iverilog verilator gcc-riscv32-elf-newlib dtc
+      # We need to ensure that 'gcc' and 'g++' point to the Conda versions
+      source activate BuildEnv
+      which_conda=`which conda`
+      conda_bindir=`dirname $which_conda`
+      echo "#!/bin/sh" > $conda_bindir/gcc
+      echo "exec \$CC \$*" >> $conda_bindir/gcc
+      chmod +x $conda_bindir/gcc
+      echo "#!/bin/sh" > $conda_bindir/g++
+      echo "exec \$CXX \$*" >> $conda_bindir/g++
+      chmod +x $conda_bindir/g++
     displayName: 'Setup Test Tools'
 
   - script: |
@@ -31,10 +41,6 @@ jobs:
       source etc/fwrisc_env.sh
       which_conda=`which conda`
       conda_bindir=`dirname $which_conda`
-      echo "#!/bin/sh" > $conda_bindir/gcc
-      echo "echo 'Hello from gcc'" >> $conda_bindir/gcc
-      echo "exec \$CC \$*" >> $conda_bindir/gcc
-      chmod +x $conda_bindir/gcc
       conda_dir=`dirname $conda_bindir`
       export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
       cd ve/fwrisc_rv32i/sim
@@ -50,8 +56,6 @@ jobs:
       conda_dir=`dirname $conda_bindir`
       export LD_LIBRARY_PATH=$conda_dir/lib:$LD_LIBRARY_PATH
       cd ve/fwrisc_rv32i/sim
-      echo "** Running Icarus Verilog Test"
-      runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim ivl
       echo "** Running Verilator Test"
       runtest.pl -tl testlists/fwrisc_riscv_instr_tests.tl -sim vlsim +tool.vlsim.tracevcd
     displayName: 'Run Tests (Verilator)'
