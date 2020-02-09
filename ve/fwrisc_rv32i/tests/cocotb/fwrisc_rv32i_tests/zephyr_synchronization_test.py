@@ -6,6 +6,7 @@ Created on Feb 1, 2020
 import cocotb
 from fwrisc_rv32i_tests.zephyr_tests import ZephyrTests
 from cocotb.bfms import BfmMgr
+from fwrisc_tracer_bfm.fwrisc_tracer_signal_bfm import FwriscTracerSignalBfm
 
 class ZephyrSynchronizationTest(ZephyrTests):
     
@@ -17,6 +18,10 @@ class ZephyrSynchronizationTest(ZephyrTests):
         
     def configure_tracer(self):
         super().configure_tracer()
+        if "trace_all" in cocotb.plusargs:
+            self.tracer_bfm.set_trace_instr(1, 1, 1)
+            self.tracer_bfm.set_trace_all_memwrite(1)
+            self.tracer_bfm.set_trace_reg_writes(1)
 #         self.tracer_bfm.set_trace_instr(1, 1, 1)
 #         self.tracer_bfm.set_trace_all_memwrite(1)
 #         self.tracer_bfm.set_trace_reg_writes(1)
@@ -35,7 +40,13 @@ class ZephyrSynchronizationTest(ZephyrTests):
     
 @cocotb.test()
 def runtest(dut):
-    tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
+    use_tf_bfm = "use_sig_bfm" not in cocotb.plusargs
+   
+    if use_tf_bfm:
+        tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
+    else:
+        tracer_bfm = FwriscTracerSignalBfm(dut.u_dut.u_core.u_tracer)
+        
     test = ZephyrSynchronizationTest(tracer_bfm)
     
     yield test.run()    

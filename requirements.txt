@@ -9,4 +9,5 @@ pyyaml
 -e git+https://github.com/pybfms/mem_bfms_core.git#egg=mem_bfms_core
 -e git+https://github.com/fvutils/fltools.git#egg=fltools
 
+migen
 

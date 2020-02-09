@@ -33,6 +33,12 @@ class FwriscTracerSignalBfm():
             if self.scope.ivalid:
 #                print("instr_exec")
                 self.instr_exec(int(self.scope.pc), int(self.scope.instr))
+                
+            if self.scope.mvalid and self.scope.mwrite:
+                self.mem_write(
+                    int(self.scope.maddr), 
+                    int(self.scope.mstrb),
+                    int(self.scope.mdata))
         pass
     
     def add_addr_region(self, base, limit):
@@ -73,14 +79,5 @@ class FwriscTracerSignalBfm():
         self.lock.release()
         return ret
 
-    def set_trace_all_memwrite(self, t):
-        pass
-    
-    def set_trace_all_instr(self, t):
-        pass
-    
-    def set_trace_reg_writes(self, t):
-        pass
-    
     
     
