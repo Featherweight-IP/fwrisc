@@ -3,9 +3,9 @@ Created on Nov 20, 2019
 
 @author: ballance
 '''
+import pybfms
 import cocotb
-from cocotb.triggers import RisingEdge, Event
-from cocotb.bfms import BfmMgr
+from cocotb.triggers import RisingEdge, Event, Timer
 from fwrisc_tracer_bfm import FwriscTracerBfmIF
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
@@ -24,6 +24,8 @@ class InstrTests(FwriscTracerBfmIF):
         
         self.trace_instr = "trace_instr" in cocotb.plusargs
         self.trace_memwrite = "trace_memwrite" in cocotb.plusargs
+        
+        tracer_bfm.add_listener(self)
         
 
     def init_mem(self):
@@ -63,17 +65,15 @@ class InstrTests(FwriscTracerBfmIF):
         else:
             print("Error: out-of-bounds access")
             
-    @cocotb.coroutine
-    def run(self):
+    async def run(self):
         self.configure_tracer()
         self.init_mem()
 
-        yield self.test_done_ev.wait()
+        await self.test_done_ev.wait()
         
-        yield self.check()
+        await self.check()
 
-    @cocotb.coroutine
-    def check(self):
+    async def check(self):
         reg_data = []
         
         sw_image = cocotb.plusargs["SW_IMAGE"]
@@ -107,7 +107,7 @@ class InstrTests(FwriscTracerBfmIF):
                 exp_l.append([reg, exp])        
         
         for i in range(64):
-            info = yield self.tracer_bfm.get_reg_info(i)
+            info = await self.tracer_bfm.get_reg_info(i)
             reg_data.append(info)
         
         if not self.complete:
@@ -117,7 +117,7 @@ class InstrTests(FwriscTracerBfmIF):
             
 
 @cocotb.test()
-def runtest(dut):
+async def runtest(dut):
 #     print("--> runtest")
 #     yield RisingEdge(dut.clock)
 #     print("<-- runtest")
@@ -128,12 +128,22 @@ def runtest(dut):
 #     for b in bfms:
 #         print("BFM: " + b.bfm_info.inst_name)
 #         
-    tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
+    await pybfms.init()
+    tracer_bfm = pybfms.find_bfm(".*u_tracer")
+    sram_bfm = pybfms.find_bfm(".*u_sram")
     test = InstrTests(tracer_bfm)
-    tracer_bfm.add_listener(test)
     
 #    signal_tracer = FwriscTracerSignalBfm(dut.u_tracer)
     
-    yield test.run()
+    await test.run()
+    
+    for i in range(4):
+        data = await sram_bfm.read(i)
+        print("addr=" + hex(i) + " data=" + hex(data))
+        for j in range(4):
+            await sram_bfm.write(i, 0x55555555, (1 << j))
+            data = await sram_bfm.read(i)
+            print("    addr=" + hex(i) + " data=" + hex(data))
+            
     
     

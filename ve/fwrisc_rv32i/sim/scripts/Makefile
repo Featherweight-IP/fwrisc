@@ -2,7 +2,7 @@
 include $(PACKAGES_DIR)/packages.mk
 include $(PACKAGES_DIR)/simscripts/mkfiles/plusargs.mk
 
-PLUSARGS += +tool.cocotb
+PLUSARGS += +tool.cocotb +tool.pybfms
 
 # Ensure cocotb resolves X appropriately when running with signals
 COCOTB_RESOLVE_X=ZEROS
@@ -11,7 +11,7 @@ export COCOTB_RESOLVE_X
 PYTHONPATH:=$(FWRISC)/ve/fwrisc_rv32i/tests/cocotb:$(PYTHONPATH)
 PYTHONPATH:=$(FWRISC)/ve/fwrisc_tracer_bfm/src:$(PYTHONPATH)
 
-COCOTB_BFM_MODULES += fwrisc_tracer_bfm
+PYBFMS_BFM_MODULES += fwrisc_tracer_bfm generic_sram_bfms
 
 MK_INCLUDES += $(FWRISC)/ve/fwrisc_rv32i/tests/fwrisc_tests.mk
 

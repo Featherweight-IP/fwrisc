@@ -4,8 +4,9 @@ Created on Feb 1, 2020
 @author: ballance
 '''
 import cocotb
+import pybfms
 from fwrisc_rv32i_tests.zephyr_tests import ZephyrTests
-from cocotb.bfms import BfmMgr
+from cocotb.triggers import Timer
 
 class ZephyrPhilosophersTest(ZephyrTests):
     
@@ -36,8 +37,11 @@ class ZephyrPhilosophersTest(ZephyrTests):
             self.test_done_ev.set()
     
 @cocotb.test()
-def runtest(dut):
-    tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
+async def runtest(dut):
+    await Timer(0)
+    pybfms.BfmMgr.init()
+    tracer_bfm = pybfms.BfmMgr.find_bfm(".*u_tracer")
+    
     test = ZephyrPhilosophersTest(tracer_bfm)
     
-    yield test.run()    
+    await test.run()    

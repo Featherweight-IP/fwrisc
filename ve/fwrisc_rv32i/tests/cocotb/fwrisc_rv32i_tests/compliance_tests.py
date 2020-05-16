@@ -53,14 +53,13 @@ class ComplianceTests(InstrTests):
                 
                 begin_signature_offset += 4
             
-    @cocotb.coroutine
-    def check(self):
+    async def check(self):
         sw_image = cocotb.plusargs["SW_IMAGE"]
         testname = cocotb.plusargs["TESTNAME"]
         ref_file = cocotb.plusargs["REF_FILE"]
         
         if False:
-            yield Timer(0)
+            await Timer(0)
         
         with open(sw_image, "rb") as f:
             elffile = ELFFile(f)
@@ -85,12 +84,12 @@ class ComplianceTests(InstrTests):
                     if exp != actual:
                         raise Exception("Test Failed")
         
-        yield Timer(0)
+        await Timer(0)
         pass
         
 
 @cocotb.test()
-def runtest(dut):
+async def runtest(dut):
     
     tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
     test = ComplianceTests(tracer_bfm)
@@ -98,4 +97,4 @@ def runtest(dut):
     
 #    signal_tracer = FwriscTracerSignalBfm(dut.u_tracer)
     
-    yield test.run()
+    await test.run()

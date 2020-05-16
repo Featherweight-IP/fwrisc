@@ -51,6 +51,7 @@ module fwrisc_decode #(
 		output reg[31:0]	op_c, 		// operand b (immediate or register)
 		// Instruction
 		output[3:0]			op,
+		output reg[5:0]		rs2_raddr,	// rs2 register address
 		output reg[5:0]		rd_raddr, 	// Destination register address
 		output reg[4:0]		op_type
 		);
@@ -124,6 +125,7 @@ module fwrisc_decode #(
 	wire[5:0]		c_rs1_rd_p   = ({3'b001, instr[9:7]});
 	wire[5:0]		c_rd_rs2_p   = ({3'b001, instr[4:2]});
 	wire[5:0]		c_rd_rs1     = instr[11:7];
+	reg[4:0]		rs2_raddr_w;
 	reg[5:0]		rd_raddr_w;
 	
 	assign op = op_w;
@@ -131,6 +133,7 @@ module fwrisc_decode #(
 	always @* begin
 		op_w = 0; // TODO
 		
+			rs2_raddr_w = instr[24:20];
 			rd_raddr_w = instr[11:7];
 			
 			case (instr[6:4])
@@ -353,12 +356,14 @@ module fwrisc_decode #(
 			decode_state <= STATE_DECODE;
 			decode_valid_r <= 1'b0;
 			rd_raddr <= 0;
+			rs2_raddr <= 0;
 		end else begin
 			case (decode_state) 
 				STATE_DECODE: begin // Wait for data to be valid
 					if (fetch_valid) begin
 						decode_state <= STATE_REG;
 						imm_lui <= {instr[31:12], 12'h000};
+						rs2_raddr <= rs2_raddr_w;
 						rd_raddr <= rd_raddr_w;
 						op_type <= op_type_w;
 //						op <= op_w;

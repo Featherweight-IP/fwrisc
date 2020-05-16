@@ -27,6 +27,7 @@ module fwrisc #(
 		parameter ENABLE_COMPRESSED=1,
 		parameter ENABLE_MUL_DIV=1,
 		parameter ENABLE_DEP=1,
+		parameter ENABLE_CALLSTACK_CACHE=1,
 		parameter ENABLE_COUNTERS=1
 		) (
 		input			clock,
@@ -102,6 +103,7 @@ module fwrisc #(
 	wire[31:0]				op_b;
 	wire[31:0]				op_c;
 	wire[3:0]				op;
+	wire[4:0]				rs2_raddr;
 	wire[5:0]				rd_raddr;
 	wire[4:0]				op_type;
 	fwrisc_decode #(
@@ -124,6 +126,7 @@ module fwrisc #(
 		.op_b               (op_b              ), 
 		.op_c               (op_c              ), 
 		.op                 (op                ), 
+		.rs2_raddr          (rs2_raddr          ), 
 		.rd_raddr           (rd_raddr          ), 
 		.op_type            (op_type           ));
 	
@@ -156,6 +159,7 @@ module fwrisc #(
 		.op_b            (op_b           ), 
 		.op              (op             ), 
 		.op_c            (op_c           ), 
+		.rs2             (rs2_raddr      ), 
 		.rd              (rd_raddr       ), 
 		.rd_waddr        (rd_waddr       ), 
 		.rd_wdata        (rd_wdata       ), 

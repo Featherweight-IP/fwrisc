@@ -131,6 +131,6 @@ module fwrisc_tracer_bfm(
 		end
 	end
 	
-${cocotb_bfm_api_impl}
+${pybfms_api_impl}
 	
 endmodule

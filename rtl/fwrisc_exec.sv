@@ -26,7 +26,8 @@
 module fwrisc_exec #(
 		parameter			ENABLE_COMPRESSED=1,
 		parameter 			ENABLE_MUL_DIV=1,
-		parameter			ENABLE_DEP=1
+		parameter			ENABLE_DEP=1,
+		parameter			ENABLE_CALLSTACK_CACHE=1
 		)(
 		input				clock,
 		input				reset,
@@ -42,6 +43,7 @@ module fwrisc_exec #(
 		input[31:0]			op_b,
 		input[5:0]			op,
 		input[31:0]			op_c,
+		input[5:0]			rs2,
 		input[5:0]			rd,
 		
 		output reg[5:0]		rd_waddr,
@@ -122,6 +124,26 @@ module fwrisc_exec #(
 	end else begin
 		assign dep_violation = 0;
 	end
+	
+	// callstack cache checks for attempted return-oriented programming
+	wire					callstack_violation;
+	if (ENABLE_CALLSTACK_CACHE) begin
+		wire[31:0]			exp_data;
+		wire				exp_data_valid;
+		fwrisc_callstack_cache u_callstack_cache (
+			.clock           (clock          ), 
+			.reset           (reset          ), 
+			.decode_valid    (decode_valid   ), 
+			.op_type         (op_type        ), 
+			.op              (op             ), 
+			.rs2             (rs2            ), 
+			.rd              (rd             ), 
+			.exp_data        (exp_data       ), 
+			.exp_data_valid  (exp_data_valid ));
+		assign callstack_violation = 0;
+	end else begin
+		assign callstack_violation = 0;
+	end 
 
 	// Without compressed-instruction support, branches to addresses 
 	// that are not word aligned must trigger an execption

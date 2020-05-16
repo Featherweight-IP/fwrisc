@@ -5,7 +5,7 @@ Created on Feb 1, 2020
 '''
 import cocotb
 from fwrisc_rv32i_tests.zephyr_tests import ZephyrTests
-from cocotb.bfms import BfmMgr
+import pybfms
 
 class ZephyrSynchronizationTest(ZephyrTests):
     
@@ -17,10 +17,7 @@ class ZephyrSynchronizationTest(ZephyrTests):
         
     def configure_tracer(self):
         super().configure_tracer()
-#         self.tracer_bfm.set_trace_instr(1, 1, 1)
-#         self.tracer_bfm.set_trace_all_memwrite(1)
-#         self.tracer_bfm.set_trace_reg_writes(1)
-        
+
     def console_line(self, line):
         super().console_line(line)
         
@@ -34,8 +31,9 @@ class ZephyrSynchronizationTest(ZephyrTests):
             self.test_done_ev.set()
     
 @cocotb.test()
-def runtest(dut):
-    tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
+async def runtest(dut):
+    await pybfms.BfmMgr.init()
+    tracer_bfm = pybfms.BfmMgr.find_bfm(".*u_tracer")
     test = ZephyrSynchronizationTest(tracer_bfm)
     
-    yield test.run()    
+    await test.run()    

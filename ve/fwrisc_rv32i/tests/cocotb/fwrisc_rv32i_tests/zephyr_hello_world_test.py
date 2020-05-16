@@ -19,8 +19,8 @@ class ZephyrHelloWorldTest(ZephyrTests):
             self.test_done_ev.set()
     
 @cocotb.test()
-def runtest(dut):
+async def runtest(dut):
     tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
     test = ZephyrHelloWorldTest(tracer_bfm)
     
-    yield test.run()    
+    await test.run()    

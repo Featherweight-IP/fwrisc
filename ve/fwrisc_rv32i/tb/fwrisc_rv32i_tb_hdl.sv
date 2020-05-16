@@ -10,7 +10,10 @@
  * 
  * Unit-level testbench for the FWRISC core
  */
-module fwrisc_rv32i_tb_hdl(input clock);
+module fwrisc_rv32i_tb_hdl(
+    // Note: this is needed in order to allow cocotb's VPI integration work
+    input clock /*verilator public*/
+    );
 	
 `ifdef HAVE_HDL_CLKGEN
 	reg clk_r = 0;
@@ -80,7 +83,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	assign dready = 1;
 	assign iready = 1;
 
-	generic_sram_byte_en_dualport #(
+	generic_sram_byte_en_dualport_target_bfm #(
 		.DATA_WIDTH        (32       ), 
 		.ADDRESS_WIDTH     (14       ), // 64k (4x16k)
 		.INIT_FILE         ("ram.hex")

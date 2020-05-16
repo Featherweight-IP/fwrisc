@@ -4,13 +4,14 @@ Created on Nov 23, 2019
 @author: ballance
 '''
 import cocotb
-from cocotb.bfms import BfmMgr
+import pybfms
 from fwrisc_rv32i_tests.instr_tests import InstrTests
 from fwrisc_tracer_bfm.fwrisc_tracer_signal_bfm import FwriscTracerSignalBfm
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 from sys import stdout
+from cocotb.triggers import Timer
 
 
 class ZephyrTests(InstrTests):
@@ -74,31 +75,30 @@ class ZephyrTests(InstrTests):
     def console_line(self, line):
         self.console_output.append(line)
         
-
-    @cocotb.coroutine
-    def run(self):
+    async def run(self):
         # Configure the tracer BFM
         self.configure_tracer()
         
-        yield self.test_done_ev.wait()
+        await self.test_done_ev.wait()
         pass
 
-    @cocotb.coroutine        
-    def check(self):
+    async def check(self):
         print("Check")
         pass
         
 
 @cocotb.test()
-def runtest(dut):
+async def runtest(dut):
     use_tf_bfm = True
    
     if use_tf_bfm: 
-        tracer_bfm = BfmMgr.find_bfm(".*u_tracer")
+        await Timer(0)
+        pybfms.BfmMgr.init()
+        tracer_bfm = pybfms.BfmMgr.find_bfm(".*u_tracer")
     else:
         tracer_bfm = FwriscTracerSignalBfm(dut.u_dut.u_core.u_tracer)
     test = ZephyrTests(tracer_bfm)
     
     
-    yield test.run()
+    await test.run()
     
