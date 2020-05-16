@@ -45,8 +45,13 @@ class ZephyrTests(InstrTests):
         self.tracer_bfm.add_addr_region(
             self.ram_console_addr,
             self.ram_console_addr+1023)
+
+    def instr_exec(self, pc, instr):
+#        print("instr_exec: 0x%08x" % (pc))
+        pass
         
     def mem_write(self, maddr, mstrb, mdata):
+#        print("mem_write: 0x%08x 0x%08x" % (maddr, mdata))
         if maddr >= self.ram_console_addr and maddr < self.ram_console_addr+1024 and mdata != 0:
             ch = 0
             if mstrb == 1:

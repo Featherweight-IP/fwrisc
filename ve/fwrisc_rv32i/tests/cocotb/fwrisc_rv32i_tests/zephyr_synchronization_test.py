@@ -18,6 +18,14 @@ class ZephyrSynchronizationTest(ZephyrTests):
     def configure_tracer(self):
         super().configure_tracer()
 
+        if "trace_all" in cocotb.plusargs:
+            self.tracer_bfm.set_trace_instr(1, 1, 1)
+            self.tracer_bfm.set_trace_all_memwrite(1)
+            self.tracer_bfm.set_trace_reg_writes(1)
+#         self.tracer_bfm.set_trace_instr(1, 1, 1)
+#         self.tracer_bfm.set_trace_all_memwrite(1)
+#         self.tracer_bfm.set_trace_reg_writes(1)
+        
     def console_line(self, line):
         super().console_line(line)
         
