@@ -72,9 +72,11 @@ module fwrisc_regfile #(
 `ifdef FORMAL
 	initial regs[0] = 0;
 `else
+	`ifdef FWRISC_SOFT_CORE
 	initial begin
 		$readmemh("regs.hex", regs);
 	end
+	`endif
 `endif
 	
 	// Assert the soft-reset request
@@ -87,6 +89,8 @@ module fwrisc_regfile #(
 			dep_lo_r <= 0;
 			dep_hi_r <= 0;
 			mtvec_r <= 0;
+			`ifndef FWRISC_SOFT_CORE
+			`endif
 		end else begin
 			case ({rd_wen, rd_waddr})
 				{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
