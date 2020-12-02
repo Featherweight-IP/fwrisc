@@ -81,7 +81,8 @@ module fwrisc_regfile #(
 	
 	// Assert the soft-reset request
 	assign soft_reset_req = (rd_wen && rd_waddr == CSR_SOFT_RESET);
-	
+
+	integer reg_i;
 	always @(posedge clock) begin
 		if (reset) begin
 			cycle_count <= 0;
@@ -90,6 +91,9 @@ module fwrisc_regfile #(
 			dep_hi_r <= 0;
 			mtvec_r <= 0;
 			`ifndef FWRISC_SOFT_CORE
+			for (reg_i=0; reg_i<'h40; reg_i=reg_i+1) begin
+				regs[reg_i] <= {32{1'b0}};
+			end
 			`endif
 		end else begin
 			case ({rd_wen, rd_waddr})

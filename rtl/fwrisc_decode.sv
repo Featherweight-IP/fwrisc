@@ -63,6 +63,7 @@ module fwrisc_decode #(
 	`include "fwrisc_system_op.svh"
 
 	// Compute various immediate outputs
+	wire[31:0]		instr; // 32-bit instruction
 	wire[31:0]		imm_jump = $signed({instr[31], instr[19:12], instr[20], instr[30:21],1'b0});
 	wire[31:0]		auipc_imm_31_12 = {instr[31:12], {12{1'b0}}};
 	wire[31:0]		imm_11_0 = $signed({instr[31:20]});
@@ -72,7 +73,6 @@ module fwrisc_decode #(
 	wire[31:0]		imm_branch = $signed({instr[31], instr[7], instr[30:25], instr[11:8], 1'b0});	
 	reg[4:0]		op_type_w;
 	reg[3:0]		op_w;
-	wire[31:0]		instr; // 32-bit instruction
 	reg				decode_valid_r;
 
 	// Hook in the compressed-instruction expander if compressed
@@ -353,6 +353,8 @@ module fwrisc_decode #(
 			decode_state <= STATE_DECODE;
 			decode_valid_r <= 1'b0;
 			rd_raddr <= 0;
+			imm_lui <= 0;
+			op_type <= 0;
 		end else begin
 			case (decode_state) 
 				STATE_DECODE: begin // Wait for data to be valid

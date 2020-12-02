@@ -75,9 +75,11 @@ module fwrisc_fetch #(
 		if (reset) begin
 			state <= STATE_FETCH1;
 			instr_cache_valid <= 0;
+			instr_cache <= {16{1'b0}};
 			fetch_valid_r <= 0;
 			ivalid_r <= 0;
 			instr_c <= 0;
+			instr <= {32{1'b0}};
 		end else begin 
 			// 
 			case (state)

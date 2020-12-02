@@ -109,6 +109,7 @@ module fwrisc_exec #(
 	wire[31:0]				next_pc_seq = pc + next_pc_seq_incr;
 	// Holds the value to be written to MTVAL
 	reg[31:0]				mtval = 0;
+	wire [31:0]				alu_out;
 
 	// dep_violation determines if execution goes
 	// outside the valid region
@@ -398,7 +399,6 @@ module fwrisc_exec #(
 		endcase
 	end
 	
-	wire [31:0]	alu_out;
 	
 	// TODO: rd_wen
 	always @* begin
