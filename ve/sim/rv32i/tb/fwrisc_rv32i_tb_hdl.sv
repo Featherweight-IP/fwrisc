@@ -45,7 +45,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 `endif
 
 	
-	reg reset = 1;
+	reg reset /*verilator public*/ = 1;
 	reg [7:0] reset_cnt = 0;
 	
 	always @(posedge clock) begin
@@ -80,6 +80,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	assign dready = 1;
 	assign iready = 1;
 
+	/*
 	generic_sram_byte_en_dualport #(
 		.DATA_WIDTH        (32       ), 
 		.ADDRESS_WIDTH     (14       ), // 64k (4x16k)
@@ -96,6 +97,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 		.i_address_b       (daddr[31:2]				),
 		.i_byte_enable_b   (dwstb  					),
 		.o_read_data_b     (drdata					));
+	*/
 	
 
 	// Connect the tracer BFM to 
@@ -119,7 +121,6 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	wire 			tracer_mvalid = u_dut.u_core.u_tracer.mvalid;
 
 /*
- */
 	fwrisc_tracer_bfm u_tracer(
 			.clock(clock),
 			.reset(reset),
@@ -139,6 +140,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
 			.mwrite(tracer_mwrite),
 			.mvalid(tracer_mvalid)
 		);
+ */
 /*
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),

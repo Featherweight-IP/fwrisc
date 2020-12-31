@@ -1,0 +1,9 @@
+
+tests:
+    - i32_btype:
+        description: Tests btype instructions
+    - i32_itype:
+    - i32_lui:
+    - i32_rtype:
+    
+        

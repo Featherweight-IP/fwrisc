@@ -1,0 +1,7 @@
+
+tests:
+    - instr:
+        path: mkdv_instr.yaml
+      
+    - riscv_compliance:
+        path: mkdv_riscv_compliance.yaml 

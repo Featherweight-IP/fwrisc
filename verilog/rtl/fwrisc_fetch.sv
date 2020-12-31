@@ -49,13 +49,13 @@ module fwrisc_fetch #(
 	reg[2:0]		state;
 	reg[15:0]		instr_cache;
 	// Indicates whether the cached half-word is also compressed
-	wire 			instr_cache_c = (&instr_cache[1:0] != 1);
+	wire 			instr_cache_c = (&instr_cache[1:0] != 2'b01);
 	reg				instr_cache_valid;
 	// Note: Compressed instructions have 00, 01, or 10 low bits
 	// Low half-word is a compressed instruction
-	wire			instr_c_lo = (&idata[1:0] != 1);
+	wire			instr_c_lo = (&idata[1:0] != 2'b01);
 	// High half-word is a compressed instruction
-	wire			instr_c_hi = (&idata[17:16] != 1);
+	wire			instr_c_hi = (&idata[17:16] != 2'b01);
 	
 	wire			instr_c_next = (next_pc[1])?instr_c_hi:instr_c_lo;
 	
