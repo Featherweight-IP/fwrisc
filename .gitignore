@@ -1,4 +1,7 @@
 
 packages/
-rundir
+rundir/
+cache/
+
+__pycache__/
 

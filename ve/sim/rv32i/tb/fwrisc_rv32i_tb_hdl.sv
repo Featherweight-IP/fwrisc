@@ -1,7 +1,7 @@
 /****************************************************************************
  * fwrisc_tb.sv
  ****************************************************************************/
-`ifdef IVERILOG
+`ifdef NEED_TIMESCALE
 `timescale 1ns/1ns
 `endif
 
@@ -12,12 +12,16 @@
  */
 module fwrisc_rv32i_tb_hdl(input clock);
 	
-`ifdef HAVE_HDL_CLKGEN
+`ifdef HAVE_HDL_CLOCKGEN
 	reg clk_r = 0;
 	
 	initial begin
 		forever begin
+`ifdef NEED_TIMESCALE
+			#10;
+`else
 			#10ns;
+`endif
 			clk_r <= ~clk_r;
 		end
 	end
@@ -80,25 +84,21 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	assign dready = 1;
 	assign iready = 1;
 
-	/*
-	generic_sram_byte_en_dualport #(
-		.DATA_WIDTH        (32       ), 
-		.ADDRESS_WIDTH     (14       ), // 64k (4x16k)
-		.INIT_FILE         ("ram.hex")
+	generic_sram_byte_en_dualport_target_bfm #(
+		.DAT_WIDTH        (32       ), 
+		.ADR_WIDTH        (14       ) // 64k (4x16k)
 		) u_sram (
-		.i_clk             (clock            		), 
-		.i_write_data_a    (32'b0   				), 
-		.i_write_enable_a  (1'b0 					), 
-		.i_address_a       (iaddr[31:2]				), 
-		.i_byte_enable_a   (4'hf  					), 
-		.o_read_data_a     (idata    				), 
-		.i_write_data_b    (dwdata   				), 
-		.i_write_enable_b  ((dvalid && dwrite) 		), 
-		.i_address_b       (daddr[31:2]				),
-		.i_byte_enable_b   (dwstb  					),
-		.o_read_data_b     (drdata					));
-	*/
-	
+		.clock				(clock            		), 
+		.a_dat_w			(32'b0   				), 
+		.a_we				(1'b0 					), 
+		.a_adr				(iaddr[31:2]			), 
+		.a_sel				(4'hf  					), 
+		.a_dat_r			(idata    				), 
+		.b_dat_w			(dwdata   				), 
+		.b_we				((dvalid && dwrite) 	), 
+		.b_adr				(daddr[31:2]			),
+		.b_sel				(dwstb  				),
+		.b_dat_r			(drdata					));
 
 	// Connect the tracer BFM to 
 	wire [31:0]		tracer_pc = u_dut.u_core.u_tracer.pc;
@@ -120,7 +120,6 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	wire			tracer_mwrite = u_dut.u_core.u_tracer.mwrite;
 	wire 			tracer_mvalid = u_dut.u_core.u_tracer.mvalid;
 
-/*
 	fwrisc_tracer_bfm u_tracer(
 			.clock(clock),
 			.reset(reset),
@@ -140,7 +139,6 @@ module fwrisc_rv32i_tb_hdl(input clock);
 			.mwrite(tracer_mwrite),
 			.mvalid(tracer_mvalid)
 		);
- */
 /*
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),

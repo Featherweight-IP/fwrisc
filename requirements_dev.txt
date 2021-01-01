@@ -5,8 +5,8 @@ cocotb
 vlsim
 
 -e git+ssh://git@github.com/pybfms/pybfms.git#egg=pybfms
-# -e git+https://github.com/pybfms/generic_sram_bfms.git#egg=generic_sram_bfms
-# -e git+https://github.com/pybfms/mem_bfms_core.git#egg=mem_bfms_core
+-e git+ssh://git@github.com/pybfms/pybfms_generic_sram.git#egg=pybfms_generic_sram
+-e git+ssh://git@github.com/pybfms/pybfms_mem_core.git#egg=pybfms_mem_core
 -e git+ssh://git@github.com/fvutils/mkdv.git#egg=mkdv
 
 

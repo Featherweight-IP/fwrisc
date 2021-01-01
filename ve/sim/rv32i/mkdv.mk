@@ -2,12 +2,14 @@
 MKDV_MK := $(abspath $(lastword $(MAKEFILE_LIST)))
 TEST_DIR := $(dir $(MKDV_MK))
 MKDV_TOOL ?= vlsim
-MKDV_PLUGINS += cocotb 
+MKDV_PLUGINS += cocotb pybfms
 RISCV_CC=riscv32-unknown-elf-gcc
 
 MKDV_TEST ?= instr.arith.add
 
 TOP_MODULE = fwrisc_rv32i_tb_hdl
+
+PYBFMS_MODULES += generic_sram_bfms fwrisc_tracer_bfm
 
 VLSIM_CLKSPEC = clock=10ns
 
@@ -40,7 +42,7 @@ RULES := 1
 include $(TEST_DIR)/../../common/defs_rules.mk
 
 %.elf : %.S
-	$(Q)$(RISCV_CC) -o $@ $^ \
+	$(Q)$(RISCV_CC) -o $@ $^ -march=rv32i \
 		-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
 		-T$(TEST_DIR)/tests/unit/unit.ld
 
