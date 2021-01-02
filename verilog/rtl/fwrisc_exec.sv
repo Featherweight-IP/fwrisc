@@ -90,8 +90,7 @@ module fwrisc_exec #(
 
 	reg [3:0]				exec_state;
 	reg[31:0]				pc_next;
-	reg					pc_seq_next;
-	reg					instr_c_r;
+	reg						pc_seq_next;
 	wire					mds_in_valid = (
 			(op_type == OP_TYPE_MDS && exec_state == STATE_EXECUTE)
 			&& decode_valid
@@ -168,7 +167,7 @@ module fwrisc_exec #(
 		if (exec_state == STATE_BRANCH_TAKEN || exec_state == STATE_JUMP) begin
 			next_pc_seq_incr = 0;
 		end else begin
-			next_pc_seq_incr = (instr_c_r)?2:4;
+			next_pc_seq_incr = (instr_c)?2:4;
 		end
 	end
 
@@ -212,7 +211,6 @@ module fwrisc_exec #(
 					// we're done at the end of this state
 					if (decode_valid) begin
 						// TODO: determine cases where we need multi-cycle
-						instr_c_r <= instr_c;
 						case (op_type)
 							/**
 							 * STATE_EXECUTE: regs[rd] <= alu_out

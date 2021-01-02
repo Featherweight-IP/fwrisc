@@ -383,6 +383,7 @@ module fwrisc_decode #(
 		end
 	end
 
+
 endmodule
 
 

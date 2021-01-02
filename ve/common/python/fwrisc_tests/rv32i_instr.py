@@ -30,6 +30,8 @@ async def test(top):
     u_tracer.add_listener(mon)
     
     sw_image = cocotb.plusargs["sw.image"]
+    exp_l    = []
+    reg_data = []
 
     with open(sw_image, "rb") as f:
         elffile = ELFFile(f)
@@ -53,15 +55,51 @@ async def test(top):
             word |= (data[addr+3] << (8*3)) if addr+3 < len(data) else 0
             u_sram.write_nb(int(addr/4), word, 0xF)
             addr += 4
+            
+            symtab = elffile.get_section_by_name('.symtab')
+            start_expected = symtab.get_symbol_by_name("start_expected")[0]["st_value"]
+            end_expected = symtab.get_symbol_by_name("end_expected")[0]["st_value"]
+
+        section = None       
+        for i in range(elffile.num_sections()):
+            shdr = elffile._get_section_header(i)
+            if (start_expected >= shdr['sh_addr']) and (end_expected <= (shdr['sh_addr'] + shdr['sh_size'])):
+                start_expected -= shdr['sh_addr']
+                end_expected -= shdr['sh_addr']
+                section = elffile.get_section(i)
+                break
+
+        data = section.data()
+            
+          
+        for i in range(start_expected,end_expected,8):
+            reg = data[i+0] | (data[i+1] << 8) | (data[i+2] << 16) | (data[i+3] << 24)
+            exp = data[i+4] | (data[i+5] << 8) | (data[i+6] << 16) | (data[i+7] << 24)
+                
+            exp_l.append([reg, exp])                    
 
     addr = await mon.wait_exec({0x80000004}, 100)
     
-    if addr == -1:
-        # Timeout
-        pass
+    if addr != 0x80000004:
+        raise cocotb.result.TestError("execution timed out")
     
-    print("addr=" + str(addr))
-    
-    
+
+    for i in range(64):
+        info = await u_tracer.get_reg_info(i)
+        reg_data.append(info)
+        
+    print("exp_l: " + str(exp_l))
+    print("reg_data: " + str(reg_data))
+
+    errors = 0
+    for e in exp_l:
+        if reg_data[e[0]][0] == e[1]:
+            print(" x" + str(e[0]) + ": " + hex(e[1]))
+        else:
+            print("*x" + str(e[0]) + ": expect=" + hex(e[1]) + " actual=" + hex(reg_data[e[0]][0]))
+            errors += 1
+            
+    if errors:
+        raise cocotb.result.TestError("" + str(errors) + " register-compare errors")
     
     
