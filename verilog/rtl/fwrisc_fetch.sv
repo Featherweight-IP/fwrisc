@@ -84,7 +84,6 @@ module fwrisc_fetch #(
 			// 
 			case (state)
 				default /*STATE_FETCH1*/: begin // Wait for fetch to complete
-					iaddr <= {next_pc[31:2], 2'b0};
 					if (iready && ivalid_r) begin
 						instr_c <= instr_c_next;
 						// Decide what to do based on alignment and fetched data
@@ -110,17 +109,20 @@ module fwrisc_fetch #(
 								instr[15:0] <= idata[31:16];
 								instr_cache_valid <= 0;
 								ivalid_r <= 1;
+								iaddr <= {next_pc[31:2]+1'b1, 2'b0};
 								state <= STATE_FETCH2; // Need to fetch upper half-word
 							end
 							2'b11: begin // Fetch the high half-word
-								instr[15:0] <= idata[31:16];
+								instr <= {{16{1'b0}}, idata[31:16]};
 								instr_cache_valid <= 0;
+								fetch_valid_r <= 1;
 								ivalid_r <= 0;
 								state <= STATE_WAIT_DECODE; 
 							end
 						endcase
 					end else begin
 						ivalid_r <= 1;
+						iaddr <= {next_pc[31:2], 2'b0};
 					end
 				end
 						
@@ -133,6 +135,7 @@ module fwrisc_fetch #(
 						// TODO: for now, we always go back to fetch
 						// This is wasteful, but reliable
 						state <= STATE_FETCH1;
+						iaddr <= {next_pc[31:2], 2'b0};
 `ifdef UNDEFINED
 						if (!next_pc_seq) begin
 							instr_cache_valid <= 0;

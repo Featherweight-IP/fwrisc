@@ -24,7 +24,7 @@ class ExecMonitor(FwriscTracerBfmIF):
         return self.iaddr
         
     def instr_exec(self, pc, instr):
-        print("instr_exec: " + hex(pc))
+#        print("instr_exec: " + hex(pc))
         if pc in self.addr_s:
             self.iaddr = pc
             self.ev.set()

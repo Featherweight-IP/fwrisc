@@ -5,10 +5,11 @@ Created on Dec 30, 2020
 '''
 
 import cocotb
-import pybfms
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 from fwrisc_tracer_bfm.exec_monitor import ExecMonitor
+from gpio_bfms import GpioBfm
+import pybfms
 
 
 @cocotb.test()
@@ -22,6 +23,17 @@ async def test(top):
     u_sram = pybfms.find_bfm(".*u_sram")
     u_dbg_bfm = pybfms.find_bfm(".*u_dbg_bfm")
 
+    u_irq_bfm : GpioBfm = pybfms.find_bfm(".*u_irq_bfm")
+    
+    async def irq_toggle():
+        while True:
+            await cocotb.triggers.Timer(10, "us")
+            u_irq_bfm.set_gpio_out_bit(0, 1)
+            await cocotb.triggers.Timer(10, "us")
+            u_irq_bfm.set_gpio_out_bit(0, 0)
+    
+    cocotb.fork(irq_toggle())
+    
 #    mon = ExecMonitor()
 #    u_tracer.add_listener(mon)
     

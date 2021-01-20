@@ -3,7 +3,11 @@ name: fwrisc
 tests:
     - formal.decode:
         path: formal/decode
+    - formal.fetch:
+        path: formal/fetch
     - sim.rv32i:
         path: sim/rv32i
+    - sim.rv32c:
+        path: sim/rv32c
 
 

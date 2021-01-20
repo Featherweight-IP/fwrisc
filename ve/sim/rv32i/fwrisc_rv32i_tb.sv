@@ -6,11 +6,11 @@
 `endif
 
 /**
- * Module: fwrisc_rv32i_tb_hdl
+ * Module: fwrisc_rv32i_tb
  * 
  * Unit-level testbench for the FWRISC core
  */
-module fwrisc_rv32i_tb_hdl(input clock);
+module fwrisc_rv32i_tb(input clock);
 	
 `ifdef HAVE_HDL_CLOCKGEN
 	reg clk_r = 0;
@@ -36,7 +36,7 @@ module fwrisc_rv32i_tb_hdl(input clock);
         initial begin
                 if ($test$plusargs("dumpvars")) begin
                         $dumpfile("simx.vcd");
-                        $dumpvars(0, fwrisc_rv32i_tb_hdl);
+                        $dumpvars(0, fwrisc_rv32i_tb);
                 end
                 if (!$value$plusargs("timeout=%d", timeout)) begin
                         timeout=1000;
@@ -65,6 +65,30 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	wire [31:0]			daddr, dwdata, drdata;
 	wire [3:0]			dwstb;
 	wire				dwrite, dvalid, dready;
+	wire				irq;
+	
+	// RVFI interface signals
+	wire[0:0] 	rvfi_valid;
+	wire[63:0] 	rvfi_order;
+	wire[31:0] 	rvfi_insn;
+	wire[0:0]	rvfi_trap;
+	wire[0:0] 	rvfi_halt;
+	wire[0:0]	rvfi_intr;
+	wire[1:0]	rvfi_mode;
+	wire[1:0]	rvfi_ixl;
+	wire[4:0]	rvfi_rs1_addr;
+	wire[4:0]	rvfi_rs2_addr;
+	wire[31:0]	rvfi_rs1_rdata;
+	wire[31:0] 	rvfi_rs2_rdata;
+	wire[4:0] 	rvfi_rd_addr;
+	wire[31:0] 	rvfi_rd_wdata;
+	wire[31:0]	rvfi_pc_rdata;
+	wire[31:0]	rvfi_pc_wdata;
+	wire[31:0]	rvfi_mem_addr;
+	wire[3:0] 	rvfi_mem_rmask;
+	wire[3:0]	rvfi_mem_wmask;
+	wire[31:0]	rvfi_mem_rdata;
+	wire[31:0]	rvfi_mem_wdata;
 	
 	fwrisc_rv32i u_dut(
 		.clock   (clock  ), 
@@ -79,14 +103,46 @@ module fwrisc_rv32i_tb_hdl(input clock);
 		.dwstb   (dwstb  ), 
 		.dwrite  (dwrite ), 
 		.dvalid  (dvalid ), 
-		.dready  (dready ));
+		.dready  (dready ),
+		.irq     (irq    ),
+		.rvfi_valid			(rvfi_valid        	),
+		.rvfi_order			(rvfi_order			),
+		.rvfi_insn			(rvfi_insn			),
+		.rvfi_trap			(rvfi_trap			),
+		.rvfi_halt			(rvfi_halt			),
+		.rvfi_intr			(rvfi_intr			),
+		.rvfi_mode			(rvfi_mode			),
+		.rvfi_ixl			(rvfi_ixl			),
+		.rvfi_rs1_addr		(rvfi_rs1_addr		),
+		.rvfi_rs2_addr		(rvfi_rs2_addr		),
+		.rvfi_rs1_rdata		(rvfi_rs1_rdata		),
+		.rvfi_rs2_rdata		(rvfi_rs2_rdata		),
+		.rvfi_rd_addr		(rvfi_rd_addr		),
+		.rvfi_rd_wdata		(rvfi_rd_wdata		),
+		.rvfi_pc_rdata		(rvfi_pc_rdata		),
+		.rvfi_pc_wdata		(rvfi_pc_wdata		),
+		.rvfi_mem_addr		(rvfi_mem_addr		),
+		.rvfi_mem_rmask		(rvfi_mem_rmask		),
+		.rvfi_mem_wmask		(rvfi_mem_wmask		),
+		.rvfi_mem_rdata		(rvfi_mem_rdata		),
+		.rvfi_mem_wdata		(rvfi_mem_wdata		)		
+		);
+	
+	gpio_bfm #(
+			.WIDTH(1)
+		) u_irq_bfm (
+			.clock			(clock			),
+			.reset			(reset			),
+			.gpio_in		(1'b0			),
+			.gpio_out		(irq			)
+		);
 	
 	assign dready = 1;
 	assign iready = 1;
 
 	generic_sram_byte_en_dualport_target_bfm #(
 		.DAT_WIDTH        (32       ), 
-		.ADR_WIDTH        (14       ) // 64k (4x16k)
+		.ADR_WIDTH        (19       ) // 2M
 		) u_sram (
 		.clock				(clock            		), 
 		.a_dat_w			(32'b0   				), 
@@ -120,25 +176,42 @@ module fwrisc_rv32i_tb_hdl(input clock);
 	wire			tracer_mwrite = u_dut.u_core.u_tracer.mwrite;
 	wire 			tracer_mvalid = u_dut.u_core.u_tracer.mvalid;
 
-	fwrisc_tracer_bfm u_tracer(
-			.clock(clock),
-			.reset(reset),
-			.pc(tracer_pc),
-			.instr(tracer_instr),
-			.ivalid(tracer_ivalid),
-			.ra_raddr(tracer_ra_raddr),
-			.ra_rdata(tracer_ra_rdata),
-			.rb_raddr(tracer_rb_raddr),
-			.rb_rdata(tracer_rb_rdata),
-			.rd_waddr(tracer_rd_waddr),
-			.rd_wdata(tracer_rd_wdata),
-			.rd_write(tracer_rd_write),
-			.maddr(tracer_maddr),
-			.mdata(tracer_mdata),
-			.mstrb(tracer_mstrb),
-			.mwrite(tracer_mwrite),
-			.mvalid(tracer_mvalid)
+	riscv_debug_bfm u_dbg_bfm (
+			.clock				(clock				),
+			.reset				(reset				),
+			.valid				(rvfi_valid        	),
+			.instr				(rvfi_insn			),
+			.trap				(rvfi_trap			),
+			.halt				(rvfi_halt			),
+			.intr				(rvfi_intr			),
+			.mode				(rvfi_mode			),
+			.ixl				(rvfi_ixl			),
+			.rd_addr			(rvfi_rd_addr		),
+			.rd_wdata			(rvfi_rd_wdata		),
+			.pc					(rvfi_pc_rdata		),
+			.mem_addr			(rvfi_mem_addr		),
+			.mem_wmask			(rvfi_mem_wmask		),
+			.mem_wdata			(rvfi_mem_wdata		)			
 		);
+//	fwrisc_tracer_bfm u_tracer(
+//			.clock(clock),
+//			.reset(reset),
+//			.pc(tracer_pc),
+//			.instr(tracer_instr),
+//			.ivalid(tracer_ivalid),
+//			.ra_raddr(tracer_ra_raddr),
+//			.ra_rdata(tracer_ra_rdata),
+//			.rb_raddr(tracer_rb_raddr),
+//			.rb_rdata(tracer_rb_rdata),
+//			.rd_waddr(tracer_rd_waddr),
+//			.rd_wdata(tracer_rd_wdata),
+//			.rd_write(tracer_rd_write),
+//			.maddr(tracer_maddr),
+//			.mdata(tracer_mdata),
+//			.mstrb(tracer_mstrb),
+//			.mwrite(tracer_mwrite),
+//			.mvalid(tracer_mvalid)
+//		);
 /*
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),

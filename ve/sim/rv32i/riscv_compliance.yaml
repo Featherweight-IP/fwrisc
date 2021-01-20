@@ -1,241 +1,241 @@
 tests:
-    - I-ADD-01:
+    - add-01:
        variables:
-         - SW_IMAGE: I-ADD-01.elf
+         - SW_IMAGE: add-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-ADD-01.reference_output
-    - I-ADDI-01:
+         - REF_FILE: add-01.reference_output
+    - addi-01:
        variables:
-         - SW_IMAGE: I-ADDI-01.elf
+         - SW_IMAGE: addi-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-ADDI-01.reference_output
-    - I-AND-01:
+         - REF_FILE: addi-01.reference_output
+    - and-01:
        variables:
-         - SW_IMAGE: I-AND-01.elf
+         - SW_IMAGE: and-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-AND-01.reference_output
-    - I-ANDI-01:
+         - REF_FILE: and-01.reference_output
+    - andi-01:
        variables:
-         - SW_IMAGE: I-ANDI-01.elf
+         - SW_IMAGE: andi-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-ANDI-01.reference_output
-    - I-AUIPC-01:
+         - REF_FILE: andi-01.reference_output
+    - auipc-01:
        variables:
-         - SW_IMAGE: I-AUIPC-01.elf
+         - SW_IMAGE: auipc-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-AUIPC-01.reference_output
-    - I-BEQ-01:
+         - REF_FILE: auipc-01.reference_output
+    - beq-01:
        variables:
-         - SW_IMAGE: I-BEQ-01.elf
+         - SW_IMAGE: beq-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-BEQ-01.reference_output
-    - I-BGE-01:
+         - REF_FILE: beq-01.reference_output
+    - bge-01:
        variables:
-         - SW_IMAGE: I-BGE-01.elf
+         - SW_IMAGE: bge-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-BGE-01.reference_output
-    - I-BGEU-01:
+         - REF_FILE: bge-01.reference_output
+    - bgeu-01:
        variables:
-         - SW_IMAGE: I-BGEU-01.elf
+         - SW_IMAGE: bgeu-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-BGEU-01.reference_output
-    - I-BLT-01:
+         - REF_FILE: bgeu-01.reference_output
+    - blt-01:
        variables:
-         - SW_IMAGE: I-BLT-01.elf
+         - SW_IMAGE: blt-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-BLT-01.reference_output
-    - I-BLTU-01:
+         - REF_FILE: blt-01.reference_output
+    - bltu-01:
        variables:
-         - SW_IMAGE: I-BLTU-01.elf
+         - SW_IMAGE: bltu-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-BLTU-01.reference_output
-    - I-BNE-01:
+         - REF_FILE: bltu-01.reference_output
+    - bne-01:
        variables:
-         - SW_IMAGE: I-BNE-01.elf
+         - SW_IMAGE: bne-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-BNE-01.reference_output
-    - I-DELAY.SLOTS-01:
+         - REF_FILE: bne-01.reference_output
+           #    - delay.slots-01:
+           #       variables:
+           #         - SW_IMAGE: delay_slots-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: delay_slots-01.reference_output
+           #    - ebreak-01:
+           #       variables:
+           #         - SW_IMAGE: ebreak-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: ebreak-01.reference_output
+           #    - ecall-01:
+           #       variables:
+           #         - SW_IMAGE: ecall-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: ecall-01.reference_output
+           #    - endianess-01:
+           #       variables:
+           #         - SW_IMAGE: endianess-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: endianess-01.reference_output
+           #    - io:
+           #       variables:
+           #         - SW_IMAGE: io.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: io.reference_output
+    - jal-01:
        variables:
-         - SW_IMAGE: I-DELAY_SLOTS-01.elf
+         - SW_IMAGE: jal-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-DELAY_SLOTS-01.reference_output
-    - I-EBREAK-01:
+         - REF_FILE: jal-01.reference_output
+    - jalr-01:
        variables:
-         - SW_IMAGE: I-EBREAK-01.elf
+         - SW_IMAGE: jalr-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-EBREAK-01.reference_output
-    - I-ECALL-01:
+         - REF_FILE: jalr-01.reference_output
+    - lb-align-01:
        variables:
-         - SW_IMAGE: I-ECALL-01.elf
+         - SW_IMAGE: lb-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-ECALL-01.reference_output
-    - I-ENDIANESS-01:
+         - REF_FILE: lb-align-01.reference_output
+    - lbu-align-01:
        variables:
-         - SW_IMAGE: I-ENDIANESS-01.elf
+         - SW_IMAGE: lbu-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-ENDIANESS-01.reference_output
-    - I-IO:
+         - REF_FILE: lbu-align-01.reference_output
+    - lh-align-01:
        variables:
-         - SW_IMAGE: I-IO.elf
+         - SW_IMAGE: lh-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-IO.reference_output
-    - I-JAL-01:
+         - REF_FILE: lh-align-01.reference_output
+    - lhu-align-01:
        variables:
-         - SW_IMAGE: I-JAL-01.elf
+         - SW_IMAGE: lhu-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-JAL-01.reference_output
-    - I-JALR-01:
+         - REF_FILE: lhu-align-01.reference_output
+    - lui-01:
        variables:
-         - SW_IMAGE: I-JALR-01.elf
+         - SW_IMAGE: lui-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-JALR-01.reference_output
-    - I-LB-01:
+         - REF_FILE: lui-01.reference_output
+    - lw-align-01:
        variables:
-         - SW_IMAGE: I-LB-01.elf
+         - SW_IMAGE: lw-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-LB-01.reference_output
-    - I-LBU-01:
+         - REF_FILE: lw-align-01.reference_output
+           #    - misalign.jmp-01:
+           #       variables:
+           #         - SW_IMAGE: misalign_jmp-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: misalign_jmp-01.reference_output
+           #    - misalign.ldst-01:
+           #       variables:
+           #         - SW_IMAGE: misalign_ldst-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: misalign_ldst-01.reference_output
+           #    - nop-01:
+           #       variables:
+           #         - SW_IMAGE: nop-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: nop-01.reference_output
+    - or-01:
        variables:
-         - SW_IMAGE: I-LBU-01.elf
+         - SW_IMAGE: or-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-LBU-01.reference_output
-    - I-LH-01:
+         - REF_FILE: or-01.reference_output
+    - ori-01:
        variables:
-         - SW_IMAGE: I-LH-01.elf
+         - SW_IMAGE: ori-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-LH-01.reference_output
-    - I-LHU-01:
+         - REF_FILE: ori-01.reference_output
+           #    - rf.size-01:
+           #       variables:
+           #         - SW_IMAGE: rf_size-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: rf_size-01.reference_output
+           #    - rf.width-01:
+           #       variables:
+           #         - SW_IMAGE: rf_width-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: rf_width-01.reference_output
+           #    - rf.x0-01:
+           #       variables:
+           #         - SW_IMAGE: rf_x0-01.elf
+           #         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
+           #         - REF_FILE: rf_x0-01.reference_output
+    - sb-align-01:
        variables:
-         - SW_IMAGE: I-LHU-01.elf
+         - SW_IMAGE: sb-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-LHU-01.reference_output
-    - I-LUI-01:
+         - REF_FILE: sb-align-01.reference_output
+    - sh-align-01:
        variables:
-         - SW_IMAGE: I-LUI-01.elf
+         - SW_IMAGE: sh-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-LUI-01.reference_output
-    - I-LW-01:
+         - REF_FILE: sh-align-01.reference_output
+    - sll-01:
        variables:
-         - SW_IMAGE: I-LW-01.elf
+         - SW_IMAGE: sll-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-LW-01.reference_output
-    - I-MISALIGN.JMP-01:
+         - REF_FILE: sll-01.reference_output
+    - slli-01:
        variables:
-         - SW_IMAGE: I-MISALIGN_JMP-01.elf
+         - SW_IMAGE: slli-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-MISALIGN_JMP-01.reference_output
-    - I-MISALIGN.LDST-01:
+         - REF_FILE: slli-01.reference_output
+    - slt-01:
        variables:
-         - SW_IMAGE: I-MISALIGN_LDST-01.elf
+         - SW_IMAGE: slt-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-MISALIGN_LDST-01.reference_output
-    - I-NOP-01:
+         - REF_FILE: slt-01.reference_output
+    - slti-01:
        variables:
-         - SW_IMAGE: I-NOP-01.elf
+         - SW_IMAGE: slti-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-NOP-01.reference_output
-    - I-OR-01:
+         - REF_FILE: slti-01.reference_output
+    - sltiu-01:
        variables:
-         - SW_IMAGE: I-OR-01.elf
+         - SW_IMAGE: sltiu-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-OR-01.reference_output
-    - I-ORI-01:
+         - REF_FILE: sltiu-01.reference_output
+    - sltu-01:
        variables:
-         - SW_IMAGE: I-ORI-01.elf
+         - SW_IMAGE: sltu-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-ORI-01.reference_output
-    - I-RF.size-01:
+         - REF_FILE: sltu-01.reference_output
+    - sra-01:
        variables:
-         - SW_IMAGE: I-RF_size-01.elf
+         - SW_IMAGE: sra-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-RF_size-01.reference_output
-    - I-RF.width-01:
+         - REF_FILE: sra-01.reference_output
+    - srai-01:
        variables:
-         - SW_IMAGE: I-RF_width-01.elf
+         - SW_IMAGE: srai-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-RF_width-01.reference_output
-    - I-RF.x0-01:
+         - REF_FILE: srai-01.reference_output
+    - srl-01:
        variables:
-         - SW_IMAGE: I-RF_x0-01.elf
+         - SW_IMAGE: srl-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-RF_x0-01.reference_output
-    - I-SB-01:
+         - REF_FILE: srl-01.reference_output
+    - srli-01:
        variables:
-         - SW_IMAGE: I-SB-01.elf
+         - SW_IMAGE: srli-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SB-01.reference_output
-    - I-SH-01:
+         - REF_FILE: srli-01.reference_output
+    - sub-01:
        variables:
-         - SW_IMAGE: I-SH-01.elf
+         - SW_IMAGE: sub-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SH-01.reference_output
-    - I-SLL-01:
+         - REF_FILE: sub-01.reference_output
+    - sw-align-01:
        variables:
-         - SW_IMAGE: I-SLL-01.elf
+         - SW_IMAGE: sw-align-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SLL-01.reference_output
-    - I-SLLI-01:
+         - REF_FILE: sw-align-01.reference_output
+    - xor-01:
        variables:
-         - SW_IMAGE: I-SLLI-01.elf
+         - SW_IMAGE: xor-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SLLI-01.reference_output
-    - I-SLT-01:
+         - REF_FILE: xor-01.reference_output
+    - xori-01:
        variables:
-         - SW_IMAGE: I-SLT-01.elf
+         - SW_IMAGE: xori-01.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SLT-01.reference_output
-    - I-SLTI-01:
-       variables:
-         - SW_IMAGE: I-SLTI-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SLTI-01.reference_output
-    - I-SLTIU-01:
-       variables:
-         - SW_IMAGE: I-SLTIU-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SLTIU-01.reference_output
-    - I-SLTU-01:
-       variables:
-         - SW_IMAGE: I-SLTU-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SLTU-01.reference_output
-    - I-SRA-01:
-       variables:
-         - SW_IMAGE: I-SRA-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SRA-01.reference_output
-    - I-SRAI-01:
-       variables:
-         - SW_IMAGE: I-SRAI-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SRAI-01.reference_output
-    - I-SRL-01:
-       variables:
-         - SW_IMAGE: I-SRL-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SRL-01.reference_output
-    - I-SRLI-01:
-       variables:
-         - SW_IMAGE: I-SRLI-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SRLI-01.reference_output
-    - I-SUB-01:
-       variables:
-         - SW_IMAGE: I-SUB-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SUB-01.reference_output
-    - I-SW-01:
-       variables:
-         - SW_IMAGE: I-SW-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-SW-01.reference_output
-    - I-XOR-01:
-       variables:
-         - SW_IMAGE: I-XOR-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-XOR-01.reference_output
-    - I-XORI-01:
-       variables:
-         - SW_IMAGE: I-XORI-01.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
-         - REF_FILE: I-XORI-01.reference_output
+         - REF_FILE: xori-01.reference_output

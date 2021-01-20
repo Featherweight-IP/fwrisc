@@ -66,10 +66,10 @@ async def test(top):
     print("<-- init")
     
     u_sram = pybfms.find_bfm(".*u_sram")
-    u_tracer = pybfms.find_bfm(".*u_tracer")
+    u_dbg_bfm = pybfms.find_bfm(".*u_dbg_bfm")
     
-    mon = ExecMonitor()
-    u_tracer.add_listener(mon)
+#    mon = ExecMonitor()
+#    u_tracer.add_listener(mon)
    
     # Load the test sw
     sw_image = cocotb.plusargs["sw.image"]

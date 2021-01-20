@@ -27,7 +27,10 @@ module fwrisc #(
 		parameter ENABLE_COMPRESSED=1,
 		parameter ENABLE_MUL_DIV=1,
 		parameter ENABLE_DEP=1,
-		parameter ENABLE_COUNTERS=1
+		parameter ENABLE_COUNTERS=1,
+		parameter ENABLE_FULL_GPR=1, // 0 -> RV32E
+		parameter CSR_VENDORID=32'h00000000,
+		parameter CSR_HARTID=32'h00000000
 		) (
 		input			clock,
 		input			reset,
@@ -43,13 +46,39 @@ module fwrisc #(
 		output[3:0]		dwstb,
 		output			dwrite,
 		input[31:0]		drdata,
-		input			dready
+		input			dready,
+		input			irq,
+		
+		// RVFI interface signals
+		output reg[0:0] 	rvfi_valid,
+		output reg[63:0] 	rvfi_order = {64{1'b0}},
+		output reg[31:0] 	rvfi_insn,
+		output reg[0:0]		rvfi_trap,
+		output reg[0:0] 	rvfi_halt,
+		output reg[0:0]		rvfi_intr,
+		output reg[1:0]		rvfi_mode,
+		output reg[1:0]		rvfi_ixl,
+		output reg[4:0]		rvfi_rs1_addr,
+		output reg[4:0]		rvfi_rs2_addr,
+		output reg[31:0]	rvfi_rs1_rdata,
+		output reg[31:0] 	rvfi_rs2_rdata,
+		output reg[4:0] 	rvfi_rd_addr,
+		output reg[31:0] 	rvfi_rd_wdata,
+		output reg[31:0]	rvfi_pc_rdata,
+		output reg[31:0]	rvfi_pc_wdata,
+		output reg[31:0]	rvfi_mem_addr,
+		output reg[3:0] 	rvfi_mem_rmask,
+		output reg[3:0]		rvfi_mem_wmask,
+		output reg[31:0]	rvfi_mem_rdata,
+		output reg[31:0]	rvfi_mem_wdata
 		);
 	
 	wire[31:0]				pc;
 	wire[31:0]				pc_seq;
 	wire					fetch_valid;
 	wire					instr_complete;
+	wire					trap;
+	wire					tret;
 	wire[31:0]				instr;
 	wire					instr_c;
 	wire					int_reset;
@@ -60,6 +89,7 @@ module fwrisc #(
 	reg[31:0]				tracer_instr;
 	wire[31:0]				dep_lo;
 	wire[31:0]				dep_hi;
+
 	
 	assign int_reset = (reset | soft_reset_count != 0);
 	
@@ -142,6 +172,8 @@ module fwrisc #(
 	wire[5:0]				rd_waddr;
 	wire[31:0]				rd_wdata;
 	wire					rd_wen;
+	wire					meie;
+	wire					mie;
 	fwrisc_exec #(
 		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED ),
 		.ENABLE_MUL_DIV  (ENABLE_MUL_DIV )
@@ -150,6 +182,8 @@ module fwrisc #(
 		.reset           (int_reset      ), 
 		.decode_valid    (decode_valid   ),
 		.instr_complete  (instr_complete ), 
+		.trap            (trap           ),
+		.tret            (tret           ),
 		.instr_c         (instr_c        ), 
 		.op_type         (op_type        ), 
 		.op_a            (op_a           ), 
@@ -171,7 +205,10 @@ module fwrisc #(
 		.dwdata          (dwdata         ),
 		.dwstb           (dwstb          ),
 		.drdata          (drdata         ),
-		.dready          (dready         )
+		.dready          (dready         ),
+		.irq             (irq            ),
+		.meie            (meie           ),
+		.mie             (mie            )
 		);
 	
 	fwrisc_regfile #(
@@ -181,7 +218,10 @@ module fwrisc #(
 		.clock            (clock              ), 
 		.reset            (int_reset          ), 
 		.soft_reset_req   (soft_reset_req     ),
-		.instr_complete   (instr_complete     ), 
+		.instr_complete   (instr_complete     ),
+		.trap             (trap               ),
+		.tret             (tret               ),
+		.irq              (irq                ),
 		.ra_raddr         (ra_raddr           ), 
 		.ra_rdata         (ra_rdata           ), 
 		.rb_raddr         (rb_raddr           ), 
@@ -191,7 +231,9 @@ module fwrisc #(
 		.rd_wen           (rd_wen             ),
 		.dep_lo           (dep_lo             ),
 		.dep_hi           (dep_hi             ),
-		.mtvec            (mtvec              )
+		.mtvec            (mtvec              ),
+		.meie             (meie               ),
+		.mie              (mie                )
 		);
 	
 	fwrisc_tracer u_tracer (
@@ -213,6 +255,59 @@ module fwrisc #(
 		.mwrite    (dwrite                    ), 
 		.mvalid    ((dready && dvalid)        ));
 
+	always @(posedge clock) begin
+		if (rvfi_valid) begin
+			rvfi_order <= rvfi_order + 1;
+		end
+	end
+
+	// Track whether a non-zero register was written
+	reg[31:0] rd_wdata_r;
+	always @(posedge clock) begin
+		if (reset) begin
+			rd_wdata_r <= {32{1'b0}};
+		end else begin
+			if (instr_complete) begin
+				rd_wdata_r <= {32{1'b0}};
+			end else begin
+				if (rd_wen) begin
+					if (|rd_waddr) begin
+						rd_wdata_r <= rd_wdata;
+					end else begin
+						rd_wdata_r <= {32{1'b0}};
+					end
+				end
+			end
+		end
+	end
+
+	// RVFI connection
+	always @(negedge clock) begin
+		rvfi_valid <= instr_complete;
+		if (instr_complete) begin
+			rvfi_insn  <= tracer_instr;
+			rvfi_trap  <= 0;
+			rvfi_halt  <= 0;
+			rvfi_intr  <= 0;
+			rvfi_mode  <= 0;
+			rvfi_ixl   <= 0;
+			rvfi_rs1_addr  <= ra_raddr;
+			rvfi_rs2_addr  <= rb_raddr;
+			rvfi_rs1_rdata <= ra_rdata;
+			rvfi_rs2_rdata <= rb_rdata;
+			rvfi_rd_addr   <= rd_waddr;
+			rvfi_rd_wdata  <= rd_wdata_r;
+			rvfi_pc_rdata  <= tracer_pc;
+			rvfi_pc_wdata  <= pc;
+			rvfi_mem_addr  <= daddr;
+			rvfi_mem_rmask <= 0;
+			rvfi_mem_wmask <= 0;
+			rvfi_mem_rdata <= drdata;
+			rvfi_mem_wdata <= dwdata;
+		end
+	end
+`ifdef FWRISC_FORMAL
+`endif /* FWRISC_FORMAL */
 
 endmodule
 

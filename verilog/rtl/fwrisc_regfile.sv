@@ -24,6 +24,7 @@
  * TODO: Add module documentation
  */
 module fwrisc_regfile #(
+		parameter ENABLE_FULL_GPR=1,
 		parameter ENABLE_COUNTERS=1,
 		// Enable Data Execution Protection
 		parameter ENABLE_DEP=1
@@ -32,6 +33,9 @@ module fwrisc_regfile #(
 		input				reset,
 		output				soft_reset_req,
 		input				instr_complete,
+		input				trap,
+		input				tret,
+		input				irq,
 
 		input[5:0]			ra_raddr,
 		output reg[31:0]	ra_rdata,
@@ -43,7 +47,9 @@ module fwrisc_regfile #(
 		
 		output[31:0]		dep_lo,
 		output[31:0]		dep_hi,
-		output[31:0]		mtvec
+		output[31:0]		mtvec,
+		output reg			meie,
+		output reg			mie
 		);
 	
 	`include "fwrisc_csr_addr.svh"
@@ -79,6 +85,8 @@ module fwrisc_regfile #(
 	`endif
 `endif
 	
+	reg mpie;
+	
 	// Assert the soft-reset request
 	assign soft_reset_req = (rd_wen && rd_waddr == CSR_SOFT_RESET);
 
@@ -90,6 +98,9 @@ module fwrisc_regfile #(
 			dep_lo_r <= 0;
 			dep_hi_r <= 0;
 			mtvec_r <= 0;
+			meie <= 1'b1;
+			mie <= 1'b1;
+			mpie <= 1'b0;
 			`ifndef FWRISC_SOFT_CORE
 			for (reg_i=0; reg_i<'h40; reg_i=reg_i+1) begin
 				regs[reg_i] <= {32{1'b0}};
@@ -107,6 +118,16 @@ module fwrisc_regfile #(
 				{1'b1, CSR_MINSTRETH}: instr_count <= {rd_wdata, instr_count[31:0]};
 				default: instr_count <= (instr_complete)?(instr_count + 1):instr_count;
 			endcase
+		
+			if (trap) begin
+				mpie <= mie;
+				mie <= 1'b0;
+			end
+			if (tret) begin
+				mie <= mpie;
+				mpie <= 1'b0;
+			end
+				
 	
 			// Once the DEP registers have been written and enabled,
 			// they are locked out until the next reset
@@ -118,6 +139,13 @@ module fwrisc_regfile #(
 			end
 			if (rd_wen && rd_waddr == CSR_MTVEC) begin
 				mtvec_r <= rd_wdata;
+			end
+			if (rd_wen && rd_waddr == CSR_MIE) begin
+				meie <= rd_wdata[11];
+			end
+			if (rd_wen && rd_waddr == CSR_MSTATUS) begin
+				mie <= rd_wdata[3];
+				mpie <= rd_wdata[7];
 			end
 		end
 	end
@@ -143,6 +171,7 @@ module fwrisc_regfile #(
 			CSR_MINSTRETH: rb_rdata <= instr_count[63:32];
 			// TODO: DEP (?)
 			CSR_MTVEC:     rb_rdata <= mtvec_r;
+			CSR_MIP:       rb_rdata <= {20'b0, irq, 11'b0};
 			default:       rb_rdata <= regs[rb_raddr];
 		endcase
 	end

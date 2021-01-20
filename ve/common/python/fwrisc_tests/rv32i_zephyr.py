@@ -10,7 +10,6 @@ from fwrisc_tracer_bfm.exec_monitor import ExecMonitor
 import pybfms
 from fwrisc_tracer_bfm.fwrisc_tracer_bfm_if import FwriscTracerBfmIF
 from riscv_debug_bfms.riscv_debug_bfm import RiscvDebugBfm, RiscvDebugTraceLevel
-from gpio_bfms.GpioBfm import GpioBfm
 
 class ComplianceTestTube(object):
     
@@ -62,16 +61,39 @@ async def test(top):
     
     u_sram = pybfms.find_bfm(".*u_sram")
     u_dbg_bfm : RiscvDebugBfm = pybfms.find_bfm(".*u_dbg_bfm")
-    u_irq_bfm : GpioBfm = pybfms.find_bfm(".*u_irq_bfm")
     
-    async def irq_toggle():
-        while True:
-            await cocotb.triggers.Timer(10, "us")
-            u_irq_bfm.set_gpio_out_bit(0, 1)
-            await cocotb.triggers.Timer(10, "us")
-            u_irq_bfm.set_gpio_out_bit(0, 0)
+    sw_image = cocotb.plusargs["sw.image"]
+    u_dbg_bfm.load_elf(sw_image)
+
+    print("Note: loading image " + sw_image)    
+    with open(sw_image, "rb") as f:
+        elffile = ELFFile(f)
+        
+        # Find the section that contains the data we need
+        section = None
+        for i in range(elffile.num_sections()):
+            shdr = elffile._get_section_header(i)
+#            print("sh_addr=" + hex(shdr['sh_addr']) + " sh_size=" + hex(shdr['sh_size']) + " flags=" + hex(shdr['sh_flags']))
+#            print("  keys=" + str(shdr.keys()))
+            print("sh_size=" + hex(shdr['sh_size']) + " sh_flags=" + hex(shdr['sh_flags']))
+            if shdr['sh_size'] != 0 and (shdr['sh_flags'] & 0x2) == 0x2:
+                section = elffile.get_section(i)
+                data = section.data()
+                addr = shdr['sh_addr']
+                j = 0
+                while j < len(data):
+                    word = (data[j+0] << (8*0))
+                    word |= (data[j+1] << (8*1)) if j+1 < len(data) else 0
+                    word |= (data[j+2] << (8*2)) if j+2 < len(data) else 0
+                    word |= (data[j+3] << (8*3)) if j+3 < len(data) else 0
+                    print("Write: " + hex(addr) + "(" + hex(int((addr & 0xFFFFF)/4)) + ") " + hex(word))
+                    u_sram.write_nb(int((addr & 0xFFFFF)/4), word, 0xF)
+                    addr += 4
+                    j += 4    
     
-    cocotb.fork(irq_toggle())
+    await cocotb.triggers.Timer(10, 'ms')
+    
+    return
     
 #    u_dbg_bfm.trace_level(RiscvDebugTraceLevel.Call)
 #    u_dbg_bfm.en_disasm = False
@@ -121,9 +143,6 @@ async def test(top):
 
     tube = ComplianceTestTube(u_sram, u_dbg_bfm, write_str, write_num)
     u_dbg_bfm.add_instr_exec_cb(tube.instr_exec)
-    
-    addr = await u_dbg_bfm.wait_exec({"self_loop"}, 100)
-    
 
     addr = await u_dbg_bfm.wait_exec({"self_loop"}, 100000)
     

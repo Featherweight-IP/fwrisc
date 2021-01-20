@@ -12,6 +12,9 @@ MKDV_VL_INCDIRS += $(PACKAGES_DIR)/fwprotocol-defs/src/sv
 
 MKDV_PYTHONPATH += $(DV_COMMON_DIR)/python
 
+PATH:=$(PACKAGES_DIR)/python/bin:$(PATH)
+export PATH
+
 include $(MKDV_MKFILE)
 
 else # Rules

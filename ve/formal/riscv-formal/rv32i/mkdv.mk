@@ -6,7 +6,10 @@ MKDV_TEST ?= jal
 SBY_MODE ?= cover
 SBY_DEPTH ?= 64
 
-SBY_OPTIONS = mode=bmc expect=pass,fail append=0 depth=81 skip=80
+#SBY_OPTIONS = mode=bmc expect=pass,fail append=0 depth=81 skip=80
+#SBY_OPTIONS = mode=bmc expect=pass,fail append=0 depth=41 skip=40
+#SBY_OPTIONS = mode=bmc expect=pass,fail append=0 depth=21 skip=20
+SBY_OPTIONS = mode=bmc expect=pass,fail append=0 depth=11 skip=10
 SBY_PREP_OPTIONS += -flatten -nordff
 
 MKDV_TESTS += i32_btype i32_itype i32_lui i32_rtype
@@ -16,7 +19,8 @@ RISCV_INSN = $(MKDV_TEST)
 MKDV_VL_DEFINES += RISCV_FORMAL RISCV_FORMAL_NRET=1 
 MKDV_VL_DEFINES += RISCV_FORMAL_XLEN=32 RISCV_FORMAL_ILEN=32
 MKDV_VL_DEFINES += RISCV_FORMAL_RESET_CYCLES=1 
-MKDV_VL_DEFINES += RISCV_FORMAL_CHECK_CYCLE=80
+#MKDV_VL_DEFINES += RISCV_FORMAL_CHECK_CYCLE=80
+MKDV_VL_DEFINES += RISCV_FORMAL_CHECK_CYCLE=10
 MKDV_VL_DEFINES += RISCV_FORMAL_CHANNEL_IDX=0 
 
 MKDV_VL_DEFINES += RISCV_FORMAL_ALIGNED_MEM

@@ -1,0 +1,5 @@
+tests:
+    - hello_world:
+       variables:
+         - SW_IMAGE: hello_world/zephyr/zephyr.elf
+         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
