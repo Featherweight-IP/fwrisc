@@ -56,8 +56,6 @@ module fwrisc_regfile #(
 	// In case we need a writable mtvec
 	reg[31:0]			mtvec_r;
 
-	reg[5:0]			ra_raddr_r;
-	reg[5:0]			rb_raddr_r;
 	reg[31:0]			regs['h3f:0];
 
 	if (ENABLE_DEP) begin

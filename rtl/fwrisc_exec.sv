@@ -40,7 +40,7 @@ module fwrisc_exec #(
 		
 		input[31:0]			op_a,
 		input[31:0]			op_b,
-		input[5:0]			op,
+		input[3:0]			op,
 		input[31:0]			op_c,
 		input[5:0]			rd,
 		

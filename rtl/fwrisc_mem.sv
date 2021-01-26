@@ -60,6 +60,7 @@ module fwrisc_mem (
 	always @(posedge clock) begin
 		if (reset) begin
 			ack_valid <= 0;
+			ack_data <= {32{1'b0}};
 			mem_state <= 0;
 			dvalid <= 0;
 			daddr <= 0;
