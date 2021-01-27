@@ -32,6 +32,8 @@ module fwrisc_exec #(
 		input				reset,
 		input				decode_valid,
 		output reg 			instr_complete,
+		output reg			trap, // Exception
+		output reg			tret, // Return from exception
 
 		// Indicates whether the instruction is compressed
 		input				instr_c,
@@ -66,7 +68,11 @@ module fwrisc_exec #(
 		output[31:0]		dwdata,
 		output[3:0]			dwstb,
 		input[31:0]			drdata,
-		input				dready
+		input				dready,
+		
+		input				irq,
+		input				meie,
+		input               mie
 		);
 	
 	`include "fwrisc_alu_op.svh"
@@ -105,6 +111,7 @@ module fwrisc_exec #(
 	
 	// Holds the next PC if execution is sequential
 	reg[2:0]				next_pc_seq_incr;
+	reg						mcause_int;
 	reg[3:0]				mcause;
 	wire[31:0]				next_pc_seq = pc + next_pc_seq_incr;
 	// Holds the value to be written to MTVAL
@@ -114,6 +121,7 @@ module fwrisc_exec #(
 	// dep_violation determines if execution goes
 	// outside the valid region
 	wire					dep_violation;
+	generate
 	if (ENABLE_DEP) begin
 		assign dep_violation = (
 			dep_lo[0] && dep_hi[0]
@@ -123,10 +131,14 @@ module fwrisc_exec #(
 	end else begin
 		assign dep_violation = 0;
 	end
+	endgenerate
+
+	wire					ei_req = (irq && meie && mie);
 
 	// Without compressed-instruction support, branches to addresses 
 	// that are not word aligned must trigger an execption
 	wire					jump_target_misaligned;
+	generate
 	if (!ENABLE_COMPRESSED) begin
 		assign jump_target_misaligned = (
 			(exec_state == STATE_JUMP || exec_state == STATE_BRANCH_TAKEN) 
@@ -135,6 +147,7 @@ module fwrisc_exec #(
 	end else begin
 		assign jump_target_misaligned = 0;
 	end
+	endgenerate
 	
 	reg						ldst_addr_misaligned;
 	always @* begin
@@ -199,87 +212,109 @@ module fwrisc_exec #(
 	always @(posedge clock) begin
 		if (reset) begin
 			exec_state <= STATE_EXECUTE;
-			instr_complete <= 0;
+			instr_complete <= 1'b0;
+			trap <= 1'b0;
+			tret <= 1'b0;
 			pc <= 'h8000_0000;
 			pc_seq <= 1;
-			mcause <= 0;
+			mcause <= 4'b0;
+			mcause_int <= 1'b0;
 		end else begin
 //			instr_complete <= instr_complete_w;
 			case (exec_state)
 				STATE_EXECUTE: begin
-					// Single-cycle execute state. For ALU instructions,
-					// we're done at the end of this state
 					if (decode_valid) begin
-						// TODO: determine cases where we need multi-cycle
-						case (op_type)
-							/**
-							 * STATE_EXECUTE: regs[rd] <= alu_out
-							 */
-							OP_TYPE_ARITH: begin
-								pc <= pc_next;
-								pc_seq <= pc_seq_next;
-								instr_complete <= 1;
-							end
-							/**
-							 * STATE_EXECUTE: alu_out = (op_a ? op_b)
-							 * STATE_BRANCH_TAKEN: pc <= pc + jump_offset (op_c)
-							 */
-							OP_TYPE_BRANCH: begin
-								if (alu_out[0]) begin
-									// Taken branch
-									exec_state <= STATE_BRANCH_TAKEN;
-								end else begin
-									// Still sequential
+						// Single-cycle execute state. For ALU instructions,
+						// we're done at the end of this state
+						
+						if (ei_req) begin
+							exec_state <= STATE_EXCEPTION_1;
+							mcause <= 4'd11;
+							mcause_int <= 1'b1;
+						end else begin
+							// TODO: determine cases where we need multi-cycle
+							case (op_type)
+								/**
+								 * STATE_EXECUTE: regs[rd] <= alu_out
+								 */
+								OP_TYPE_ARITH: begin
 									pc <= pc_next;
 									pc_seq <= pc_seq_next;
 									instr_complete <= 1;
 								end
-							end
-							OP_TYPE_LDST: begin
-								// alu_out holds the data address
-								// TODO: handle misaligne accesses
-								if (ldst_addr_misaligned) begin
-									if (op == OP_SB || op == OP_SH || op == OP_SW) begin
-										mcause <= 6; 
+							
+								/**
+								 * STATE_EXECUTE: alu_out = (op_a ? op_b)
+								 * STATE_BRANCH_TAKEN: pc <= pc + jump_offset (op_c)
+								 */
+								OP_TYPE_BRANCH: begin
+									if (alu_out[0]) begin
+										// Taken branch
+										exec_state <= STATE_BRANCH_TAKEN;
 									end else begin
-										mcause <= 4; 
+										// Still sequential
+										pc <= pc_next;
+										pc_seq <= pc_seq_next;
+										instr_complete <= 1;
 									end
-									exec_state <= STATE_EXCEPTION_1;
-								end else begin
-									exec_state <= STATE_LDST_COMPLETE;
 								end
-							end
-							OP_TYPE_MDS: begin
-								exec_state <= STATE_MDS_COMPLETE;
-							end
-							/**
-							 * STATE_EXECUTE: regs[rd] <= pc_seq_next
-							 * STATE_JUMP: pc <= jump_base (op_a) + jump_offset (op_c)
-							 */
-							OP_TYPE_JUMP: begin
-								exec_state <= STATE_JUMP;
-							end
-							OP_TYPE_SYSTEM: begin
-								if (op == OP_TYPE_ERET) begin
-									instr_complete <= 1;
-									pc <= op_a; 
-									pc_seq <= 0;
-									exec_state <= STATE_EXECUTE;
-								end else begin
-									mcause <= (op == OP_TYPE_EBREAK)?3:11; // MCALL/MBREAK
-									exec_state <= STATE_EXCEPTION_1;
+							
+								OP_TYPE_LDST: begin
+									// alu_out holds the data address
+									// TODO: handle misaligne accesses
+									if (ldst_addr_misaligned) begin
+										if (op == OP_SB || op == OP_SH || op == OP_SW) begin
+											mcause <= 6; 
+											mcause_int <= 1'b0;
+										end else begin
+											mcause <= 4; 
+											mcause_int <= 1'b0;
+										end
+										exec_state <= STATE_EXCEPTION_1;
+									end else begin
+										exec_state <= STATE_LDST_COMPLETE;
+									end
 								end
-							end
-							/**
-							 * STATE_EXECUTE: regs[csr] <= op_a [op] op_b
-							 * STATE_CSR: regs[rd] <= op_b (regs[csr])
-							 */
-							default /*OP_TYPE_CSR*/: begin
-								exec_state <= STATE_CSR;
-							end
-						endcase
+							
+								OP_TYPE_MDS: begin
+									exec_state <= STATE_MDS_COMPLETE;
+								end
+							
+								/**
+								 * STATE_EXECUTE: regs[rd] <= pc_seq_next
+								 * STATE_JUMP: pc <= jump_base (op_a) + jump_offset (op_c)
+								 */
+								OP_TYPE_JUMP: begin
+									exec_state <= STATE_JUMP;
+								end
+							
+								OP_TYPE_SYSTEM: begin
+									if (op == OP_TYPE_ERET) begin
+										instr_complete <= 1'b1;
+										tret <= 1'b1;
+										pc <= op_a; 
+										pc_seq <= 0;
+										exec_state <= STATE_EXECUTE;
+									end else begin
+										mcause <= (op == OP_TYPE_EBREAK)?3:11; // MCALL/MBREAK
+										mcause_int <= 1'b0;
+										exec_state <= STATE_EXCEPTION_1;
+									end
+								end
+							
+								/**
+								 * STATE_EXECUTE: regs[csr] <= op_a [op] op_b
+								 * STATE_CSR: regs[rd] <= op_b (regs[csr])
+								 */
+								default /*OP_TYPE_CSR*/: begin
+									exec_state <= STATE_CSR;
+								end
+							endcase
+						end
 					end else begin
-						instr_complete <= 0;
+						instr_complete <= 1'b0;
+						trap <= 1'b0;
+						tret <= 1'b0;
 					end
 				end
 				
@@ -302,11 +337,13 @@ module fwrisc_exec #(
 						
 						2'b01: begin
 							mcause <= 0; // instruction address fault
+							mcause_int <= 1'b0;
 							exec_state <= STATE_EXCEPTION_1;
 						end
 						
 						default: begin
 							mcause <= 1; // instruction access fault
+							mcause_int <= 1'b0;
 							exec_state <= STATE_EXCEPTION_1;
 						end
 					endcase
@@ -315,6 +352,7 @@ module fwrisc_exec #(
 				STATE_BRANCH_TAKEN: begin
 					if (jump_target_misaligned) begin
 						mcause <= 0; // instruction address fault
+						mcause_int <= 1'b0;
 						exec_state <= STATE_EXCEPTION_1;
 					end else begin
 						pc <= alu_out;
@@ -354,8 +392,9 @@ module fwrisc_exec #(
 					// Write MCAUSE
 					// TODO: change pc to exception base
 					pc <= mtvec;
-					pc_seq <= 0;
-					instr_complete <= 1;
+					pc_seq <= 1'b0;
+					instr_complete <= 1'b1;
+					trap <= 1'b1;
 					exec_state <= STATE_EXECUTE;
 				end
 			endcase
@@ -421,10 +460,10 @@ module fwrisc_exec #(
 	// TODO: rd_wdata input selector
 	always @* begin
 		case (exec_state)
-			STATE_EXCEPTION_1: rd_wdata = pc;
-			STATE_EXCEPTION_2: rd_wdata = mtval;
-			STATE_EXCEPTION_3: rd_wdata = {28'd0, mcause};
-			STATE_MDS_COMPLETE: rd_wdata = mds_out;
+			STATE_EXCEPTION_1: rd_wdata   = pc;
+			STATE_EXCEPTION_2: rd_wdata   = mtval;
+			STATE_EXCEPTION_3: rd_wdata   = {mcause_int, 27'b0, mcause};
+			STATE_MDS_COMPLETE: rd_wdata  = mds_out;
 			STATE_LDST_COMPLETE: rd_wdata = mem_ack_data;
 			default: rd_wdata = alu_out;
 		endcase

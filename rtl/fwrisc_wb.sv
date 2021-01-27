@@ -20,7 +20,8 @@ module fwrisc_wb #(
 		input			reset,
 	
 		`WB_INITIATOR_PORT(wbi_,32,32),
-		`WB_INITIATOR_PORT(wbd_,32,32)
+		`WB_INITIATOR_PORT(wbd_,32,32),
+		input			irq
 		);
 	
 	assign wbi_dat_w = {32{1'b0}};
@@ -60,7 +61,8 @@ module fwrisc_wb #(
 			.dwstb(dwstb),
 			.dwrite(dwrite),
 			.drdata(drdata),
-			.dready(dready)
+			.dready(dready),
+			.irq(irq)
 			);
 	
 	assign wbi_adr = iaddr;

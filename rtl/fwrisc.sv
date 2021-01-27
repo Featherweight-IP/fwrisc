@@ -43,13 +43,16 @@ module fwrisc #(
 		output[3:0]		dwstb,
 		output			dwrite,
 		input[31:0]		drdata,
-		input			dready
+		input			dready,
+		input			irq
 		);
 	
 	wire[31:0]				pc;
 	wire[31:0]				pc_seq;
 	wire					fetch_valid;
 	wire					instr_complete;
+	wire					trap;
+	wire					tret;
 	wire[31:0]				instr;
 	wire					instr_c;
 	wire					int_reset;
@@ -142,6 +145,8 @@ module fwrisc #(
 	wire[5:0]				rd_waddr;
 	wire[31:0]				rd_wdata;
 	wire					rd_wen;
+	wire                    meie;
+	wire                    mie;
 	fwrisc_exec #(
 		.ENABLE_COMPRESSED  (ENABLE_COMPRESSED ),
 		.ENABLE_MUL_DIV  (ENABLE_MUL_DIV )
@@ -150,6 +155,8 @@ module fwrisc #(
 		.reset           (int_reset      ), 
 		.decode_valid    (decode_valid   ),
 		.instr_complete  (instr_complete ), 
+		.trap            (trap           ),
+		.tret            (tret           ),
 		.instr_c         (instr_c        ), 
 		.op_type         (op_type        ), 
 		.op_a            (op_a           ), 
@@ -171,7 +178,10 @@ module fwrisc #(
 		.dwdata          (dwdata         ),
 		.dwstb           (dwstb          ),
 		.drdata          (drdata         ),
-		.dready          (dready         )
+		.dready          (dready         ),
+		.irq             (irq            ),
+		.meie            (meie           ),
+		.mie             (mie            )
 		);
 	
 	fwrisc_regfile #(
@@ -182,6 +192,9 @@ module fwrisc #(
 		.reset            (int_reset          ), 
 		.soft_reset_req   (soft_reset_req     ),
 		.instr_complete   (instr_complete     ), 
+		.trap             (trap               ),
+		.tret             (tret               ),
+		.irq              (irq                ),
 		.ra_raddr         (ra_raddr           ), 
 		.ra_rdata         (ra_rdata           ), 
 		.rb_raddr         (rb_raddr           ), 
