@@ -3,8 +3,9 @@
 //***************************************************************************
 
  // List file paths and processing directives here
--F ./rtl/fwrisc.f
--F ./ve/ve.F
+-F ./packages/sve.F
+-F ./sve.F
+
 
 
 

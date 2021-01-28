@@ -63,6 +63,7 @@ module fwrisc_regfile #(
 
 	reg[31:0]			regs['h3f:0];
 
+	generate
 	if (ENABLE_DEP) begin
 		assign dep_lo = dep_lo_r;
 		assign dep_hi = dep_hi_r;
@@ -70,6 +71,7 @@ module fwrisc_regfile #(
 		assign dep_lo = 0;
 		assign dep_hi = 0;
 	end
+	endgenerate
 	assign mtvec  = mtvec_r;
 	
 `ifdef FORMAL
@@ -98,11 +100,13 @@ module fwrisc_regfile #(
 			meie <= 1'b1;
 			mie <= 1'b1;
 			mpie <= 1'b0;
+			/*
 			`ifndef FWRISC_SOFT_CORE
 			for (reg_i=0; reg_i<'h40; reg_i=reg_i+1) begin
 				regs[reg_i] <= {32{1'b0}};
 			end
 			`endif
+			 */
 		end else begin
 			case ({rd_wen, rd_waddr})
 				{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
