@@ -96,11 +96,12 @@ module fwrisc_regfile #(
 			instr_count <= 0;
 			dep_lo_r <= 0;
 			dep_hi_r <= 0;
-			mtvec_r <= 0;
+			mtvec_r <= {32{1'b0}};
 			meie <= 1'b1;
 			mie <= 1'b1;
 			mpie <= 1'b0;
 			/*
+			// TODO: this doesn't synthesize
 			`ifndef FWRISC_SOFT_CORE
 			for (reg_i=0; reg_i<'h40; reg_i=reg_i+1) begin
 				regs[reg_i] <= {32{1'b0}};
@@ -162,10 +163,15 @@ module fwrisc_regfile #(
 				end
 			end
 		end
-		ra_rdata <= regs[ra_raddr];
+		case (ra_raddr)
+			0:				ra_rdata <= {32{1'b0}};
+			default: 		ra_rdata <= regs[ra_raddr];
+		endcase
 		
 		// Only RB is used to access CSRs
 		case (rb_raddr)
+			0:             rb_rdata <= {32{1'b0}};
+			CSR_MHARTID:   rb_rdata <= {32{1'b0}};
 			CSR_MCYCLE:    rb_rdata <= cycle_count[31:0];
 			CSR_MCYCLEH:   rb_rdata <= cycle_count[63:32];
 			CSR_MINSTRET:  rb_rdata <= instr_count[31:0];
