@@ -14,7 +14,8 @@ module fwrisc_rv32i_wb (
 		input			reset,
 	
 		`WB_INITIATOR_PORT(wbi_,32,32),
-		`WB_INITIATOR_PORT(wbd_,32,32)
+		`WB_INITIATOR_PORT(wbd_,32,32),
+		input			irq
 		);
 
 	fwrisc_wb #(
@@ -27,7 +28,8 @@ module fwrisc_rv32i_wb (
 			.reset(reset),
 	
 			`WB_CONNECT(wbi_,wbi_),
-			`WB_CONNECT(wbd_,wbd_)
+			`WB_CONNECT(wbd_,wbd_),
+			.irq(irq)
 			);
 
 endmodule
