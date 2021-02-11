@@ -242,7 +242,9 @@ module fwrisc #(
 		.rd_wen           (rd_wen             ),
 		.dep_lo           (dep_lo             ),
 		.dep_hi           (dep_hi             ),
-		.mtvec            (mtvec              )
+		.mtvec            (mtvec              ),
+		.meie             (meie               ),
+		.mie              (mie                )
 		);
 	
 	fwrisc_tracer u_tracer (

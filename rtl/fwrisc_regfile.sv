@@ -108,14 +108,12 @@ module fwrisc_regfile #(
 			meie <= 1'b1;
 			mie <= 1'b1;
 			mpie <= 1'b0;
-			/*
 			// TODO: this doesn't synthesize
 			`ifndef FWRISC_SOFT_CORE
 			for (reg_i=0; reg_i<'h40; reg_i=reg_i+1) begin
 				regs[reg_i] <= {32{1'b0}};
 			end
 			`endif
-			 */
 		end else begin
 			case ({rd_wen, rd_waddr})
 				{1'b1, CSR_MCYCLE}: cycle_count <= {cycle_count[63:32], rd_wdata};
@@ -163,7 +161,7 @@ module fwrisc_regfile #(
 	always @(posedge clock) begin
 		// Gate off writing to r0 and read-only CSRs
 		if (rd_wen) begin
-			if (|rd_waddr && rd_waddr[5:3] != 3'b100) begin
+			if (|rd_waddr /*&& rd_waddr[5:4] == 2'b00*/) begin
 				regs[rd_waddr] <= rd_wdata;
 			end else begin
 				if (rd_waddr != 0) begin
@@ -200,6 +198,7 @@ module fwrisc_regfile #(
 			CSR_MHARTID:   rb_rdata <= HARTID;
 			CSR_MISA:      rb_rdata <= {2'b01, ISA[29:0]};
 			CSR_MIE:       rb_rdata <= {20'b0, meie, 11'b0};
+			CSR_MSTATUS:   rb_rdata <= {{24{1'b0}}, mpie, {3{1'b0}}, mie, {3{1'b0}}};
 			CSR_MCYCLE:    rb_rdata <= cycle_count[31:0];
 			CSR_MCYCLEH:   rb_rdata <= cycle_count[63:32];
 			CSR_MINSTRET:  rb_rdata <= instr_count[31:0];
