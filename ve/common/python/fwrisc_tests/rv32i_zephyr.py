@@ -90,8 +90,14 @@ async def test(top):
                     u_sram.write_nb(int((addr & 0xFFFFF)/4), word, 0xF)
                     addr += 4
                     j += 4    
+
+    print("--> wait main")
+    await u_dbg_bfm.on_exit("main")
+    print("<-- wait main")
     
-    await cocotb.triggers.Timer(10, 'ms')
+#    u_dbg_bfm.add_enter_exit_cb(lambda pc,sym,enter: print("CB: " + hex(pc) + " " + str(sym)  + " " + str(enter)))
+
+#    await cocotb.triggers.Timer(100, 'ms')
     
     return
     

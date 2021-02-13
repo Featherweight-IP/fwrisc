@@ -1,0 +1,6 @@
+
+menu "fwrisc"
+
+rsource "drivers/Kconfig"
+
+endmenu

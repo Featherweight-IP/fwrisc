@@ -5,3 +5,4 @@ cache/
 
 __pycache__/
 
+pybfms_gen.*

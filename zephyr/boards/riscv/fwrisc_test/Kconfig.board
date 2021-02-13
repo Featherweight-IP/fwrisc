@@ -1,0 +1,6 @@
+
+config BOARD_FWRISC_TEST
+	bool "fwrisc_test SoC"
+	depends on SOC_FWRISC_TESTSOC
+	
+	

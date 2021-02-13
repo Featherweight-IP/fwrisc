@@ -1,0 +1,131 @@
+<!-- THIS IS TOOL GENERATED SESSION FILE. PLEASE DO NOT MODIFY THIS -->
+<!DOCTYPE visualizer_session>
+<session featureversion="0.3" version="0.2" skip_do_file="0">
+ <app argc="5">
+  <argv pos="0" value="/project/tools/questa/2020.4/visualizer/bin/../linux_x86_64/Visualizer/bin/hdlclient"/>
+  <argv pos="1" value="-designfile"/>
+  <argv pos="2" value="cache/questa/design.bin"/>
+  <argv pos="3" value="-wavefile"/>
+  <argv pos="4" value="rundir/qwave.db"/>
+ </app>
+ <window_config>
+  <dockareas right="450" bottom="169" left="474" top="0"/>
+  <taborder bottom="transcript+cone+" left="structure+"/>
+  <activetab bottom="cone" left="structure" activewindow="wave"/>
+  <window undocked="0" dock_location="bottom" type="transcript" visible="1" x="0" y="0"/>
+  <window undocked="0" dock_location="bottom" type="cone" visible="1" x="0" y="0"/>
+  <window undocked="0" dock_location="left" type="structure" visible="1" x="0" y="0"/>
+  <window width="2070" undocked="0" type="rtl" visible="1" height="1194" x="1134" y="114"/>
+  <window undocked="0" dock_location="left" type="testbench" visible="0" x="0" y="0"/>
+  <window width="1920" undocked="1" dock_location="bottom" type="wave" visible="1" height="1029" x="64" y="27"/>
+  <window width="1920" undocked="1" dock_location="bottom" type="wave" visible="0" height="1029" x="0" id="1" y="27"/>
+  <window undocked="0" dock_location="center" type="source" visible="1" x="0" y="0"/>
+  <window undocked="0" dock_location="center" type="source" visible="0" x="0" id="1" y="0"/>
+  <window undocked="0" dock_location="center" type="source" visible="0" x="0" id="2" y="0"/>
+  <window undocked="0" dock_location="center" type="source" visible="0" x="0" id="3" y="0"/>
+ </window_config>
+ <wave_file_mgr>
+  <waveFile fileName="/project/fun/featherweight-ip/fwrisc-trunk/ve/sim/rv32i/rundir/qwave.db" waveType="0" tagName="F0"/>
+ </wave_file_mgr>
+ <gui>
+  <main_window visible="1">
+   <srcbrowser instancename="fwrisc_rv32i_tb" primary="true"/>
+   <sourcetclcommands>
+    <tcl command="src activate source"/>
+    <tcl command="src top 5"/>
+   </sourcetclcommands>
+   <srcbrowser instancename="fwrisc_rv32i_tb.u_dbg_bfm.ctxt.regs"/>
+   <sourcetclcommands>
+    <tcl command="src activate source1"/>
+    <tcl command="src top 713"/>
+   </sourcetclcommands>
+   <srcbrowser instancename="fwrisc_rv32i_tb.u_dut.u_core"/>
+   <sourcetclcommands>
+    <tcl command="src activate source2"/>
+    <tcl command="src top 26"/>
+   </sourcetclcommands>
+   <edge_gui cur_selection="AnyEdge"/>
+  </main_window>
+  <watchTower_cur_setting customDisplayTimeUnitListStr="" curActiveWaveFile="F0" curRadix="8" curDisplayTimeUnitStr="1ns" curDisplayTimeUnit="-9">
+   <curTime lowtime="206150" hightime="0"/>
+  </watchTower_cur_setting>
+  <drv_rec_data drivers="true"/>
+  <transcript>
+   <window width="2070" height="197" x="-2570" y="-697"/>
+  </transcript>
+  <cone upf_action="0" wf_diff="0" grey_mode="0" value_tooltip="0" show_values="0" time_sync="1" trace_action="0" src_sync="1" zoom_and_center="0" id="0" clock_domain="0">
+   <flop_level_combo flop_level_cur_item="0"/>
+   <extend_level_combo extend_level_cur_item="0"/>
+   <max_level_combo max_level_cur_value="100"/>
+   <cone_point_drop_site1 cur_item="-1"/>
+   <cone_point_drop_site2 cur_item="-1"/>
+   <cur_viewport zoom_factor="zoom: no current page" scroll_pos="scrollpos: no current page" page_num="page: no current page"/>
+  </cone>
+  <structure>
+   <window width="474" height="908" x="0" y="58"/>
+  </structure>
+  <wave name="Wave0">
+   <timeunit value="11"/>
+   <frequnit value="2"/>
+   <showdiff value="0"/>
+  </wave>
+  <source>
+   <window width="1586" height="880" x="0" y="0"/>
+  </source>
+ </gui>
+ <wave_mgr sync_time_range="0">
+  <waveWindow nameWidth="144" wintype="4" displayTimeUnit="-9" value_tooltip="0" displayScopeName="1" showMarkers="1" swapRepresentationOfX="0" displayGrid="0" primNudge="1" secNudge="1" alignBaseName="0" displayTimeUnitStr="1ns" displayLeadingZeros="0" displayFileTag="1" waveWidth="1654" displayRadixWithValue="0" valueWidth="77" trackViewToTime="1" snapToEdge="1" showSecCursor="1" signalHeight="18" displayGlobalView="1">
+   <window name="Wave0">
+    <timeunit value="11"/>
+    <frequnit value="2"/>
+    <showdiff value="0"/>
+   </window>
+   <viewPort>
+    <beginTime lowtime="0" hightime="0"/>
+    <endTime lowtime="10000000" hightime="0"/>
+    <beginViewTime lowtime="204985" hightime="0"/>
+    <endViewTime lowtime="208418" hightime="0"/>
+    <beginLastViewTime lowtime="204985" hightime="0"/>
+    <endLastViewTime lowtime="208418" hightime="0"/>
+   </viewPort>
+   <primCursor lowtime="206150" hightime="0"/>
+   <secCursor lowtime="196954" hightime="0"/>
+   <wavetclcommands>
+    <tcl command="onerror resume&#xa;wave update off&#xa;wave clearselection&#xa;"/>
+    <tcl commandblock="custom radix definitions"></tcl>
+    <tcl command="wave update off"/>
+    <tcl command="wave group fwrisc_rv32i_tb.u_dbg_bfm.ctxt -backgroundcolor #004466"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.MSG_SZ[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.disasm[255:0]} -tag F0 -radix string"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.pc[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.instr[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.symbol[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame0[255:0]} -tag F0 -radix string -select"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame1[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame2[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame3[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame4[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame5[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame6[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add -group fwrisc_rv32i_tb.u_dbg_bfm.ctxt {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.frame7[255:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave insertion [expr [wave index insertpoint] + 1]"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dbg_bfm.mem_addr[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dbg_bfm.mem_wmask[3:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dut.u_core.daddr[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dut.u_core.dwdata[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dut.u_core.dwstb[3:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add fwrisc_rv32i_tb.u_dut.u_core.dwrite -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dbg_bfm.ctxt.regs.ra[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dut.u_core.drdata[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add fwrisc_rv32i_tb.u_dut.u_core.dready -tag F0 -radix hexadecimal"/>
+    <tcl command="wave add {fwrisc_rv32i_tb.u_dbg_bfm.mem_wdata[31:0]} -tag F0 -radix hexadecimal"/>
+    <tcl command="wave update on"/>
+    <tcl command="wave top 0"/>
+    <tcl command="wave zoom range 204985 208418"/>
+    <tcl command=""/>
+   </wavetclcommands>
+  </waveWindow>
+ </wave_mgr>
+ <windows/>
+ <dut selection="fwrisc_rv32i_tb"/>
+</session>

@@ -1,0 +1,22 @@
+
+if SOC_FWRISC_TESTSOC
+
+
+config SOC
+	string
+	default "fwrisc_testsoc"
+	
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	int
+	default 16000000
+	
+config RISCV_SOC_INTERRUPT_INIT
+	bool
+	default y
+	
+config NUM_IRQS
+	int
+	default 8
+	
+endif # SOC_FWRISC_TESTSOC
+

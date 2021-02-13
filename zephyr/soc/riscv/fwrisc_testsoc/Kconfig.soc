@@ -1,0 +1,7 @@
+
+
+config SOC_FWRISC_TESTSOC
+	bool "fwrisc_testsoc SoC"
+	select RISCV
+	select ATOMIC_OPERATIONS_C
+		

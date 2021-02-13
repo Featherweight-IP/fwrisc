@@ -1,0 +1,5 @@
+
+config BOARD
+	default "fwrisc_test"
+	depends on BOARD_FWRISC_TEST
+	
