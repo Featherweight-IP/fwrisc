@@ -1,0 +1,7 @@
+
+tests:
+    - instr:
+        path: instr.yaml
+      
+    - riscv_compliance:
+        path: riscv_compliance.yaml 

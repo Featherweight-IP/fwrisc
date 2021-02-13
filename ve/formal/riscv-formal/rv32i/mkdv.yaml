@@ -1,0 +1,123 @@
+
+tests:
+    - insn.add
+        variables:
+            - RISCV_INSN: add
+    - insn.addi
+        variables:
+            - RISCV_INSN: addi
+    - insn.and
+        variables:
+            - RISCV_INSN: and
+    - insn.andi
+        variables:
+            - RISCV_INSN: andi
+    - insn.auipc
+        variables:
+            - RISCV_INSN: auipc
+    - insn.beq
+        variables:
+            - RISCV_INSN: beq
+    - insn.bge
+        variables:
+            - RISCV_INSN: bge
+    - insn.bgeu
+        variables:
+            - RISCV_INSN: bgeu
+    - insn.blt
+        variables:
+            - RISCV_INSN: blt
+    - insn.bltu
+        variables:
+            - RISCV_INSN: bltu
+    - insn.bne
+        variables:
+            - RISCV_INSN: bne
+    - insn.jal
+        variables:
+            - RISCV_INSN: jal
+    - insn.jalr
+        variables:
+            - RISCV_INSN: jalr
+    - insn.lb
+        variables:
+            - RISCV_INSN: lb
+    - insn.lbu
+        variables:
+            - RISCV_INSN: lbu
+    - insn.lh
+        variables:
+            - RISCV_INSN: lh
+    - insn.lhu
+        variables:
+            - RISCV_INSN: lhu
+    - insn.lui
+        variables:
+            - RISCV_INSN: lui
+    - insn.lw
+        variables:
+            - RISCV_INSN: lw
+    - insn.or
+        variables:
+            - RISCV_INSN: or
+    - insn.ori
+        variables:
+            - RISCV_INSN: ori
+    - insn.sb
+        variables:
+            - RISCV_INSN: sb
+    - insn.sh
+        variables:
+            - RISCV_INSN: sh
+    - insn.sll
+        variables:
+            - RISCV_INSN: sll
+    - insn.slli
+        variables:
+            - RISCV_INSN: slli
+    - insn.slt
+        variables:
+            - RISCV_INSN: slt
+    - insn.slti
+        variables:
+            - RISCV_INSN: slti
+    - insn.sltiu
+        variables:
+            - RISCV_INSN: sltiu
+    - insn.sltu
+        variables:
+            - RISCV_INSN: sltu
+    - insn.sra
+        variables:
+            - RISCV_INSN: sra
+    - insn.srai
+        variables:
+            - RISCV_INSN: srai
+    - insn.srl
+        variables:
+            - RISCV_INSN: srl
+    - insn.srli
+        variables:
+            - RISCV_INSN: srli
+    - insn.sub
+        variables:
+            - RISCV_INSN: sub
+    - insn.sw
+        variables:
+            - RISCV_INSN: sw
+    - insn.xor
+        variables:
+            - RISCV_INSN: xor
+    - insn.xori
+        variables:
+            - RISCV_INSN: xori
+
+    - causal_ch0
+    - causal
+    - liveness
+    - makefile
+    - pc_bwd
+    - pc_fwd
+    - reg
+    - unique
+

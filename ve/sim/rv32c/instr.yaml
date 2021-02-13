@@ -1,0 +1,9 @@
+#****************************************************************************
+#* rv32c unit tests
+#****************************************************************************
+
+tests:
+    - arith.cadd:
+       variables:
+         - SW_IMAGE: arith_cadd.elf
+         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_instr

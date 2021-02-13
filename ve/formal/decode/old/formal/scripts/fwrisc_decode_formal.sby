@@ -1,0 +1,36 @@
+#****************************************************************************
+#* fwrisc_decode_formal.sby
+#*
+#* Formal template script 
+#****************************************************************************
+
+
+[options]
+mode {MODE}
+depth {DEPTH}
+
+[engines]
+smtbmc boolector
+
+[script]
+# TODO: add in RTL files
+read -sv -formal \
+{VE_DIR}/../../rtl/fwrisc_c_decode.sv \
+{VE_DIR}/../../rtl/fwrisc_decode.sv \
+fwrisc_decode_formal_checker.sv \
+fwrisc_decode_formal_test.sv \
+fwrisc_decode_formal_tb.sv
+prep -top fwrisc_decode_formal_tb
+
+[files]
+# TODO: add in RTL files
+
+{VE_DIR}/tb/fwrisc_decode_formal_tb.sv
+{VE_DIR}/../../rtl/fwrisc_op_type.svh
+{VE_DIR}/../../rtl/fwrisc_alu_op.svh
+{VE_DIR}/../../rtl/fwrisc_mul_div_shift_op.svh
+{VE_DIR}/../../rtl/fwrisc_csr_addr.svh
+fwrisc_decode_formal_checker.sv {VE_DIR}/tb/{CHECKER}.sv
+fwrisc_decode_formal_test.sv {VE_DIR}/tests/{TESTNAME}_test.sv
+{VE_DIR}/tests/fwrisc_decode_formal_opcode_defines.svh
+

@@ -1,0 +1,34 @@
+#****************************************************************************
+#* fwrisc_exec_formal.sby
+#*
+#* Formal template script 
+#****************************************************************************
+
+
+[options]
+mode {MODE}
+depth {DEPTH}
+
+[engines]
+smtbmc boolector
+
+[script]
+# TODO: add in RTL files
+#read -sv -formal -define TESTNAME={TESTNAME} -define CHECKER={CHECKER} {CORE_SRC_FILES}
+#read -define TESTNAME={TESTNAME} -define CHECKER={CHECKER} -sv -formal {CORE_SRC_FILES}
+read -sv -formal {CORE_SRC_FILES}
+prep -top fwrisc_exec_formal_tb
+
+[files]
+# Copy source files
+{VE_DIR}/../../rtl/fwrisc_op_type.svh
+{VE_DIR}/../../rtl/fwrisc_alu_op.svh
+{VE_DIR}/../../rtl/fwrisc_mem_op.svh
+{VE_DIR}/../../rtl/fwrisc_mul_div_shift_op.svh
+{VE_DIR}/../../rtl/fwrisc_csr_addr.svh
+{VE_DIR}/../../rtl/fwrisc_system_op.svh
+{VE_DIR}//tb/fwrisc_exec_formal_defines.svh
+
+[file fwrisc_exec_formal_tb_defines.svh]
+`define TEST_MODULE {TESTNAME}_test
+`define CHECKER_MODULE {CHECKER}

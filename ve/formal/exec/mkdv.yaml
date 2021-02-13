@@ -1,0 +1,31 @@
+
+tests:
+    - arith:
+        variables:
+            - MODE: cover
+    - branch:
+        variables:
+            - MODE: cover
+            - DEPTH: 32
+    - call:
+        variables:
+            - MODE: cover
+            - DEPTH: 64
+    - csr:
+        variables:
+            - MODE: cover
+            - DEPTH: 32
+    - jump:
+        variables:
+            - MODE: cover
+            - DEPTH: 32
+    - mds:
+        variables:
+            - MODE: cover
+            - DEPTH: 64
+    - mem:
+        variables:
+            - MODE: cover
+            - DEPTH: 32
+    
+        
