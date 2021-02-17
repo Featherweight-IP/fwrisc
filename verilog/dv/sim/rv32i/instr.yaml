@@ -155,18 +155,18 @@ tests:
        variables:
          - SW_IMAGE: branch_bne_t_fwd.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
-    - counters.cycle:
-       variables:
-         - SW_IMAGE: counters_cycle.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
+#    - counters.cycle:
+#       variables:
+#         - SW_IMAGE: counters_cycle.elf
+#         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
     - exception.bne:
        variables:
          - SW_IMAGE: exception_bne.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
-    - exception.dep.x:
-       variables:
-         - SW_IMAGE: exception_dep_x.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
+#    - exception.dep.x:
+#       variables:
+#         - SW_IMAGE: exception_dep_x.elf
+#         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
     - exception.jalr:
        variables:
          - SW_IMAGE: exception_jalr.elf
@@ -243,10 +243,10 @@ tests:
        variables:
          - SW_IMAGE: ldst_sw_lw.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
-    - long.loop:
-       variables:
-         - SW_IMAGE: long_loop.elf
-         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
+#    - long.loop:
+#       variables:
+#         - SW_IMAGE: long_loop.elf
+#         - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
     - lui:
        variables:
          - SW_IMAGE: lui.elf

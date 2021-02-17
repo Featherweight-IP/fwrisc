@@ -1,16 +1,15 @@
 
+
 pyelftools
 pyyaml
 cocotb
 
--e git+https://github.com/fvutils/mkdv.git@task_bfm#egg=mkdv
+vlsim
 
--e git+http://github.com/mballance/vlsim.git#egg=vlsim
-
--e git+https://github.com/pybfms/pybfms.git#egg=pybfms
-
-# -e git+https://github.com/pybfms/generic_sram_bfms.git#egg=generic_sram_bfms
-# -e git+https://github.com/pybfms/mem_bfms_core.git#egg=mem_bfms_core
-# -e git+https://github.com/fvutils/fltools.git#egg=fltools
-
+-e git+ssh://git@github.com/pybfms/pybfms.git#egg=pybfms
+-e git+ssh://git@github.com/pybfms/pybfms_generic_sram.git#egg=pybfms_generic_sram
+-e git+ssh://git@github.com/pybfms/pybfms_gpio.git#egg=pybfms_gpio
+-e git+ssh://git@github.com/pybfms/pybfms_mem_core.git#egg=pybfms_mem_core
+-e git+ssh://git@github.com/pybfms/pybfms_riscv_debug.git#egg=pybfms_riscv_debug
+-e git+ssh://git@github.com/fvutils/mkdv.git#egg=mkdv
 

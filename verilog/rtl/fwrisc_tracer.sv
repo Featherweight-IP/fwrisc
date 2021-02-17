@@ -41,6 +41,7 @@ module fwrisc_tracer (
 		input [5:0]		rd_waddr,
 		input [31:0]	rd_wdata,
 		input			rd_write,
+		
 		// memory access
 		input [31:0]	maddr,
 		input [31:0]	mdata,
@@ -48,6 +49,34 @@ module fwrisc_tracer (
 		input			mwrite,
 		input 			mvalid
 		);
+
+// Instance the implementation module if specified
+`ifdef FWRISC_DBG_BFM_MODULE
+`FWRISC_DBG_BFM_MODULE u_dbg (
+			.clock(			clock),
+			.reset(			reset),
+			.pc(			pc),
+			.instr(	        instr),
+				// True during execute stage. 
+				// Note that write-back will occur at the same time
+			.ivalid(		ivalid),
+				// ra, rb
+			.ra_raddr(		ra_raddr),
+			.ra_rdata(		ra_rdata),
+			.rb_raddr(		rb_raddr),
+			.rb_rdata(		rb_rdata),
+				// rd
+			.rd_waddr(		rd_waddr),
+			.rd_wdata(		rd_wdata),
+			.rd_write(		rd_write),
+				// memory access
+			.maddr(         maddr),
+			.mdata(         mdata),
+			.mstrb(         mstrb),
+			.mwrite(		mwrite),
+			.mvalid(		mvalid)
+			);
+`endif
 
 endmodule
 

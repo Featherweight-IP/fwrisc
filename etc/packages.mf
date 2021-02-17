@@ -1,10 +1,10 @@
 
-simscripts@http://github.com/mballance/simscripts.git
-memory_primitives@http://github.com/mballance/memory_primitives.git
-zephyr@https://github.com/zephyrproject-rtos/zephyr/archive/zephyr-v2.2.0.tar.gz
-RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
+# memory_primitives@http://github.com/mballance/memory_primitives.git
+zephyr@https://github.com/zephyrproject-rtos/zephyr/archive/zephyr-v2.4.0.tar.gz
+# RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 # fwuart@ssh://github.com:Featherweight-IP/fwuart.git
 fwuart@http://github.com/Featherweight-IP/fwuart.git
 fwprotocol-defs@http://github.com/Featherweight-IP/fwprotocol-defs.git
 riscv-compliance@http://github.com/riscv/riscv-compliance.git depth=1
-
+riscv-formal@https://git@github.com/SymbioticEDA/riscv-formal.git depth=1
+embench-iot@https://github.com/embench/embench-iot.git depth=1

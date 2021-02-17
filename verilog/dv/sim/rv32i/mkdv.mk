@@ -1,21 +1,24 @@
-
 MKDV_MK := $(abspath $(lastword $(MAKEFILE_LIST)))
 TEST_DIR := $(dir $(MKDV_MK))
 MKDV_TOOL ?= vlsim
 MKDV_PLUGINS += cocotb pybfms
-RISCV_CC=riscv32-unknown-elf-gcc
+RISCV_CC=riscv64-zephyr-elf-gcc
 
 MKDV_TEST ?= instr.arith.add
 
-MKDV_TIMEOUT ?= 10ms
+MKDV_TIMEOUT ?= 20ms
 
 TOP_MODULE = fwrisc_rv32i_tb
 
 PYBFMS_MODULES += generic_sram_bfms riscv_debug_bfms gpio_bfms
 
 VLSIM_CLKSPEC = clock=10ns
+VLSIM_OPTIONS += -Wno-fatal
 
 ifeq (,$(SW_IMAGE))
+    ifneq (,$(findstring embench,$(subst ., ,$(MKDV_TEST))))
+	SW_IMAGE = $(subst .,_,$(subst embench.,,$(MKDV_TEST))).elf
+    endif
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))
 	SW_IMAGE = $(subst .,_,$(subst instr.,,$(MKDV_TEST))).elf
     endif
@@ -31,6 +34,9 @@ ifeq (,$(SW_IMAGE))
 endif
 
 ifeq (,$(MKDV_COCOTB_MODULE))
+    ifneq (,$(findstring embench,$(subst ., ,$(MKDV_TEST))))
+	MKDV_COCOTB_MODULE = fwrisc_tests.embench
+    endif
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))
 	MKDV_COCOTB_MODULE = fwrisc_tests.rv32i_instr
     endif
@@ -57,6 +63,7 @@ MKDV_VL_SRCS += $(TEST_DIR)/fwrisc_rv32i_tb.sv
 
 VLSIM_OPTIONS += -Wno-fatal
 
+include $(TEST_DIR)/../../../dbg/defs_rules.mk
 include $(TEST_DIR)/../../common/defs_rules.mk
 ZEPHYR_BASE=$(PACKAGES_DIR)/zephyr
 
@@ -75,6 +82,20 @@ include $(TEST_DIR)/../../common/defs_rules.mk
 		-I$(PACKAGES_DIR)/riscv-compliance/riscv-test-env \
 		-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles \
 		-T$(TEST_DIR)/../../common/include/linkmono.ld
+		
+%.elf : $(EMBENCH_DIR)/src/%
+	$(Q)$(RISCV_CC) -o $@ \
+		-I$^ -I$(EMBENCH_DIR)/support \
+		-DCPU_MHZ=1 -DWARMUP_HEAT=0 \
+		$^/*.c \
+		$(EMBENCH_DIR)/support/beebsc.c \
+		$(EMBENCH_DIR)/support/main.c \
+		$(DV_COMMON_DIR)/sw/embench_support.c \
+		$(DV_COMMON_DIR)/sw/crt0.S \
+		-march=rv32i \
+		-static -mcmodel=medany -nostartfiles \
+		-T$(DV_COMMON_DIR)/sw/baremetal.ld
+
 
 #		-T$(PACKAGES_DIR)/riscv-compliance/riscv-test-env/p/link.ld
 

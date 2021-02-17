@@ -104,7 +104,9 @@ module fwrisc_rv32i_tb(input clock);
 		.dwrite  (dwrite ), 
 		.dvalid  (dvalid ), 
 		.dready  (dready ),
-		.irq     (irq    ),
+		.irq     (irq    )
+		/*
+		,
 		.rvfi_valid			(rvfi_valid        	),
 		.rvfi_order			(rvfi_order			),
 		.rvfi_insn			(rvfi_insn			),
@@ -126,6 +128,7 @@ module fwrisc_rv32i_tb(input clock);
 		.rvfi_mem_wmask		(rvfi_mem_wmask		),
 		.rvfi_mem_rdata		(rvfi_mem_rdata		),
 		.rvfi_mem_wdata		(rvfi_mem_wdata		)		
+		 */
 		);
 	
 	gpio_bfm #(
@@ -142,7 +145,7 @@ module fwrisc_rv32i_tb(input clock);
 
 	generic_sram_byte_en_dualport_target_bfm #(
 		.DAT_WIDTH        (32       ), 
-		.ADR_WIDTH        (19       ) // 2M
+		.ADR_WIDTH        (22       ) // 16M
 		) u_sram (
 		.clock				(clock            		), 
 		.a_dat_w			(32'b0   				), 
@@ -156,6 +159,7 @@ module fwrisc_rv32i_tb(input clock);
 		.b_sel				(dwstb  				),
 		.b_dat_r			(drdata					));
 
+`ifdef UNDEFINED
 	// Connect the tracer BFM to 
 	wire [31:0]		tracer_pc = u_dut.u_core.u_tracer.pc;
 	wire [31:0]		tracer_instr = u_dut.u_core.u_tracer.instr;
@@ -179,20 +183,23 @@ module fwrisc_rv32i_tb(input clock);
 	riscv_debug_bfm u_dbg_bfm (
 			.clock				(clock				),
 			.reset				(reset				),
-			.valid				(rvfi_valid        	),
-			.instr				(rvfi_insn			),
-			.trap				(rvfi_trap			),
-			.halt				(rvfi_halt			),
-			.intr				(rvfi_intr			),
-			.mode				(rvfi_mode			),
-			.ixl				(rvfi_ixl			),
-			.rd_addr			(rvfi_rd_addr		),
-			.rd_wdata			(rvfi_rd_wdata		),
-			.pc					(rvfi_pc_rdata		),
-			.mem_addr			(rvfi_mem_addr		),
-			.mem_wmask			(rvfi_mem_wmask		),
-			.mem_wdata			(rvfi_mem_wdata		)			
+			.valid				(tracer_ivalid        	),
+			.instr				(tracer_instr			),
+			/*
+			.trap				(1'b0			),
+			.halt				(1'b0			),
+			 */
+			.intr				(1'b0			),
+//			.mode				(rvfi_mode			),
+//			.ixl				(rvfi_ixl			),
+			.rd_addr			(tracer_rd_waddr		),
+			.rd_wdata			(tracer_rd_wdata		),
+			.pc					(tracer_pc		),
+			.mem_addr			(tracer_maddr		),
+			.mem_wmask			((tracer_mwrite)?tracer_mstrb:{4{1'b0}}		),
+			.mem_data			(tracer_mdata		)			
 		);
+`endif /* UNDEFINED */
 //	fwrisc_tracer_bfm u_tracer(
 //			.clock(clock),
 //			.reset(reset),

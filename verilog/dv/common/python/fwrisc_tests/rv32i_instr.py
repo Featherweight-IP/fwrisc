@@ -9,6 +9,7 @@ import pybfms
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 from fwrisc_tracer_bfm.exec_monitor import ExecMonitor
+from riscv_debug_bfms.riscv_debug_bfm import RiscvDebugBfm
 
 
 @cocotb.test()
@@ -20,7 +21,7 @@ async def test(top):
 #     await pybfms.delta()
     
     u_sram = pybfms.find_bfm(".*u_sram")
-    u_dbg_bfm = pybfms.find_bfm(".*u_dbg_bfm")
+    u_dbg_bfm = pybfms.find_bfm(".*u_dbg", RiscvDebugBfm)
 
 #    mon = ExecMonitor()
 #    u_tracer.add_listener(mon)
@@ -91,11 +92,14 @@ async def test(top):
  
     errors = 0
     for e in exp_l:
-        if u_dbg_bfm.reg(e[0]) == e[1]:
-            print(" x" + str(e[0]) + ": " + hex(e[1]))
+        if (e[0] < 32):
+            if u_dbg_bfm.reg(e[0]) == e[1]:
+                print(" x" + str(e[0]) + ": " + hex(e[1]))
+            else:
+                print("*x" + str(e[0]) + ": expect=" + hex(e[1]) + " actual=" + hex(u_dbg_bfm.reg(e[0])))
+                errors += 1
         else:
-            print("*x" + str(e[0]) + ": expect=" + hex(e[1]) + " actual=" + hex(u_dbg_bfm.reg(e[0])))
-            errors += 1
+            print("Note: skip check on CSR")
              
     if errors:
         raise cocotb.result.TestError("" + str(errors) + " register-compare errors")

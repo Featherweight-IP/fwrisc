@@ -61,7 +61,7 @@ async def test(top):
     await pybfms.init()
     
     u_sram = pybfms.find_bfm(".*u_sram")
-    u_dbg_bfm : RiscvDebugBfm = pybfms.find_bfm(".*u_dbg_bfm")
+    u_dbg_bfm : RiscvDebugBfm = pybfms.find_bfm(".*u_dbg", type=RiscvDebugBfm)
     u_irq_bfm : GpioBfm = pybfms.find_bfm(".*u_irq_bfm")
     
     async def irq_toggle():
@@ -71,7 +71,7 @@ async def test(top):
             await cocotb.triggers.Timer(10, "us")
             u_irq_bfm.set_gpio_out_bit(0, 0)
     
-    cocotb.fork(irq_toggle())
+#    cocotb.fork(irq_toggle())
     
 #    u_dbg_bfm.trace_level(RiscvDebugTraceLevel.Call)
 #    u_dbg_bfm.en_disasm = False
@@ -105,7 +105,7 @@ async def test(top):
             shdr = elffile._get_section_header(i)
 #            print("sh_addr=" + hex(shdr['sh_addr']) + " sh_size=" + hex(shdr['sh_size']) + " flags=" + hex(shdr['sh_flags']))
 #            print("  keys=" + str(shdr.keys()))
-            if shdr['sh_size'] != 0 and shdr['sh_flags'] != 0x0:
+            if shdr['sh_size'] != 0 and (shdr['sh_flags'] & 0x2):
                 section = elffile.get_section(i)
                 data = section.data()
                 addr = shdr['sh_addr']
@@ -115,7 +115,7 @@ async def test(top):
                     word |= (data[j+1] << (8*1)) if j+1 < len(data) else 0
                     word |= (data[j+2] << (8*2)) if j+2 < len(data) else 0
                     word |= (data[j+3] << (8*3)) if j+3 < len(data) else 0
-                    u_sram.write_nb(int((addr & 0xFFFFF)/4), word, 0xF)
+                    u_sram.write_nb(int((addr & 0xFFFFFF)/4), word, 0xF)
                     addr += 4
                     j += 4
 

@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?eclipse-pydev version="1.0"?><pydev_project>
-<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
-<pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python interpreter</pydev_property>
-<pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
-<path>/${PROJECT_DIR_NAME}/packages/ivpm/scripts</path>
-<path>/${PROJECT_DIR_NAME}/packages/hpi/src</path>
-<path>/${PROJECT_DIR_NAME}/ve/fwrisc/tests/pyfv-hpi</path>
-<path>/${PROJECT_DIR_NAME}/packages/testsuite-runner/src</path>
-<path>/${PROJECT_DIR_NAME}/ve/testlists</path>
-<path>/${PROJECT_DIR_NAME}/packages/testsuite-runner/plugins</path>
-<path>/${PROJECT_DIR_NAME}/ve/fwrisc_tracer_bfm/src</path>
-<path>/${PROJECT_DIR_NAME}/packages/cocotb</path>
-<path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32imc/tests/cocotb</path>
-<path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32i/tests/cocotb</path>
-<path>/${PROJECT_DIR_NAME}/packages/fltools/src</path>
-<path>/${PROJECT_DIR_NAME}/packages/generic-sram-bfms/src</path>
-<path>/${PROJECT_DIR_NAME}/packages/mem-bfms-core/src</path>
-</pydev_pathproperty>
+        
+    
+    <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
+        
+    
+    <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python interpreter</pydev_property>
+        
+    
+    <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
+        <path>/${PROJECT_DIR_NAME}/ve/testlists</path>
+        <path>/${PROJECT_DIR_NAME}/ve/fwrisc_tracer_bfm/src</path>
+        <path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32imc/tests/cocotb</path>
+        <path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32i/tests/cocotb</path>
+        <path>/${PROJECT_DIR_NAME}/packages/mkdv/src</path>
+        <path>/${PROJECT_DIR_NAME}/packages/pybfms-riscv-debug/src</path>
+    </pydev_pathproperty>
+        
+
 </pydev_project>
