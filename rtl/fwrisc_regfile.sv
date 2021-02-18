@@ -67,7 +67,7 @@ module fwrisc_regfile #(
 	reg[31:0]			mtvec_r;
 	reg[31:0]			mscratch;
 
-	reg[31:0]			regs['h1f:0];
+	reg[31:0]			regs['h3f:0];
 
 	generate
 	if (ENABLE_DEP) begin
@@ -186,7 +186,7 @@ module fwrisc_regfile #(
 			CSR_MTVEC:     ra_rdata <= mtvec_r;
 			CSR_MSCRATCH:  ra_rdata <= mscratch;
 			CSR_MIP:       ra_rdata <= {20'b0, irq, 11'b0};
-			default:       ra_rdata <= regs[ra_raddr[4:0]];
+			default:       ra_rdata <= regs[ra_raddr[5:0]];
 		endcase
 		
 		// Only RB is used to access CSRs
@@ -207,7 +207,7 @@ module fwrisc_regfile #(
 			CSR_MTVEC:     rb_rdata <= mtvec_r;
 			CSR_MSCRATCH:  rb_rdata <= mscratch;
 			CSR_MIP:       rb_rdata <= {20'b0, irq, 11'b0};
-			default:       rb_rdata <= regs[rb_raddr[4:0]];
+			default:       rb_rdata <= regs[rb_raddr[5:0]];
 		endcase
 	end
 
