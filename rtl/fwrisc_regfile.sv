@@ -24,9 +24,14 @@
  * TODO: Add module documentation
  */
 module fwrisc_regfile #(
-		parameter ENABLE_COUNTERS=1,
+		parameter 			ENABLE_COUNTERS=1,
 		// Enable Data Execution Protection
-		parameter ENABLE_DEP=1
+		parameter 			ENABLE_DEP=1,
+		parameter[31:0]		VENDORID=0,
+		parameter[31:0]		ARCHID=0,
+		parameter[31:0]		IMPID=0,
+		parameter[31:0]		HARTID=0,
+		parameter[31:0]		ISA=0
 		) (
 		input				clock,
 		input				reset,
@@ -60,8 +65,9 @@ module fwrisc_regfile #(
 	reg[31:0]			dep_hi_r;
 	// In case we need a writable mtvec
 	reg[31:0]			mtvec_r;
+	reg[31:0]			mscratch;
 
-	reg[31:0]			regs['h3f:0];
+	reg[31:0]			regs['h1f:0];
 
 	generate
 	if (ENABLE_DEP) begin
@@ -96,6 +102,8 @@ module fwrisc_regfile #(
 			instr_count <= 0;
 			dep_lo_r <= 0;
 			dep_hi_r <= 0;
+			mtvec_r <= 0;
+			mscratch <= {32{1'b0}};
 			mtvec_r <= {32{1'b0}};
 			meie <= 1'b1;
 			mie <= 1'b1;
@@ -161,15 +169,35 @@ module fwrisc_regfile #(
 				end
 			end
 		end
-		case (ra_raddr)
-			0:				ra_rdata <= {32{1'b0}};
-			default: 		ra_rdata <= regs[ra_raddr];
+
+		case (ra_raddr) 
+			6'b0:          ra_rdata <= {32{1'b0}};
+			CSR_MVENDORID: ra_rdata <= VENDORID;
+			CSR_MARCHID:   ra_rdata <= ARCHID;
+			CSR_MIMPID:    ra_rdata <= IMPID;
+			CSR_MHARTID:   ra_rdata <= HARTID;
+			CSR_MISA:      ra_rdata <= {2'b01, ISA[29:0]};
+			CSR_MIE:       ra_rdata <= {20'b0, meie, 11'b0};
+			CSR_MCYCLE:    ra_rdata <= cycle_count[31:0];
+			CSR_MCYCLEH:   ra_rdata <= cycle_count[63:32];
+			CSR_MINSTRET:  ra_rdata <= instr_count[31:0];
+			CSR_MINSTRETH: ra_rdata <= instr_count[63:32];
+			// TODO: DEP (?)
+			CSR_MTVEC:     ra_rdata <= mtvec_r;
+			CSR_MSCRATCH:  ra_rdata <= mscratch;
+			CSR_MIP:       ra_rdata <= {20'b0, irq, 11'b0};
+			default:       ra_rdata <= regs[ra_raddr[4:0]];
 		endcase
 		
 		// Only RB is used to access CSRs
 		case (rb_raddr)
 			0:             rb_rdata <= {32{1'b0}};
-			CSR_MHARTID:   rb_rdata <= {32{1'b0}};
+			CSR_MVENDORID: rb_rdata <= VENDORID;
+			CSR_MARCHID:   rb_rdata <= ARCHID;
+			CSR_MIMPID:    rb_rdata <= IMPID;
+			CSR_MHARTID:   rb_rdata <= HARTID;
+			CSR_MISA:      rb_rdata <= {2'b01, ISA[29:0]};
+			CSR_MIE:       rb_rdata <= {20'b0, meie, 11'b0};
 			CSR_MSTATUS:   rb_rdata <= {{24{1'b0}}, mpie, {3{1'b0}}, mie, {3{1'b0}}};
 			CSR_MCYCLE:    rb_rdata <= cycle_count[31:0];
 			CSR_MCYCLEH:   rb_rdata <= cycle_count[63:32];
@@ -177,8 +205,9 @@ module fwrisc_regfile #(
 			CSR_MINSTRETH: rb_rdata <= instr_count[63:32];
 			// TODO: DEP (?)
 			CSR_MTVEC:     rb_rdata <= mtvec_r;
+			CSR_MSCRATCH:  rb_rdata <= mscratch;
 			CSR_MIP:       rb_rdata <= {20'b0, irq, 11'b0};
-			default:       rb_rdata <= regs[rb_raddr];
+			default:       rb_rdata <= regs[rb_raddr[4:0]];
 		endcase
 	end
 

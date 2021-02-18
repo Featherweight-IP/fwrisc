@@ -27,7 +27,11 @@ module fwrisc #(
 		parameter ENABLE_COMPRESSED=1,
 		parameter ENABLE_MUL_DIV=1,
 		parameter ENABLE_DEP=1,
-		parameter ENABLE_COUNTERS=1
+		parameter ENABLE_COUNTERS=1,
+		parameter[31:0] VENDORID = 0,
+		parameter[31:0] ARCHID = 0,
+		parameter[31:0] IMPID = 0,
+		parameter[31:0] HARTID = 0
 		) (
 		input			clock,
 		input			reset,
@@ -185,8 +189,42 @@ module fwrisc #(
 		);
 	
 	fwrisc_regfile #(
-		.ENABLE_COUNTERS  (ENABLE_COUNTERS ),
-		.ENABLE_DEP       (ENABLE_DEP      )
+		.ENABLE_COUNTERS  	(ENABLE_COUNTERS ),
+		.ENABLE_DEP       	(ENABLE_DEP      ),
+		.VENDORID			(VENDORID        ),
+		.ARCHID				(ARCHID          ),
+		.IMPID				(IMPID           ),
+		.HARTID				(HARTID          ),
+		.ISA                ({
+			2'b01,
+			4'b0, // 29:26
+			1'b0,							// Reserved
+			1'b0,							// Reserved
+			1'b0,							// Non-standard extensions
+			1'b0,							// Reserved
+			1'b0,							// Vector extension
+			1'b0,							// User mode
+			1'b0,							// Transactional memory extension
+			1'b0,							// Supervisor mode
+			1'b0,							// Reserved
+			1'b0,							// Quad-precision floating-point
+			1'b0,							// Packed-SIMD
+			1'b0,							// Reserved
+			1'b1,							// User-level interrupts
+			(ENABLE_MUL_DIV)?1'b1:1'b0,		// Multiply/Divide
+			1'b0,							// Decimal floating-point extension
+			1'b0,							// Reserved
+			1'b0,							// Dynamically-translated languages
+			1'b1,							// RV32I
+			1'b0,							// Reserved
+			1'b0,							// Additional
+			1'b0,							// Single-precision floating-point
+			1'b0,							// RV32E
+			1'b0,							// Double-precision floating-point
+			(ENABLE_COMPRESSED)?1'b1:1'b0,	// Compressed instructions
+			1'b0, 							// Bit operations
+			1'b0  							// Atomic		
+			})
 		) u_regfile (
 		.clock            (clock              ), 
 		.reset            (int_reset          ), 

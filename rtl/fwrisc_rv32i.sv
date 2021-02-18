@@ -7,7 +7,12 @@
  * 
  * FWRISC RV32I configuration
  */
-module fwrisc_rv32i(
+module fwrisc_rv32i #(
+		parameter[31:0] VENDORID = 0,
+		parameter[31:0] ARCHID = 0,
+		parameter[31:0] IMPID = 0,
+		parameter[31:0] HARTID = 0
+		) (
 		input			clock,
 		input			reset,
 		
@@ -22,14 +27,19 @@ module fwrisc_rv32i(
 		output[3:0]		dwstb,
 		output			dwrite,
 		input[31:0]		drdata,
-		input			dready		
+		input			dready,
+		input			irq
 		);
 	
 	fwrisc #(
-		.ENABLE_COMPRESSED  (0), 
-		.ENABLE_MUL_DIV     (0), 
-		.ENABLE_DEP         (0), 
-		.ENABLE_COUNTERS    (1)
+		.ENABLE_COMPRESSED(  0), 
+		.ENABLE_MUL_DIV(     0), 
+		.ENABLE_DEP(         0), 
+		.ENABLE_COUNTERS(    1),
+		.VENDORID(           VENDORID),
+		.ARCHID(             ARCHID),
+		.IMPID(              IMPID),
+		.HARTID(             HARTID)
 		) u_core (
 		.clock              (clock             ), 
 		.reset              (reset             ), 
@@ -43,7 +53,8 @@ module fwrisc_rv32i(
 		.dwstb              (dwstb             ), 
 		.dwrite             (dwrite            ), 
 		.drdata             (drdata            ), 
-		.dready             (dready            ));
+		.dready             (dready            ),
+		.irq				(irq               ));
 
 endmodule
 
