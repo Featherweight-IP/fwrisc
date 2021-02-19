@@ -1,0 +1,11 @@
+
+tests:
+
+    - interrupt_basics:
+        variables:
+            - SW_IMAGE: interrupt_basics.elf
+            - MKDV_COCOTB_MODULE: fwrisc_tests.baremetal
+    - smoke:
+        variables:
+            - SW_IMAGE: smoke.elf
+            - MKDV_COCOTB_MODULE: fwrisc_tests.baremetal

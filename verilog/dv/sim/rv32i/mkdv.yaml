@@ -1,5 +1,7 @@
 
 tests:
+    - baremetal:
+        path: baremetal.yaml
     - instr:
         path: instr.yaml
       
