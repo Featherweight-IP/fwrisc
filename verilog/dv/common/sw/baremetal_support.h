@@ -28,6 +28,10 @@ typedef void (*exception_f)(int unsigned cause);
 
 void set_exception_handler(exception_f f);
 
+void enable_interrupts();
+
+void disable_interrupts();
+
 
 
 #endif /* INCLUDED_BAREMETAL_SUPPORT_H */

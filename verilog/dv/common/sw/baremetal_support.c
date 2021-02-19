@@ -26,6 +26,20 @@ void set_exception_handler(exception_f f) {
 	handler = f;
 }
 
+void enable_interrupts() {
+	unsigned int mie;
+    __asm__ volatile ("csrrs %0, mie, %1\n"
+                      : "=r" (mie)
+                      : "r" (1 << 11));
+}
+
+void disable_interrupts() {
+	unsigned int mie;
+    __asm__ volatile ("csrrc %0, mie, %1\n"
+                      : "=r" (mie)
+                      : "r" (1 << 11));
+}
+
 void outstr(const char *m) {
 	const char *p = m;
 	volatile unsigned int *out_p = &outstr_addr;

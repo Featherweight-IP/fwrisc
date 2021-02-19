@@ -18,11 +18,31 @@ static void interrupt(int unsigned cause) {
 int main() {
 	int i, x;
 	unsigned int old_count;
+	volatile unsigned int *int_count_p;
 
 	set_exception_handler(&interrupt);
 
+	// First, try to raise an interrupt while disabled
+	int_count_p = &int_count;
+	*((volatile unsigned int *)0x40000000) = 10;
+
+	// Wait for a bit and confirm that no interrupt is received
+	x = 0;
+	while (*int_count_p == old_count && x < 1000) {
+		x++;
+	}
+
+	*((volatile unsigned int *)0x40000004) = 0;
+	if (*int_count_p == old_count) {
+		record_pass("No interrupts received");
+	} else {
+		record_fail("More than zero received");
+	}
+
+	enable_interrupts();
+
 	for (i=0; i<4; i++) {
-		volatile unsigned int *int_count_p = &int_count;
+		int_count_p = &int_count;
 		old_count = int_count;
 		*((volatile unsigned int *)0x40000000) = 100;
 

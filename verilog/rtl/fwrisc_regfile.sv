@@ -34,27 +34,27 @@ module fwrisc_regfile #(
 		parameter[31:0]		HARTID=0,
 		parameter[31:0]		ISA=0
 		) (
-		input				clock,
-		input				reset,
-		output				soft_reset_req,
-		input				instr_complete,
-		input				trap,
-		input				tret,
-		input				irq,
+		input					clock,
+		input					reset,
+		output					soft_reset_req,
+		input					instr_complete,
+		input					trap,
+		input					tret,
+		input					irq,
 
-		input[5:0]			ra_raddr,
+		input[5:0]				ra_raddr,
 		output reg[31:0]		ra_rdata,
-		input[5:0]			rb_raddr,
+		input[5:0]				rb_raddr,
 		output reg[31:0]		rb_rdata,
-		input[5:0]			rd_waddr,
-		input[31:0]			rd_wdata,
-		input				rd_wen,
+		input[5:0]				rd_waddr,
+		input[31:0]				rd_wdata,
+		input					rd_wen,
 		
 		output[31:0]			dep_lo,
 		output[31:0]			dep_hi,
 		output[31:0]			mtvec,
-		output reg			meie,
-		output reg			mie
+		output reg				meie,
+		output reg				mie
 		);
 	
 	`include "fwrisc_csr_addr.svh"
@@ -69,7 +69,7 @@ module fwrisc_regfile #(
 	reg[31:0]			mscratch;
 	reg[31:0]			mepc;
 	reg[3:0]			mcause_r;
-	reg				mcause_int_r;
+	reg					mcause_int_r;
 
 	localparam N_REGS  = (RV32E)?15:31;
 	localparam RA_BITS = (RV32E)?4:5;
@@ -113,8 +113,8 @@ module fwrisc_regfile #(
 			mscratch <= {32{1'b0}};
 			mepc <= {32{1'b0}};
 			mtvec_r <= {32{1'b0}};
-			meie <= 1'b1;
-			mie <= 1'b1;
+			meie <= 1'b0; // TODO: Should be default 0?
+			mie <= 1'b1; 
 			mpie <= 1'b0;
 			mcause_r <= {4{1'b0}};
 			mcause_int_r <= 1'b0;
