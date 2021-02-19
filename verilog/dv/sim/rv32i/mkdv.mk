@@ -6,18 +6,22 @@ RISCV_CC=riscv64-zephyr-elf-gcc
 
 MKDV_TEST ?= instr.arith.add
 
-MKDV_TIMEOUT ?= 20ms
+MKDV_TIMEOUT ?= 2ms
 
 TOP_MODULE = fwrisc_rv32i_tb
 
 PYBFMS_MODULES += generic_sram_bfms riscv_debug_bfms gpio_bfms
 
 VLSIM_CLKSPEC = clock=10ns
+#VLSIM_CLKSPEC = clock=1000ns
 VLSIM_OPTIONS += -Wno-fatal
 
 ifeq (,$(SW_IMAGE))
     ifneq (,$(findstring embench,$(subst ., ,$(MKDV_TEST))))
 	SW_IMAGE = $(subst .,_,$(subst embench.,,$(MKDV_TEST))).elf
+    endif
+    ifneq (,$(findstring baremetal,$(subst ., ,$(MKDV_TEST))))
+	SW_IMAGE = $(subst .,_,$(subst baremetal.,,$(MKDV_TEST))).elf
     endif
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))
 	SW_IMAGE = $(subst .,_,$(subst instr.,,$(MKDV_TEST))).elf
@@ -36,6 +40,9 @@ endif
 ifeq (,$(MKDV_COCOTB_MODULE))
     ifneq (,$(findstring embench,$(subst ., ,$(MKDV_TEST))))
 	MKDV_COCOTB_MODULE = fwrisc_tests.embench
+    endif
+    ifneq (,$(findstring baremetal,$(subst ., ,$(MKDV_TEST))))
+	MKDV_COCOTB_MODULE = fwrisc_tests.baremetal
     endif
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))
 	MKDV_COCOTB_MODULE = fwrisc_tests.rv32i_instr
@@ -91,6 +98,16 @@ include $(TEST_DIR)/../../common/defs_rules.mk
 		$(EMBENCH_DIR)/support/beebsc.c \
 		$(EMBENCH_DIR)/support/main.c \
 		$(DV_COMMON_DIR)/sw/embench_support.c \
+		$(DV_COMMON_DIR)/sw/crt0.S \
+		-march=rv32i \
+		-static -mcmodel=medany -nostartfiles \
+		-T$(DV_COMMON_DIR)/sw/baremetal.ld
+		
+%.elf : $(TEST_DIR)/tests/baremetal/%.c
+	$(Q)$(RISCV_CC) -o $@ \
+		-I$(TEST_DIR)/../../common/sw \
+		$(TEST_DIR)/../../common/sw/baremetal_support.c \
+		$(TEST_DIR)/tests/baremetal/$*.c \
 		$(DV_COMMON_DIR)/sw/crt0.S \
 		-march=rv32i \
 		-static -mcmodel=medany -nostartfiles \

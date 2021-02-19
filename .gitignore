@@ -2,3 +2,6 @@
 packages/
 rundir
 __pycache__/
+cache/
+rundir/
+regress/

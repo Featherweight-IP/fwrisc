@@ -11,6 +11,24 @@ import pybfms
 from fwrisc_tracer_bfm.fwrisc_tracer_bfm_if import FwriscTracerBfmIF
 from riscv_debug_bfms.riscv_debug_bfm import RiscvDebugBfm, RiscvDebugTraceLevel
 
+class Tube(object):
+    
+    def __init__(self, addr):
+        self.addr = addr
+        self.out = ""
+
+    def memwrite(self, addr, data, mask):
+        if addr == self.addr:
+            ch = data & 0xFF
+            
+            if ch != 0:
+                if ch == 0xa:
+                    print("# " + self.out)
+                    self.out = ""
+                else:
+                    self.out += "%c" % (ch,)
+    
+
 @cocotb.test()
 async def test(top):
     await pybfms.init()
@@ -22,9 +40,11 @@ async def test(top):
     u_dbg_bfm.load_elf(sw_image)
 
     # Mask extra events to go fast     
-    u_dbg_bfm.set_trace_level(RiscvDebugTraceLevel.Call)
+#    u_dbg_bfm.set_trace_level(RiscvDebugTraceLevel.Call)
     
-
+    tube = Tube(u_dbg_bfm.sym2addr("outstr_addr"))
+    u_dbg_bfm.add_memwrite_cb(tube.memwrite)
+    
     print("Note: loading image " + sw_image)    
     with open(sw_image, "rb") as f:
         elffile = ELFFile(f)
@@ -33,10 +53,7 @@ async def test(top):
         section = None
         for i in range(elffile.num_sections()):
             shdr = elffile._get_section_header(i)
-#            print("sh_addr=" + hex(shdr['sh_addr']) + " sh_size=" + hex(shdr['sh_size']) + " flags=" + hex(shdr['sh_flags']))
-#            print("  keys=" + str(shdr.keys()))
-            print("sh_size=" + hex(shdr['sh_size']) + " sh_flags=" + hex(shdr['sh_flags']))
-            if shdr['sh_size'] != 0 and (shdr['sh_flags'] & 0x2) == 0x2:
+            if shdr['sh_size'] != 0 and (shdr['sh_flags'] & 0x2):
                 section = elffile.get_section(i)
                 data = section.data()
                 addr = shdr['sh_addr']
@@ -46,31 +63,21 @@ async def test(top):
                     word |= (data[j+1] << (8*1)) if j+1 < len(data) else 0
                     word |= (data[j+2] << (8*2)) if j+2 < len(data) else 0
                     word |= (data[j+3] << (8*3)) if j+3 < len(data) else 0
-#                    print("Write: " + hex(addr) + "(" + hex(int((addr & 0xFFFFF)/4)) + ") " + hex(word))
                     u_sram.write_nb(int((addr & 0xFFFFF)/4), word, 0xF)
                     addr += 4
                     j += 4    
 
-    print("--> wait main")
-    await u_dbg_bfm.on_exit("main")
-    print("<-- wait main")
-
-    print("--> wait start_trigger")
-    await u_dbg_bfm.on_exit("start_trigger")
-    print("<-- wait start_trigger")
-
-    await cocotb.triggers.Timer(0, "ns")    
-    start = cocotb.utils.get_sim_time("ms")
-    print("start=" + str(start))
+    test_pass_addr = u_dbg_bfm.sym2addr("test_pass")
+    test_fail_addr = u_dbg_bfm.sym2addr("test_fail")
     
-    print("--> wait stop_trigger")
-    await u_dbg_bfm.on_exit("stop_trigger")
-    print("<-- wait stop_trigger")
+    print("--> wait end_test")
+    addr = await u_dbg_bfm.on_entry(("test_pass", "test_fail"))
+    print("<-- wait end_test")
     
-    await cocotb.triggers.Timer(0, "ns")    
-    stop = cocotb.utils.get_sim_time("ms")
-    print("stop=" + str(stop))
-   
-    print("Total time: " + str(stop-start) + "ms")
+    print("addr=" + hex(addr) + " test_pass_addr=" + hex(test_pass_addr))
+    
+    if addr != test_pass_addr:
+        raise Exception("Test failed")
+
 
         

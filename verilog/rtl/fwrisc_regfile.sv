@@ -67,6 +67,7 @@ module fwrisc_regfile #(
 	// In case we need a writable mtvec
 	reg[31:0]			mtvec_r;
 	reg[31:0]			mscratch;
+	reg[31:0]			mepc;
 	reg[3:0]			mcause_r;
 	reg				mcause_int_r;
 
@@ -110,6 +111,7 @@ module fwrisc_regfile #(
 			dep_hi_r <= 0;
 			mtvec_r <= 0;
 			mscratch <= {32{1'b0}};
+			mepc <= {32{1'b0}};
 			mtvec_r <= {32{1'b0}};
 			meie <= 1'b1;
 			mie <= 1'b1;
@@ -169,6 +171,12 @@ module fwrisc_regfile #(
 				mie <= rd_wdata[3];
 				mpie <= rd_wdata[7];
 			end
+			if (rd_wen && rd_waddr == CSR_MSCRATCH) begin
+				mscratch <= rd_wdata;
+			end
+			if (rd_wen && rd_waddr == CSR_MEPC) begin
+				mepc <= rd_wdata;
+			end
 		end
 	end
 
@@ -176,7 +184,9 @@ module fwrisc_regfile #(
 		// Gate off writing to r0 and read-only CSRs
 		if (rd_wen) begin
 			if (|rd_waddr /*&& rd_waddr[5:4] == 2'b00*/) begin
-				regs[~rd_waddr[RA_BITS-1:0]] <= rd_wdata;
+				if (rd_waddr[5] == 0) begin
+					regs[~rd_waddr[RA_BITS-1:0]] <= rd_wdata;
+				end
 			end else begin
 				if (rd_waddr != 0) begin
 					$display("Warning: skipping write to %0d", rd_waddr);
@@ -199,6 +209,7 @@ module fwrisc_regfile #(
 			// TODO: DEP (?)
 			CSR_MTVEC:     ra_rdata <= mtvec_r;
 			CSR_MSCRATCH:  ra_rdata <= mscratch;
+			CSR_MEPC:      ra_rdata <= mepc;
 			CSR_MIP:       ra_rdata <= {20'b0, irq, 11'b0};
 			default:       ra_rdata <= regs[~ra_raddr[RA_BITS-1:0]];
 		endcase
@@ -220,6 +231,7 @@ module fwrisc_regfile #(
 			// TODO: DEP (?)
 			CSR_MTVEC:     rb_rdata <= mtvec_r;
 			CSR_MSCRATCH:  rb_rdata <= mscratch;
+			CSR_MEPC:      rb_rdata <= mepc;
 			CSR_MCAUSE:    rb_rdata <= {mcause_int_r, {27{1'b0}}, mcause_r};
 			CSR_MIP:       rb_rdata <= {20'b0, irq, 11'b0};
 			default:       rb_rdata <= regs[~rb_raddr[RA_BITS-1:0]];
