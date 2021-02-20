@@ -1,0 +1,7 @@
+
+tests:
+    - rv32i:
+        path: rv32i/mkdv.yaml
+
+    - rv32c:
+        path: rv32c/mkdv.yaml

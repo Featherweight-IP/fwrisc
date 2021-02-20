@@ -1,0 +1,9 @@
+
+tests:
+    - compressed:
+        variables:
+            - TOP_MODULE: fwrisc_fetch_c_formal_tb
+    - no_compressed:
+        variables:
+            - TOP_MODULE: fwrisc_fetch_formal_tb
+

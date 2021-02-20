@@ -11,7 +11,7 @@ MKDV_TIMEOUT ?= 10ms
 
 TOP_MODULE = fwrisc_rv32c_tb
 
-PYBFMS_MODULES += generic_sram_bfms fwrisc_tracer_bfm
+PYBFMS_MODULES += generic_sram_bfms riscv_debug_bfms
 
 VLSIM_CLKSPEC = clock=10ns
 
@@ -26,10 +26,10 @@ endif
 
 ifeq (,$(MKDV_COCOTB_MODULE))
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))
-	MKDV_COCOTB_MODULE = fwrisc_tests.rv32c_instr
+	MKDV_COCOTB_MODULE = fwrisc_tests.rv32i_instr
     endif
     ifneq (,$(findstring riscv_compliance,$(subst ., ,$(MKDV_TEST))))
-	MKDV_COCOTB_MODULE = fwrisc_tests.rv32c_compliance
+	MKDV_COCOTB_MODULE = fwrisc_tests.rv32i_compliance
 	REF_FILE=$(subst .,_,$(subst riscv_compliance.,,$(MKDV_TEST))).reference_output
     endif
 endif
@@ -45,10 +45,12 @@ MKDV_VL_SRCS += $(TEST_DIR)/fwrisc_rv32c_tb.sv
 
 VLSIM_OPTIONS += -Wno-fatal
 
+include $(TEST_DIR)/../../../dbg/defs_rules.mk
 include $(TEST_DIR)/../../common/defs_rules.mk
 
 RULES := 1
 
+include $(TEST_DIR)/../../../dbg/defs_rules.mk
 include $(TEST_DIR)/../../common/defs_rules.mk
 
 %.elf : %.S

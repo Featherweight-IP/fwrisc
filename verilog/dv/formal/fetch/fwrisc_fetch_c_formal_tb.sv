@@ -2,12 +2,22 @@
  * fwrisc_fetch_formal_tb.sv
  ****************************************************************************/
  
+// `include "fwrisc_fetch_formal_defines.svh"
+
+`ifndef TEST_MODULE
+	`define TEST_MODULE fwrisc_fetch_formal_smoke_test
+`endif
+
+`ifndef CHECKER_MODULE
+	`define CHECKER_MODULE fwrisc_fetch_formal_smoke_checker
+`endif
+
 /**
  * Module: fwrisc_fetch_formal_tb
  * 
  * TODO: Add module documentation
  */
-module fwrisc_fetch_formal_tb(input clock);
+module fwrisc_fetch_c_formal_tb(input clock);
 
 	reg[3:0]	reset_cnt = 0;
 	(* keep *)
@@ -72,7 +82,7 @@ module fwrisc_fetch_formal_tb(input clock);
 	end
 	
 	fwrisc_fetch #(
-		.ENABLE_COMPRESSED  (0)
+		.ENABLE_COMPRESSED  (1)
 		) u_dut (
 		.clock              (clock             ), 
 		.reset              (reset             ), 
@@ -101,23 +111,37 @@ module fwrisc_fetch_formal_tb(input clock);
 				instr_o_valid <= {instr_o_valid[N_OUT_INSTR-2:1], 1'b1};
 				instr_o <= {instr_o[32*(N_OUT_INSTR-1)-1:32], instr};
 			
-				assert(instr_c == 0);
-				/*
-				 */
-				// Not compressed
-				if (!next_pc_r[1]) begin
-					// Aligned fetch -- should be exactly equal
-					assert(instr == idata_i[31:0]);
+				// If the output instruction is compressed, we only need
+				// to look at the most-recent input
+				if (instr[1:0] != 2'b11) begin
+					assert(instr_c == 1);
+					/*
+					 */
 					assert(iaddr_i[31:0] == {next_pc_r[31:2], 2'b0});
+					if (!next_pc_r[1]) begin
+						assert(instr == idata_i[15:0]);
+					end else begin
+						assert(instr == idata_i[31:16]);
+					end
+					assert(instr[31:16] == {16{1'b0}});
 				end else begin
-					// Unaligned fetch -- will be a combination of the last two fetches
-					assert(instr == {idata_i[15:0], idata_i[63:48]});
-					// Two fetches must be sequential words
-					assert(iaddr_i[63:32] == {next_pc_r[31:2], 2'b0});
-					assert(iaddr_i[31:2] == iaddr_i[63:34]+1);
+					assert(instr_c == 0);
+					/*
+					 */
+					// Not compressed
+					if (!next_pc_r[1]) begin
+						// Aligned fetch -- should be exactly equal
+						assert(instr == idata_i[31:0]);
+						assert(iaddr_i[31:0] == {next_pc_r[31:2], 2'b0});
+					end else begin
+						// Unaligned fetch -- will be a combination of the last two fetches
+						assert(instr == {idata_i[15:0], idata_i[63:48]});
+						// Two fetches must be sequential words
+						assert(iaddr_i[63:32] == {next_pc_r[31:2], 2'b0});
+						assert(iaddr_i[31:2] == iaddr_i[63:34]+1);
+					end
 				end
-				
-				next_pc_r <= {{8{1'b0}}, next_pc[23:2], 2'b0};
+				next_pc_r <= {{8{1'b0}}, next_pc[23:1], 1'b0};
 				next_pc_seq_r <= next_pc_seq;
 				decode_complete <= 1'b1;
 			end else begin

@@ -53,9 +53,9 @@ module fwrisc_fetch #(
 	reg				instr_cache_valid;
 	// Note: Compressed instructions have 00, 01, or 10 low bits
 	// Low half-word is a compressed instruction
-	wire			instr_c_lo = (&idata[1:0] != 1);
+	wire			instr_c_lo = (idata[1:0] != 2'b11);
 	// High half-word is a compressed instruction
-	wire			instr_c_hi = (&idata[17:16] != 1);
+	wire			instr_c_hi = (idata[17:16] != 2'b11);
 	
 	wire			instr_c_next = (next_pc[1])?instr_c_hi:instr_c_lo;
 	
@@ -84,43 +84,53 @@ module fwrisc_fetch #(
 			// 
 			case (state)
 				default /*STATE_FETCH1*/: begin // Wait for fetch to complete
-					iaddr <= {next_pc[31:2], 2'b0};
 					if (iready && ivalid_r) begin
-						instr_c <= instr_c_next;
-						// Decide what to do based on alignment and fetched data
-						case ({next_pc[1], instr_c_next})
-							2'b00: begin // Aligned fetch of a 32-bit instruction
-								instr <= idata;
-//								fetch_valid <= 1;
-								instr_cache_valid <= 0;
-								fetch_valid_r <= 1;
-								ivalid_r <= 0;
-								state <= STATE_WAIT_DECODE; // Wait for instruction to be accepted
-							end
-							2'b01: begin // Aligned fetch of a 16-bit instruction
-								instr <= idata[15:0];
-								instr_cache <= idata[31:16];
-								instr_cache_valid <= 1;
-								fetch_valid_r <= 1;
-								ivalid_r <= 0;
-								state <= STATE_WAIT_DECODE; // Wait for instruction to be accepted
-							end
-							2'b10: begin // Unaligned fetch of a 32-bit instruction
-								// We received the first half
-								instr[15:0] <= idata[31:16];
-								instr_cache_valid <= 0;
-								ivalid_r <= 1;
-								state <= STATE_FETCH2; // Need to fetch upper half-word
-							end
-							2'b11: begin // Fetch the high half-word
-								instr[15:0] <= idata[31:16];
-								instr_cache_valid <= 0;
-								ivalid_r <= 0;
-								state <= STATE_WAIT_DECODE; 
-							end
-						endcase
+						if (ENABLE_COMPRESSED) begin
+							instr_c <= instr_c_next;
+							// Decide what to do based on alignment and fetched data
+							case ({next_pc[1], instr_c_next})
+								2'b00: begin // Aligned fetch of a 32-bit instruction
+									instr <= idata;
+									instr_cache_valid <= 0;
+									fetch_valid_r <= 1;
+									ivalid_r <= 0;
+									state <= STATE_WAIT_DECODE; // Wait for instruction to be accepted
+								end
+								2'b01: begin // Aligned fetch of a 16-bit instruction
+									instr <= idata[15:0];
+									instr_cache <= idata[31:16];
+									instr_cache_valid <= 1;
+									fetch_valid_r <= 1;
+									ivalid_r <= 0;
+									state <= STATE_WAIT_DECODE; // Wait for instruction to be accepted
+								end
+								2'b10: begin // Unaligned fetch of a 32-bit instruction
+									// We received the first half
+									instr[15:0] <= idata[31:16];
+									instr_cache_valid <= 0;
+									ivalid_r <= 1;
+									iaddr <= {next_pc[31:2]+1'd1, 2'b0};
+									state <= STATE_FETCH2; // Need to fetch upper half-word
+								end
+								2'b11: begin // Fetch the high half-word
+									instr[15:0] <= idata[31:16];
+									instr_cache_valid <= 0;
+									ivalid_r <= 0;
+									fetch_valid_r <= 1;
+									state <= STATE_WAIT_DECODE; 
+								end
+							endcase
+						end else begin // COMPRESSED not enabled
+							instr_c <= 1'b0;
+							instr <= idata;
+							instr_cache_valid <= 0;
+							fetch_valid_r <= 1;
+							ivalid_r <= 0;
+							state <= STATE_WAIT_DECODE; // Wait for instruction to be accepted
+						end
 					end else begin
 						ivalid_r <= 1;
+						iaddr <= {next_pc[31:2], 2'b0};
 					end
 				end
 						
@@ -133,6 +143,7 @@ module fwrisc_fetch #(
 						// TODO: for now, we always go back to fetch
 						// This is wasteful, but reliable
 						state <= STATE_FETCH1;
+						instr <= {32{1'b0}};
 `ifdef UNDEFINED
 						if (!next_pc_seq) begin
 							instr_cache_valid <= 0;
@@ -162,11 +173,11 @@ module fwrisc_fetch #(
 				end
 				
 				STATE_FETCH2: begin // Wait for fetch of upper half-word to complete
-					iaddr <= {next_pc[31:2]+1'd1, 2'b0};
 					if (iready) begin
 						ivalid_r <= 0;
 						// Fetch of upper half-word is complete
 						instr[31:16] <= idata[15:0];
+						instr_c <= (instr[1:0] != 2'b11);
 						
 						// Cache the leftover data for later 
 						instr_cache <= idata[31:16];

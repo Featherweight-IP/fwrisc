@@ -2,137 +2,137 @@ tests:
     - cadd-01:
         variables:
             - SW_IMAGE: cadd-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cadd-01.reference_output
     - caddi-01:
         variables:
             - SW_IMAGE: caddi-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: caddi-01.reference_output
     - caddi16sp-01:
         variables:
             - SW_IMAGE: caddi16sp-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: caddi16sp-01.reference_output
     - caddi4spn-01:
         variables:
             - SW_IMAGE: caddi4spn-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: caddi4spn-01.reference_output
     - cand-01:
         variables:
             - SW_IMAGE: cand-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cand-01.reference_output
     - candi-01:
         variables:
             - SW_IMAGE: candi-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: candi-01.reference_output
     - cbeqz-01:
         variables:
             - SW_IMAGE: cbeqz-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cbeqz-01.reference_output
     - cbnez-01:
         variables:
             - SW_IMAGE: cbnez-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cbnez-01.reference_output
     - cebreak-01:
         variables:
             - SW_IMAGE: cebreak-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cebreak-01.reference_output
     - cj-01:
         variables:
             - SW_IMAGE: cj-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cj-01.reference_output
     - cjal-01:
         variables:
             - SW_IMAGE: cjal-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cjal-01.reference_output
     - cjalr-01:
         variables:
             - SW_IMAGE: cjalr-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cjalr-01.reference_output
     - cjr-01:
         variables:
             - SW_IMAGE: cjr-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cjr-01.reference_output
     - cli-01:
         variables:
             - SW_IMAGE: cli-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cli-01.reference_output
     - clui-01:
         variables:
             - SW_IMAGE: clui-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: clui-01.reference_output
     - clw-01:
         variables:
             - SW_IMAGE: clw-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: clw-01.reference_output
     - clwsp-01:
         variables:
             - SW_IMAGE: clwsp-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: clwsp-01.reference_output
     - cmv-01:
         variables:
             - SW_IMAGE: cmv-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cmv-01.reference_output
     - cnop-01:
         variables:
             - SW_IMAGE: cnop-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cnop-01.reference_output
     - cor-01:
         variables:
             - SW_IMAGE: cor-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cor-01.reference_output
     - cslli-01:
         variables:
             - SW_IMAGE: cslli-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cslli-01.reference_output
     - csrai-01:
         variables:
             - SW_IMAGE: csrai-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: csrai-01.reference_output
     - csrli-01:
         variables:
             - SW_IMAGE: csrli-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: csrli-01.reference_output
     - csub-01:
         variables:
             - SW_IMAGE: csub-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: csub-01.reference_output
     - csw-01:
         variables:
             - SW_IMAGE: csw-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: csw-01.reference_output
     - cswsp-01:
         variables:
             - SW_IMAGE: cswsp-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cswsp-01.reference_output
     - cxor-01:
         variables:
             - SW_IMAGE: cxor-01.elf
-            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32c_compliance
+            - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_compliance
             - REF_FILE: cxor-01.reference_output
 
 

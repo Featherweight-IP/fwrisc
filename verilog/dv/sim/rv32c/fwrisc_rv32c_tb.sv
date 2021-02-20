@@ -105,6 +105,7 @@ module fwrisc_rv32c_tb(input clock);
 		.b_sel				(dwstb  				),
 		.b_dat_r			(drdata					));
 
+/*
 	// Connect the tracer BFM to 
 	wire [31:0]		tracer_pc = u_dut.u_tracer.pc;
 	wire [31:0]		tracer_instr = u_dut.u_tracer.instr;
@@ -144,7 +145,6 @@ module fwrisc_rv32c_tb(input clock);
 			.mwrite(tracer_mwrite),
 			.mvalid(tracer_mvalid)
 		);
-/*
 	bind fwrisc_tracer fwrisc_tracer_bfm u_tracer(
 			.clock(clock),
 			.reset(reset),

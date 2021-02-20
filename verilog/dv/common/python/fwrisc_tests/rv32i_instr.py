@@ -77,9 +77,11 @@ async def test(top):
                 
             exp_l.append([reg, exp])                    
 
-    addr = await u_dbg_bfm.wait_exec({0x80000004}, 100)
+    done_addr = u_dbg_bfm.sym2addr("done")
+
+    addr = await u_dbg_bfm.wait_exec("done", 100)
     
-    if addr != 0x80000004:
+    if addr != done_addr:
         raise cocotb.result.TestError("execution timed out")
     
 
