@@ -1,4 +1,4 @@
-tests:
+jobs:
     - hello_world:
        variables:
          - SW_IMAGE: hello_world/zephyr/zephyr.elf

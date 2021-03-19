@@ -6,7 +6,7 @@ RISCV_CC=riscv64-zephyr-elf-gcc
 
 MKDV_TEST ?= instr.arith.add
 
-MKDV_TIMEOUT ?= 2ms
+MKDV_TIMEOUT ?= 20ms
 
 TOP_MODULE = fwrisc_rv32i_tb
 
@@ -42,7 +42,11 @@ ifeq (,$(MKDV_COCOTB_MODULE))
 	MKDV_COCOTB_MODULE = fwrisc_tests.embench
     endif
     ifneq (,$(findstring baremetal,$(subst ., ,$(MKDV_TEST))))
-	MKDV_COCOTB_MODULE = fwrisc_tests.baremetal
+    	ifeq (baremetal.rpc,$(MKDV_TEST))
+			MKDV_COCOTB_MODULE = fwrisc_tests.rpc
+    	else
+			MKDV_COCOTB_MODULE = fwrisc_tests.baremetal
+    	endif
     endif
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))
 	MKDV_COCOTB_MODULE = fwrisc_tests.rv32i_instr
@@ -109,6 +113,7 @@ include $(TEST_DIR)/../../common/defs_rules.mk
 		$(TEST_DIR)/../../common/sw/baremetal_support.c \
 		$(TEST_DIR)/tests/baremetal/$*.c \
 		$(DV_COMMON_DIR)/sw/crt0.S \
+		-DBSS_CLEARED \
 		-march=rv32i \
 		-static -mcmodel=medany -nostartfiles \
 		-T$(DV_COMMON_DIR)/sw/baremetal.ld

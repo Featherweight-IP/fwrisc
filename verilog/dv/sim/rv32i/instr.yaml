@@ -2,7 +2,7 @@
 #* rv32i unit tests
 #****************************************************************************
 
-tests:
+jobs:
     - arith.add:
        variables:
          - SW_IMAGE: arith_add.elf

@@ -7,12 +7,13 @@
 
 #ifndef INCLUDED_BAREMETAL_SUPPORT_H
 #define INCLUDED_BAREMETAL_SUPPORT_H
+#include <stdarg.h>
 
 extern unsigned int outstr_addr;
 
 void outstr(const char *s);
 
-void print(const char *m);
+void println(const char *m);
 
 void record_pass(const char *m);
 
@@ -32,6 +33,9 @@ void enable_interrupts();
 
 void disable_interrupts();
 
+void print(const char *fmt, ...);
+
+void vprint(const char *fmt, va_list ap);
 
 
 #endif /* INCLUDED_BAREMETAL_SUPPORT_H */

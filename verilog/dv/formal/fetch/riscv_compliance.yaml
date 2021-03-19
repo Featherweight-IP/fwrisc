@@ -1,4 +1,4 @@
-jobs:
+tests:
     - add-01:
        variables:
          - SW_IMAGE: add-01.elf

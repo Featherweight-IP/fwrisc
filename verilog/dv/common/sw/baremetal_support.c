@@ -50,7 +50,7 @@ void outstr(const char *m) {
 	}
 }
 
-void print(const char *m) {
+void println(const char *m) {
 	outstr(m);
 	outstr("\n");
 }
@@ -89,6 +89,17 @@ void endtest() {
 	} else {
 		test_fail();
 	}
+}
+
+void print(const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	vprint(fmt, ap);
+	va_end(ap);
+}
+
+void vprint(const char *fmt, va_list ap) {
+	;
 }
 
 

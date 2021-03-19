@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?eclipse-pydev version="1.0"?><pydev_project>
-        
+                
+    
+    
     
     <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
-        
+                
+    
+    
     
     <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python interpreter</pydev_property>
-        
+                
+    
+    
     
     <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
-        <path>/${PROJECT_DIR_NAME}/ve/testlists</path>
-        <path>/${PROJECT_DIR_NAME}/ve/fwrisc_tracer_bfm/src</path>
-        <path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32imc/tests/cocotb</path>
-        <path>/${PROJECT_DIR_NAME}/ve/fwrisc_rv32i/tests/cocotb</path>
         <path>/${PROJECT_DIR_NAME}/packages/mkdv/src</path>
         <path>/${PROJECT_DIR_NAME}/packages/pybfms-riscv-debug/src</path>
+        <path>/${PROJECT_DIR_NAME}/packages/pybfms-core-debug-common/src</path>
+        <path>/${PROJECT_DIR_NAME}/packages/pybfms-core-debug-common/ve/unit</path>
+        <path>/${PROJECT_DIR_NAME}/verilog/dv/common/python</path>
+        <path>/${PROJECT_DIR_NAME}/packages/pyhvl-rpc/src</path>
     </pydev_pathproperty>
-        
+                
+
+
 
 </pydev_project>

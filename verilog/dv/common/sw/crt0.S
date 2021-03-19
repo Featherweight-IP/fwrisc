@@ -55,6 +55,7 @@ _start:
 .option pop
  */
 
+#ifndef BSS_CLEARED
   /* clear BSS */
   la x26, _bss_start
   la x27, _bss_end
@@ -66,6 +67,7 @@ zero_loop:
   addi x26, x26, 4
   ble x26, x27, zero_loop
 zero_loop_end:
+#endif /* BSS_CLEARED */
 
   call main
 
