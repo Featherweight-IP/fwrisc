@@ -9,6 +9,20 @@ import hvlrpc
 class BareMetalSupport(object):
     
     @hvlrpc.func
+    def record_pass(self, m : str):
+        print("PASS: " + m)
+        
+    @hvlrpc.func
+    def record_fail(self, m : str):
+        print("FAIL: " + m)
+        
+    @hvlrpc.func
+    def endtest(self):
+        print("endtest")
+        pass
+        
+    
+    @hvlrpc.func
     def vprint(self, fmt : str, ap : hvlrpc.va_list):
 #        print("vprint: fmt=" + fmt)
         msg = ""
@@ -28,6 +42,8 @@ class BareMetalSupport(object):
                 elif fc == 'd':
                     # TODO: handle ll modifier
                     msg += "%d" % ap.int32()
+                elif fc == 's':
+                    msg += ap.str()
                 i += 1
             else:
                 # No more

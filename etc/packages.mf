@@ -1,6 +1,7 @@
 
 # memory_primitives@http://github.com/mballance/memory_primitives.git
-zephyr@https://github.com/zephyrproject-rtos/zephyr/archive/zephyr-v2.4.0.tar.gz
+# zephyr@https://github.com/zephyrproject-rtos/zephyr/archive/zephyr-v2.4.0.tar.gz
+zephyr@ssh://github.com:mballance/zephyr.git
 # RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 # fwuart@ssh://github.com:Featherweight-IP/fwuart.git
 fwuart@http://github.com/Featherweight-IP/fwuart.git

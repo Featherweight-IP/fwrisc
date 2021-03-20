@@ -26,8 +26,8 @@ void func_s(const char *s) {
 int main() {
 	int i;
 
-	for (i=0; i<1000; i++) {
-		print("Hello [%d] %d %d %d %d %d", i, 1, 2, 3, 4, 5);
+	for (i=0; i<100; i++) {
+		print("Hello [%d] %d %d %d %d %d", i, 1000+i, 200*i, 300*i, 4, 5);
 	}
 	/*
 	func_c(1);

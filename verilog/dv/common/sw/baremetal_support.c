@@ -5,6 +5,7 @@
  *      Author: mballance
  */
 #include "baremetal_support.h"
+#include <stdint.h>
 
 unsigned int outstr_addr;
 static unsigned int n_pass = 0;
@@ -48,6 +49,11 @@ void outstr(const char *m) {
 		*out_p = *p;
 		p++;
 	}
+}
+
+void outc(char c) {
+	volatile unsigned int *out_p = &outstr_addr;
+	*out_p = c;
 }
 
 void println(const char *m) {
@@ -99,7 +105,32 @@ void print(const char *fmt, ...) {
 }
 
 void vprint(const char *fmt, va_list ap) {
-	;
+#ifdef UNDEFINED
+	const char *p = fmt;
+
+	while (*p) {
+		if (*p == '%') {
+			p++;
+			if (*p == 'd') {
+				int32_t idx = 0;
+				char tmp[16];
+				uint32_t val = va_arg(ap, uint32_t);
+				// Print decimal
+				do {
+					tmp[idx] = '0'+(val%10);
+					val /= 10;
+					idx++;
+				} while (val);
+				while (idx--) {
+					outc(tmp[idx]);
+				}
+			}
+		} else {
+			outc(*p);
+		}
+		p++;
+	}
+#endif
 }
 
 
