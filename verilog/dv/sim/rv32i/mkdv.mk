@@ -42,10 +42,13 @@ ifeq (,$(MKDV_COCOTB_MODULE))
 	MKDV_COCOTB_MODULE = fwrisc_tests.embench
     endif
     ifneq (,$(findstring baremetal,$(subst ., ,$(MKDV_TEST))))
-    	ifeq (baremetal.rpc,$(MKDV_TEST))
-			MKDV_COCOTB_MODULE = fwrisc_tests.rpc
-    	else
+#			MKDV_COCOTB_MODULE = fwrisc_tests.$(subst .,_,$(MKDV_TEST))
+#	MKDV_COCOTB_MODULE=$(wildcard $(DV_COMMON_DIR)/python/fwrisc_tests/$(subst .,_,$(MKDV_TEST)).py)
+	ifeq ($(wildcard $(DV_COMMON_DIR)/python/fwrisc_tests/$(subst .,_,$(MKDV_TEST)).py),)
 			MKDV_COCOTB_MODULE = fwrisc_tests.baremetal
+			MKDV_COCOTB_MODULE = fwrisc_tests.$(subst .,_,$(MKDV_TEST))
+    	else
+			MKDV_COCOTB_MODULE = fwrisc_tests.$(subst .,_,$(MKDV_TEST))
     	endif
     endif
     ifneq (,$(findstring instr,$(subst ., ,$(MKDV_TEST))))

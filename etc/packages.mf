@@ -5,6 +5,7 @@ zephyr@ssh://github.com:mballance/zephyr.git
 # RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 # fwuart@ssh://github.com:Featherweight-IP/fwuart.git
 fwuart@http://github.com/Featherweight-IP/fwuart.git
+fwspi-initiator@ssh://github.com:Featherweight-IP/fwspi-initiator.git
 fwprotocol-defs@http://github.com/Featherweight-IP/fwprotocol-defs.git
 riscv-compliance@http://github.com/riscv/riscv-compliance.git depth=1
 riscv-formal@https://git@github.com/SymbioticEDA/riscv-formal.git depth=1

@@ -19,6 +19,10 @@ void record_pass(const char *m);
 
 void record_fail(const char *m);
 
+void print(const char *fmt, ...);
+
+void vprint(const char *fmt, va_list ap);
+
 void test_pass();
 
 void test_fail();
@@ -32,10 +36,6 @@ void set_exception_handler(exception_f f);
 void enable_interrupts();
 
 void disable_interrupts();
-
-void print(const char *fmt, ...);
-
-void vprint(const char *fmt, va_list ap);
 
 
 #endif /* INCLUDED_BAREMETAL_SUPPORT_H */

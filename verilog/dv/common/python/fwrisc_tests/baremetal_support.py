@@ -41,7 +41,12 @@ class BareMetalSupport(object):
                     msg += '%'
                 elif fc == 'd':
                     # TODO: handle ll modifier
+                    # TODO: handle padding
                     msg += "%d" % ap.int32()
+                elif fc == 'x':
+                    # TODO: handle ll modifier
+                    # TODO: handle padding
+                    msg += "%x" % ap.int32()
                 elif fc == 's':
                     msg += ap.str()
                 i += 1

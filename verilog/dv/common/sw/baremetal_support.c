@@ -7,6 +7,7 @@
 #include "baremetal_support.h"
 #include <stdint.h>
 
+// Address for RAM console
 unsigned int outstr_addr;
 static unsigned int n_pass = 0;
 static unsigned int n_fail = 0;
@@ -41,6 +42,10 @@ void disable_interrupts() {
                       : "r" (1 << 11));
 }
 
+/**
+ * Send a string to the RAM console for the
+ * testbench to display
+ */
 void outstr(const char *m) {
 	const char *p = m;
 	volatile unsigned int *out_p = &outstr_addr;
@@ -57,21 +62,27 @@ void outc(char c) {
 }
 
 void println(const char *m) {
+#ifdef RAMCONSOLE
 	outstr(m);
 	outstr("\n");
+#endif
 }
 
 void record_pass(const char *m) {
-	outstr("PASS: ");
-	outstr(m);
-	outstr("\n");
+#ifdef RAMCONSOLE
+	print("PASS: ");
+	print(m);
+	print("\n");
+#endif
 	n_pass++;
 }
 
 void record_fail(const char *m) {
-	outstr("FAIL: ");
-	outstr(m);
-	outstr("\n");
+#ifdef RAMCONSOLE
+	print("FAIL: ");
+	print(m);
+	print("\n");
+#endif
 	n_fail++;
 }
 
@@ -105,7 +116,7 @@ void print(const char *fmt, ...) {
 }
 
 void vprint(const char *fmt, va_list ap) {
-#ifdef UNDEFINED
+#ifdef RAMCONSOLE
 	const char *p = fmt;
 
 	while (*p) {
@@ -123,6 +134,30 @@ void vprint(const char *fmt, va_list ap) {
 				} while (val);
 				while (idx--) {
 					outc(tmp[idx]);
+				}
+			} else if (*p == 'x') {
+				int32_t idx = 0;
+				char tmp[16];
+				uint32_t val = va_arg(ap, uint32_t);
+				// Print hex
+				do {
+					int d = (val % 16)
+					if (d < 10) {
+						tmp[idx] = '0'+d;
+					} else {
+						tmp[idx] = 'a'+d;
+					}
+					val /= 16;
+					idx++;
+				} while (val);
+				while (idx--) {
+					outc(tmp[idx]);
+				}
+			} else if (*p == 's') {
+				const char *sp = va_arg(ap, const char *)
+				while (*sp) {
+					outc(*sp);
+					sp++;
 				}
 			}
 		} else {

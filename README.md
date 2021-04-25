@@ -26,7 +26,7 @@ It also supports the [Zephyr](https://www.zephyrproject.org/) RTOS.
 - ECALL/EBREAK/ERET instrutions
 - Support for address-alignment exceptions
 
-## SEcurity Features
+## Security Features
 FWRISC-S implements Data Execution Prevention, as a way to prevent arbitrary code
 execution. While more-complex protection techniques are appropriate for more-complex
 systems, IoT systems typically run a fixed program that can be easily protected in

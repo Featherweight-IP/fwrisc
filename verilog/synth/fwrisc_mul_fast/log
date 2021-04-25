@@ -1,0 +1,77 @@
+mkdir -p /project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/cache/quartus
+make -C /project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/cache/quartus -f /project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/mkdv.mk \
+	MKDV_RUNDIR=/project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/rundir \
+	MKDV_CACHEDIR=/project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/cache/quartus \
+	build-quartus || (echo "FAIL: exit status $?" > status.txt; exit 1)
+make[1]: Entering directory '/project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/cache/quartus'
+make[1]: Nothing to be done for 'build-quartus'.
+make[1]: Leaving directory '/project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/cache/quartus'
+INCFILES: /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_ncsim.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_icestorm.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_vcs.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_icarus.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_cocotb.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_vlsim.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_openlane.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_questa.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_quartus.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_sby.mk /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_pybfms.mk sby questa icestorm vlsim quartus openlane icarus questa icestorm quartus openlane cocotb pybfms
+make[1]: Entering directory '/project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/rundir'
+echo 'PROJECT_REVISION = "fwrisc_mul_fast"' > fwrisc_mul_fast.qpf
+echo "" > fwrisc_mul_fast.qsf
+echo 'set_global_assignment -name FAMILY ' >> fwrisc_mul_fast.qsf
+echo "set_global_assignment -name DEVICE " >> fwrisc_mul_fast.qsf
+echo "set_global_assignment -name TOP_LEVEL_ENTITY fwrisc_mul_fast" >> fwrisc_mul_fast.qsf
+for def in ; do \
+	echo "set_global_assignment -name VERILOG_MACRO \"$def\"" >> fwrisc_mul_fast.qsf; \
+done
+for inc in /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl /project/fun/featherweight-ip/fwrisc-trunk2/packages/fwprotocol-defs/verilog/rtl /project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/../include; do \
+	echo "set_global_assignment -name SEARCH_PATH $inc" >> fwrisc_mul_fast.qsf; \
+done
+for src in /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_decode.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_c_decode.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_rv32im.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_regfile.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_rv32i.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_fetch.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_exec.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_rv32ic.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_mul_div_shift.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_rv32imc.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_wb.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_tracer.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_rv32i_wb.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_shift_fast.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_mul_fast.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_alu.sv /project/fun/featherweight-ip/fwrisc-trunk2/verilog/rtl/fwrisc_mem.sv; do \
+	echo "set_global_assignment -name SYSTEMVERILOG_FILE $src" >> fwrisc_mul_fast.qsf; \
+done
+echo "set_global_assignment -name SDC_FILE /project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/fwrisc_mul_fast.sdc" >> fwrisc_mul_fast.qsf
+quartus_map fwrisc_mul_fast #  --source=filtref.bdf --family=
+Info: *******************************************************************
+Info: Running Quartus Prime Analysis & Synthesis
+    Info: Version 20.1.1 Build 720 11/11/2020 SJ Lite Edition
+    Info: Copyright (C) 2020  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and any partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details, at
+    Info: https://fpgasoftware.intel.com/eula.
+    Info: Processing started: Thu Feb 11 20:17:56 2021
+Info: Command: quartus_map fwrisc_mul_fast
+
+*** Fatal Error: Segment Violation at (nil)
+Module: quartus_map
+Stack Trace:
+   0x12337b: ACF_MANAGER_STORAGE_REAL::preprocess_read_assignments(ACF_MANAGER_READER*, bool) + 0x49b (db_acf)
+   0x12edb7: ACF_MANAGER_STORAGE_REAL::internal_read_modern_settings_file_from_disk(char const*, bool, ACF_READ_FILE_OPTIONS&) + 0x437 (db_acf)
+   0x12faac: ACF_MANAGER_STORAGE_REAL::internal_read_file_from_disk(char const*, bool, ACF_READ_FILE_OPTIONS&) + 0x13c (db_acf)
+   0x12fd23: ACF_MANAGER_STORAGE_REAL::read_file_from_disk(char const*, bool, ACF_READ_FILE_OPTIONS&) + 0xb3 (db_acf)
+   0x133639: ACF_MANAGER_STORAGE_REAL::synchronize_all_files(bool) + 0x589 (db_acf)
+   0x133adc: ACF_MANAGER_STORAGE_REAL::synchronize(bool) + 0x12c (db_acf)
+   0x10680b: ACF_REVISION_MANAGER::synchronize() + 0x2b (db_acf)
+   0x11be5f: ACF_MANAGER_STORAGE_REAL::write_lock(bool) + 0xbf (db_acf)
+   0x10c658: ACF_MANAGER::internal_open_create_project(std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool, bool) + 0x618 (db_acf)
+   0x10ff2e: ACF_MANAGER::open_project(std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool) + 0x86e (db_acf)
+    0x32c22: QSYN_FRAMEWORK::initialize_databases() + 0xb72 (quartus_map)
+    0x1aefd: qexe_standard_main(QEXE_FRAMEWORK*, QEXE_OPTION_DEFINITION const**, int, char const**) + 0x57e (comp_qexe)
+    0x2b821: qsyn_main(int, char const**) + 0x151 (quartus_map)
+    0x3ee30: msg_main_thread(void*) + 0x10 (ccl_msg)
+     0x5acc: thr_final_wrapper + 0xc (ccl_thr)
+    0x3eeef: msg_thread_wrapper(void* (*)(void*), void*) + 0x62 (ccl_msg)
+     0x9f9c: mem_thread_wrapper(void* (*)(void*), void*) + 0x5c (ccl_mem)
+     0x8b39: err_thread_wrapper(void* (*)(void*), void*) + 0x27 (ccl_err)
+     0x5b0f: thr_thread_wrapper + 0x15 (ccl_thr)
+    0x40ea1: msg_exe_main(int, char const**, int (*)(int, char const**)) + 0xb2 (ccl_msg)
+    0x237b3: __libc_start_main + 0xf3 (c.so.6)
+
+
+End-trace
+
+make[1]: *** [/project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/mkdv_quartus.mk:34: run-quartus] Error 2
+make[1]: Leaving directory '/project/fun/featherweight-ip/fwrisc-trunk2/verilog/synth/fwrisc_mul_fast/rundir'
+make: *** [/project/fun/featherweight-ip/fwrisc-trunk2/packages/mkdv/src/mkdv/share/mkfiles/dv.mk:77: run] Error 1

@@ -107,8 +107,8 @@ async def entry(top):
 #    if addr != rpc_addrs["func_s"]:
 #        raise Exception("Unexpected address")
     
-#    v = u_dbg_bfm.param_iter().nextstr()
-    
-#    print("v=" + str(v))
+    v = u_dbg_bfm.param_iter().nextstr()
+    print("v=" + str(v))
+
     
     
