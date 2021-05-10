@@ -77,9 +77,9 @@ module fwrisc_mem (
 						mem_state <= STATE_WAIT_RSP;
 						dwrite <= (req_op == OP_SB || req_op == OP_SH || req_op == OP_SW);
 						
-						case (req_op)
+						case (req_op) // synopsys parallel_case full_case
 							OP_SB: begin
-								case (req_addr[1:0])
+								case (req_addr[1:0]) // synopsys parallel_case full_case
 									2'b00: dwstb <= 4'b0001;
 									2'b01: dwstb <= 4'b0010;
 									2'b10: dwstb <= 4'b0100;
@@ -88,19 +88,16 @@ module fwrisc_mem (
 								dwdata <= {4{req_data[7:0]}};
 							end
 							OP_SH: begin
-								case (req_addr[1])
-									0: dwstb <= 4'b0011;
-									1: dwstb <= 4'b1100;
-								endcase
+								if (req_addr[1]) begin
+									dwstb <= 4'b1100;
+								end else begin
+									dwstb <= 4'b0011;
+								end
 								dwdata <= {2{req_data[15:0]}};
 							end
 							OP_SW: begin
 								dwstb <= 4'b1111;
 								dwdata <= req_data;
-							end
-							default: begin
-								dwstb <= 4'b0000;
-								dwdata <= 32'b0;
 							end
 						endcase
 					end

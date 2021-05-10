@@ -104,8 +104,8 @@ module fwrisc_exec #(
 	wire					mds_out_valid;
 	wire[31:0]				mds_out;
 
-	wire					mem_req_valid;
-	wire[31:0]				mem_req_addr;
+	reg						mem_req_valid;
+	reg[31:0]				mem_req_addr;
 	wire					mem_ack_valid;
 	wire[31:0]				mem_ack_data;
 	
@@ -151,15 +151,13 @@ module fwrisc_exec #(
 	
 	reg						ldst_addr_misaligned;
 	always @* begin
+		ldst_addr_misaligned = 0;
 		if (exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST) begin
-			case (op)
+			case (op) // synopsys parallel_case full_case
 				OP_LH, OP_LHU, OP_SH: ldst_addr_misaligned = alu_out[0];
 				OP_LW, OP_SW: ldst_addr_misaligned = |alu_out[1:0];
-				default: ldst_addr_misaligned = 0;
 			endcase
-		end else begin
-			ldst_addr_misaligned = 0;
-		end
+		end 
 	end
 	
 	
@@ -168,10 +166,11 @@ module fwrisc_exec #(
 			mtval <= 0;
 		end else begin
 			if (jump_target_misaligned || dep_violation || ldst_addr_misaligned) begin
-				case (op_type)
-					OP_TYPE_JUMP: mtval <= {alu_out[31:1], 1'b0};
-					default: mtval <= alu_out;
-				endcase
+				if (op_type == OP_TYPE_JUMP) begin
+					mtval <= {alu_out[31:1], 1'b0};
+				end else begin
+					mtval <= alu_out;
+				end
 			end
 		end
 	end
@@ -221,7 +220,7 @@ module fwrisc_exec #(
 			mcause_int <= 1'b0;
 		end else begin
 //			instr_complete <= instr_complete_w;
-			case (exec_state)
+			case (exec_state) // synopsys parallel_case full_case
 				STATE_EXECUTE: begin
 					if (decode_valid) begin
 						// Single-cycle execute state. For ALU instructions,
@@ -233,7 +232,7 @@ module fwrisc_exec #(
 							mcause_int <= 1'b1;
 						end else begin
 							// TODO: determine cases where we need multi-cycle
-							case (op_type)
+							case (op_type) // synopsys parallel_case full_case
 								/**
 								 * STATE_EXECUTE: regs[rd] <= alu_out
 								 */
@@ -306,7 +305,7 @@ module fwrisc_exec #(
 								 * STATE_EXECUTE: regs[csr] <= op_a [op] op_b
 								 * STATE_CSR: regs[rd] <= op_b (regs[csr])
 								 */
-								default /*OP_TYPE_CSR*/: begin
+								OP_TYPE_CSR: begin
 									exec_state <= STATE_CSR;
 								end
 							endcase
@@ -327,7 +326,7 @@ module fwrisc_exec #(
 				
 				STATE_JUMP: begin
 					// Jumps automatically filter out byte-aligned addresses
-					case ({dep_violation, jump_target_misaligned})
+					case ({dep_violation, jump_target_misaligned}) // synopsys parallel_case
 						2'b00: begin
 							pc <= {alu_out[31:1], 1'b0};
 							pc_seq <= 0;
@@ -497,11 +496,25 @@ module fwrisc_exec #(
 		.out             (mds_out        ), 
 		.out_valid       (mds_out_valid  ));
 
-	assign mem_req_addr = alu_out;
-	assign mem_req_valid = (
-			exec_state == STATE_EXECUTE 
-			&& op_type == OP_TYPE_LDST
-			&& decode_valid && !ldst_addr_misaligned);
+	// Note: Driving directly from ALU isn't good
+//	assign mem_req_addr = alu_out;
+//	assign mem_req_valid = (
+//			exec_state == STATE_EXECUTE 
+//			&& op_type == OP_TYPE_LDST
+//			&& decode_valid && !ldst_addr_misaligned);
+	always @(posedge clock or posedge reset) begin
+		if (reset) begin
+			mem_req_addr <= {32{1'b0}};
+			mem_req_valid <= 0;
+		end else begin
+			mem_req_addr <= alu_out;
+			mem_req_valid <= (
+				exec_state == STATE_EXECUTE 
+				&& op_type == OP_TYPE_LDST
+				&& decode_valid && !ldst_addr_misaligned);
+		end
+	end
+	
 	fwrisc_mem u_mem (
 		.clock      (clock         ), 
 		.reset      (reset         ), 

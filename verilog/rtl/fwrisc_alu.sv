@@ -35,7 +35,7 @@ module fwrisc_alu (
 	`include "fwrisc_alu_op.svh"
 	
 	always @* begin
-		case (op) 
+		case (op) // synopsys parallel_case full_case
 			OP_ADD:  out = op_a + op_b;
 			OP_SUB:  out = op_a - op_b; // sub;
 			OP_AND:  out = op_a & op_b;
@@ -49,7 +49,7 @@ module fwrisc_alu (
 			OP_GEU:  out = {31'b0, op_a >= op_b};
 			OP_OPA:  out = op_a; // passthrough
 			OP_OPB:  out = op_b; // passthrough
-			default /*OP_XOR */: out = op_a ^ op_b;
+			OP_XOR:  out = op_a ^ op_b;
 		endcase
 	end
 

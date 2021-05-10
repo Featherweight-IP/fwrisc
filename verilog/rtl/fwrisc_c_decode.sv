@@ -53,7 +53,7 @@ module fwrisc_c_decode(
 	always @* begin
 		instr         = 0;
 
-		case (instr_i[1:0])
+		case (instr_i[1:0]) // synopsys parallel_case full_case
 			// C0
 			2'b00: begin
 				case (instr_i[15:13])

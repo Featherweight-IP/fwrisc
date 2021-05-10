@@ -109,7 +109,6 @@ module fwrisc_regfile #(
 			instr_count <= 0;
 			dep_lo_r <= 0;
 			dep_hi_r <= 0;
-			mtvec_r <= 0;
 			mscratch <= {32{1'b0}};
 			mepc <= {32{1'b0}};
 			mtvec_r <= {32{1'b0}};

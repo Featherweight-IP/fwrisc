@@ -128,12 +128,30 @@ module fwrisc_decode #(
 	
 	assign op = op_w;
 	
+	always @(posedge clock or posedge reset) begin
+		if (reset) begin
+		end else begin
+			case (i_type) // synopsys parallel_case
+				I_TYPE_B: op_c <= imm_branch;
+				I_TYPE_I,I_TYPE_L: op_c <= imm_11_0;
+				I_TYPE_S: op_c <= st_imm_11_0;
+				I_TYPE_J: op_c <= imm_jump;
+				// CSR instructions pass through the CSR
+				// register address as op_c
+				I_TYPE_SY: begin // System
+					op_c <= rb_raddr;
+				end
+				default: op_c <= {32{1'b0}}; 
+			endcase
+		end
+	end
+	
 	always @* begin
 		op_w = 0; // TODO
 		
 			rd_raddr_w = instr[11:7];
 			
-			case (instr[6:4])
+			case (instr[6:4]) // synopsys parallel_case full_case
 				3'b000: i_type = I_TYPE_L;
 				3'b001: i_type = (instr[2])?I_TYPE_U:I_TYPE_I;
 				// ??
@@ -148,11 +166,11 @@ module fwrisc_decode #(
 				end
 				3'b111: i_type = I_TYPE_SY; // SYSTEM
 //				3'b110: op_type = I_TYPE_U; // Assume instr[6:2] == 5'b01101
-				default /*3'b110*/: i_type = (instr[2])?I_TYPE_J:I_TYPE_B;
+				3'b110: i_type = (instr[2])?I_TYPE_J:I_TYPE_B;
 			endcase
 		
 			// Determine op_type
-			case (instr[6:4])
+			case (instr[6:4]) // synopsys parallel_case full_case
 				// TODO:
 //				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_FENCE:OP_TYPE_LD;
 				3'b000: op_type_w=(&instr[3:2])?OP_TYPE_ARITH:OP_TYPE_LDST;
@@ -178,18 +196,16 @@ module fwrisc_decode #(
 					end
 				end
 				3'b110: op_type_w = (instr[2])?OP_TYPE_JUMP:OP_TYPE_BRANCH;
-				default /*3'b111*/: begin
-					op_type_w = (|instr[14:12])?OP_TYPE_CSR:OP_TYPE_SYSTEM;
-				end
+				3'b111: op_type_w = (|instr[14:12])?OP_TYPE_CSR:OP_TYPE_SYSTEM;
 			endcase
 			
-			case (op_type_w)
+			case (op_type_w) // synopsys parallel_case
 				// Read MEPC for MRET
 				OP_TYPE_SYSTEM: ra_raddr = CSR_MEPC;
 				default: ra_raddr = instr[19:15];
 			endcase
 					
-			case (op_type_w)
+			case (op_type_w) // synopsys parallel_case
 				OP_TYPE_CSR: begin
 					case (instr[31:24])
 						8'hF1: rb_raddr = (CSR_BASE_Q0 | instr[23:20]);
@@ -211,8 +227,9 @@ module fwrisc_decode #(
 				end
 				default: rb_raddr = instr[24:20];
 			endcase
-			
-			case (i_type) 
+		
+			// TODO: do we need to support default?
+			case (i_type) // synopsys parallel_case
 				I_TYPE_R, I_TYPE_I, I_TYPE_B, I_TYPE_S: begin
 					op_a = ra_rdata;
 				end
@@ -230,7 +247,7 @@ module fwrisc_decode #(
 			endcase
 			
 			// Select output for OP-B (rs2)
-			case (i_type)
+			case (i_type) // synopsys parallel_case
 				I_TYPE_R, I_TYPE_S, I_TYPE_SY, I_TYPE_B: begin // R-Type/S-Type/B-Type instruction (rs2)
 					op_b = rb_rdata;
 				end
@@ -256,20 +273,8 @@ module fwrisc_decode #(
 				default: op_b = 32'b0; // TODO:
 			endcase
 
-			case (i_type)
-				I_TYPE_B: op_c = imm_branch;
-				I_TYPE_I,I_TYPE_L: op_c = imm_11_0;
-				I_TYPE_S: op_c = st_imm_11_0;
-				I_TYPE_J: op_c = imm_jump;
-				// CSR instructions pass through the CSR
-				// register address as op_c
-				I_TYPE_SY: begin // System
-					op_c = rb_raddr;
-				end
-				default: op_c = 32'b0; 
-			endcase
 			
-			case (op_type) 
+			case (op_type) // synopsys parallel_case
 				OP_TYPE_ARITH: begin
 					if (instr[2]) begin // AUIPC or LUI
 						op_w = (instr[5])?OP_OPA:OP_ADD;
@@ -356,7 +361,7 @@ module fwrisc_decode #(
 			imm_lui <= 0;
 			op_type <= 0;
 		end else begin
-			case (decode_state) 
+			case (decode_state) // synopsys parallel_case full_case
 				STATE_DECODE: begin // Wait for data to be valid
 					if (fetch_valid) begin
 						decode_state <= STATE_REG;
@@ -369,7 +374,7 @@ module fwrisc_decode #(
 						decode_valid_r <= 1'b0;
 					end
 				end
-				default /*STATE_REG*/: begin // Register read data is now valid
+				STATE_REG: begin // Register read data is now valid
 					if (exec_complete) begin
 						decode_state <= STATE_DECODE;
 						decode_valid_r <= 1'b0;
