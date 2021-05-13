@@ -30,11 +30,12 @@ module fwrisc #(
 		parameter ENABLE_COUNTERS=1,
 		parameter[31:0] VENDORID = 0,
 		parameter[31:0] ARCHID = 0,
-		parameter[31:0] IMPID = 0,
-		parameter[31:0] HARTID = 0
+		parameter[31:0] IMPID = 0
 		) (
 		input			clock,
 		input			reset,
+
+		input[31:0]		hartid,
 		
 		output[31:0]	iaddr,
 		input[31:0]		idata,
@@ -46,6 +47,7 @@ module fwrisc #(
 		output[31:0]	dwdata,
 		output[3:0]		dwstb,
 		output			dwrite,
+		output[3:0]		damo,
 		input[31:0]		drdata,
 		input			dready,
 		input			irq
@@ -67,6 +69,9 @@ module fwrisc #(
 	reg[31:0]				tracer_instr;
 	wire[31:0]				dep_lo;
 	wire[31:0]				dep_hi;
+	
+	// TODO:
+	assign damo = {4{1'b0}};
 	
 	assign int_reset = (reset | soft_reset_count != 0);
 	
@@ -194,7 +199,6 @@ module fwrisc #(
 		.VENDORID			(VENDORID        ),
 		.ARCHID				(ARCHID          ),
 		.IMPID				(IMPID           ),
-		.HARTID				(HARTID          ),
 		.ISA                ({
 			2'b01,
 			4'b0, // 29:26
@@ -227,7 +231,8 @@ module fwrisc #(
 			})
 		) u_regfile (
 		.clock            (clock              ), 
-		.reset            (int_reset          ), 
+		.reset            (int_reset          ),
+		.hartid           (hartid             ),
 		.soft_reset_req   (soft_reset_req     ),
 		.instr_complete   (instr_complete     ), 
 		.trap             (trap               ),

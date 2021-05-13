@@ -31,11 +31,11 @@ module fwrisc_regfile #(
 		parameter[31:0]		VENDORID=0,
 		parameter[31:0]		ARCHID=0,
 		parameter[31:0]		IMPID=0,
-		parameter[31:0]		HARTID=0,
 		parameter[31:0]		ISA=0
 		) (
 		input					clock,
 		input					reset,
+		input[31:0]				hartid,
 		output					soft_reset_req,
 		input					instr_complete,
 		input					trap,
@@ -198,7 +198,7 @@ module fwrisc_regfile #(
 			CSR_MVENDORID: ra_rdata <= VENDORID;
 			CSR_MARCHID:   ra_rdata <= ARCHID;
 			CSR_MIMPID:    ra_rdata <= IMPID;
-			CSR_MHARTID:   ra_rdata <= HARTID;
+			CSR_MHARTID:   ra_rdata <= hartid;
 			CSR_MISA:      ra_rdata <= {2'b01, ISA[29:0]};
 			CSR_MIE:       ra_rdata <= {20'b0, meie, 11'b0};
 			CSR_MCYCLE:    ra_rdata <= (ENABLE_COUNTERS)?cycle_count[31:0]:{32{1'b0}};
@@ -219,7 +219,7 @@ module fwrisc_regfile #(
 			CSR_MVENDORID: rb_rdata <= VENDORID;
 			CSR_MARCHID:   rb_rdata <= ARCHID;
 			CSR_MIMPID:    rb_rdata <= IMPID;
-			CSR_MHARTID:   rb_rdata <= HARTID;
+			CSR_MHARTID:   rb_rdata <= hartid;
 			CSR_MISA:      rb_rdata <= {2'b01, ISA[29:0]};
 			CSR_MIE:       rb_rdata <= {20'b0, meie, 11'b0};
 			CSR_MSTATUS:   rb_rdata <= {{24{1'b0}}, mpie, {3{1'b0}}, mie, {3{1'b0}}};

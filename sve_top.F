@@ -4,6 +4,7 @@
 
  // List file paths and processing directives here
 -F ./packages/sve.F
+-F ./ve/ve.F
 -F ./sve.F
 
 

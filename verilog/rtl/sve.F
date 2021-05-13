@@ -30,3 +30,4 @@
 ./fwrisc_rv32im.sv
 ./fwrisc_rv32imc.sv
 ./fwrisc_rv32i_wb.sv
+./fwrisc_rv32imca_wb.sv
