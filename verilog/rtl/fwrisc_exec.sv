@@ -104,6 +104,7 @@ module fwrisc_exec #(
 	wire					mds_out_valid;
 	wire[31:0]				mds_out;
 
+	reg						mem_req_amo;
 	reg						mem_req_valid;
 	reg[31:0]				mem_req_addr;
 	wire					mem_ack_valid;
@@ -273,6 +274,10 @@ module fwrisc_exec #(
 									end else begin
 										exec_state <= STATE_LDST_COMPLETE;
 									end
+								end
+								
+								OP_TYPE_AMO: begin
+									exec_state <= STATE_LDST_COMPLETE;
 								end
 							
 								OP_TYPE_MDS: begin
@@ -506,11 +511,13 @@ module fwrisc_exec #(
 		if (reset) begin
 			mem_req_addr <= {32{1'b0}};
 			mem_req_valid <= 0;
+			mem_req_amo <= 1'b0;
 		end else begin
 			mem_req_addr <= alu_out;
+			mem_req_amo <= (op_type == OP_TYPE_AMO);
 			mem_req_valid <= (
 				exec_state == STATE_EXECUTE 
-				&& op_type == OP_TYPE_LDST
+				&& (op_type == OP_TYPE_LDST || op_type = OP_TYPE_AMO)
 				&& decode_valid && !ldst_addr_misaligned);
 		end
 	end
@@ -521,6 +528,7 @@ module fwrisc_exec #(
 		.req_valid  (mem_req_valid ), 
 		.req_addr   (mem_req_addr  ), 
 		.req_op     (op[3:0]       ), 
+		.req_amo    (mem_req_amo   ),
 		.req_data   (op_b          ), 
 		.ack_valid  (mem_ack_valid ), 
 		.ack_data   (mem_ack_data  ), 

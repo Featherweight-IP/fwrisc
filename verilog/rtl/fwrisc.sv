@@ -54,7 +54,7 @@ module fwrisc #(
 		);
 	
 	wire[31:0]				pc;
-	wire[31:0]				pc_seq;
+	wire					pc_seq;
 	wire					fetch_valid;
 	wire					instr_complete;
 	wire					trap;
@@ -105,9 +105,9 @@ module fwrisc #(
 		.instr              (instr             ), 
 		.instr_c            (instr_c           ));
 
-	wire[31:0]				ra_raddr;
+	wire[5:0]				ra_raddr;
 	wire[31:0]				ra_rdata;
-	wire[31:0]				rb_raddr;
+	wire[5:0]				rb_raddr;
 	wire[31:0]				rb_rdata;
 	wire					decode_valid;
 	wire[31:0]				op_a;

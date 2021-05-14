@@ -51,6 +51,11 @@ parameter [4:0]
    * op_c = offset
    */
   OP_TYPE_LDST   = (OP_TYPE_BRANCH+5'd1),
+  
+  /**
+   * OP_TYPE_AMO
+   */
+  OP_TYPE_AMO    = (OP_TYPE_LDST+5'd1),
 
   /**
    * OP_TYPE_MDS (3)
@@ -58,7 +63,7 @@ parameter [4:0]
    * op_b = regs[rs2] | imm
    * op = mdu_op_type
    */
-  OP_TYPE_MDS    = (OP_TYPE_LDST+5'd1),
+  OP_TYPE_MDS    = (OP_TYPE_AMO+5'd1),
   
   /**
    * OP_TYPE_JUMP (4)

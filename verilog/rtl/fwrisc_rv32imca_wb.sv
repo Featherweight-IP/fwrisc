@@ -35,6 +35,7 @@ module fwrisc_rv32imca_wb #(
 	wire[31:0]				drdata;
 	wire					dready;
 	
+	
 	fwrisc #(
 		.ENABLE_COMPRESSED  (1 			), 
 		.ENABLE_MUL_DIV     (1			), 
@@ -73,46 +74,91 @@ module fwrisc_rv32imca_wb #(
 		end
 	end
 	
+	reg[31:0] 	adr_r;
+	reg[31:0] 	dat_w_r;
+	reg[31:0] 	dat_r_r;
+	reg			cyc_r;
+	reg			stb_r;
+	reg[3:0]	sel_r;
+	reg[3:0]	tgc_r;
+	reg			we_r;
+	reg			iready_r;
+	reg			dready_r;
+	
+	assign adr = adr_r;
+	assign dat_w = dat_w_r;
+	assign cyc = cyc_r;
+	assign stb = stb_r;
+	assign sel = sel_r;
+	assign tgc = tgc_r;
+	assign tgd_w = 1'b0;
+	assign tga = 1'b0;
+	assign we = we_r;
+	
+	assign iready = iready_r;
+	assign dready = dready_r;
+	assign drdata = dat_r_r;
+	assign idata = dat_r_r;
+	
 	always @(posedge clock or posedge reset) begin
 		if (reset) begin
 			wb_state <= 2'b0;
+			adr_r <= {32{1'b0}};
+			dat_w_r <= {32{1'b0}};
+			dat_r_r <= {32{1'b0}};
+			cyc_r <= 1'b0;
+			stb_r <= 1'b0;
+			sel_r <= {4{1'b0}};
+			tgc_r <= {4{1'b0}};
+			we_r <= 1'b0;
 		end else begin
 			case (wb_state) // synopsys parallel_case full_case
 				2'b00: begin
+					dready_r <= 1'b0;
+					iready_r <= 1'b0;
 					if (dvalid) begin
 						// Give priority to data
 						wb_state <= 2'b01;
+						adr_r <= daddr;
+						dat_w_r <= dwdata;
+						cyc_r <= 1'b1;
+						stb_r <= 1'b1;
+						sel_r <= dwstb;
+						we_r <= dwrite;
+						tgc_r <= damo;
 					end else if (ivalid) begin
 						wb_state <= 2'b10;
+						we_r <= 1'b0;
+						adr_r <= iaddr;
+						dat_w_r <= {32{1'b0}};
+						cyc_r <= 1'b1;
+						stb_r <= 1'b1;
+						sel_r <= {4{1'b0}};
+						we_r <= 1'b0;
+						tgc_r <= {4{1'b0}};
 					end
 				end
-				2'b01: begin
-					if (cyc && sel && ack) begin
+				2'b01: begin // data
+					if (cyc && stb && ack) begin
 						wb_state <= 2'b00;
+						dready_r <= 1'b1;
+						dat_r_r <= dat_r;
+						cyc_r <= 1'b0;
+						stb_r <= 1'b0;
 					end
 				end
-				2'b10: begin
-					if (cyc && sel && ack) begin
+				2'b10: begin // instruction
+					if (cyc && stb && ack) begin
 						wb_state <= 2'b00;
+						iready_r <= 1'b1;
+						dat_r_r <= dat_r;
+						cyc_r <= 1'b0;
+						stb_r <= 1'b0;
 					end
 				end
 			endcase
 		end
 	end
-	
-	assign adr = (dni_sel)?daddr:iaddr;
-	assign cyc = (dni_sel)?dvalid:ivalid;
-	assign sel = (dni_sel)?dvalid:ivalid;
-	assign stb = (dni_sel)?dwstb:{4{1'b0}};
-	assign tgc = (dni_sel)?damo:{4{1'b0}};
-	assign we  = (dni_sel)?dwrite:1'b0;
-	assign tgd = 1'b0;
-	assign tga = 1'b0;
-	assign dat_w = dwdata;
-	assign drdata = dat_r;
-	assign idata = dat_r;
-	assign dready = (dni_sel)?(cyc && sel && ack):1'b0;
-	assign iready = (~dni_sel)?(cyc && sel && ack):1'b0;
 
 endmodule
 

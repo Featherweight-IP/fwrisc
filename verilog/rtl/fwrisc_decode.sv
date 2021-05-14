@@ -57,6 +57,7 @@ module fwrisc_decode #(
 	
 	`include "fwrisc_op_type.svh"
 	`include "fwrisc_alu_op.svh"
+	`include "fwrisc_atomic_op.svh"
 	`include "fwrisc_mul_div_shift_op.svh"
 	`include "fwrisc_mem_op.svh"
 	`include "fwrisc_csr_addr.svh"
@@ -183,9 +184,7 @@ module fwrisc_decode #(
 						op_type_w = OP_TYPE_ARITH;
 					end
 				end
-				// TODO:
-//				3'b010: op_type_w = OP_TYPE_ST;
-				3'b010: op_type_w = OP_TYPE_LDST;
+				3'b010: op_type_w = (&instr[3:2])?OP_TYPE_AMO:OP_TYPE_LDST;
 				3'b011: begin
 					if (instr[2]) begin // LUI
 						op_type_w = OP_TYPE_ARITH;
@@ -307,7 +306,7 @@ module fwrisc_decode #(
 					endcase
 				end
 				OP_TYPE_LDST: begin
-					case ({instr[5], instr[14:12]})
+					case ({instr[5], instr[14:12]}) // synopsys parallel_case full_case
 						4'b0000: op_w = OP_LB;
 						4'b0001: op_w = OP_LH;
 						4'b0010: op_w = OP_LW;
@@ -315,7 +314,22 @@ module fwrisc_decode #(
 						4'b0101: op_w = OP_LHU;
 						4'b1000: op_w = OP_SB;
 						4'b1001: op_w = OP_SH;
-						default /*4'b1010*/: op_w = OP_SW;
+						4'b1010: op_w = OP_SW;
+					endcase
+				end
+				OP_TYPE_AMO: begin
+					case (instr[31:27]) // synopsys parallel_case full_case
+						5'b00010: op_w = OP_AMO_LR;
+						5'b00000: op_w = OP_AMO_SC;
+						5'b00001: op_w = OP_AMO_SWAP;
+						5'b00000: op_w = OP_AMO_ADD;
+						5'b00100: op_w = OP_AMO_XOR;
+						5'b01100: op_w = OP_AMO_AND;
+						5'b01000: op_w = OP_AMO_OR;
+						5'b10000: op_w = OP_AMO_MIN;
+						5'b10100: op_w = OP_AMO_MAX;
+						5'b11000: op_w = OP_AMO_MINU;
+						5'b11100: op_w = OP_AMO_MAXU;
 					endcase
 				end
 				OP_TYPE_MDS: begin
