@@ -79,7 +79,7 @@ async def test(top):
 
     done_addr = u_dbg_bfm.sym2addr("done")
 
-    addr = await u_dbg_bfm.wait_exec("done", 100)
+    addr = await u_dbg_bfm.on_exec("done")
     
     if addr != done_addr:
         raise cocotb.result.TestError("execution timed out")

@@ -9,10 +9,12 @@
 
 // Address for RAM console
 unsigned int outstr_addr;
+
 static unsigned int n_pass = 0;
 static unsigned int n_fail = 0;
 
-unsigned int exception_stack[64];
+core_data_t core_data[N_CORES];
+const uint32_t sizeof_core_data_s = sizeof(core_data_t);
 
 static exception_f handler = 0;
 
@@ -40,6 +42,23 @@ void disable_interrupts() {
     __asm__ volatile ("csrrc %0, mie, %1\n"
                       : "=r" (mie)
                       : "r" (1 << 11));
+}
+
+void config_nonprimary(
+		uint32_t		core,
+		uint32_t 		*sp,
+		void (*main_f)(uint32_t)) {
+	core_data[core].sp = sp;
+	core_data[core].main_f = main_f;
+
+	// Send an interrupt to the appropriate core
+	*((volatile uint32_t *)(0x40000000+(0x100*core)+8)) = 1;
+}
+
+uint32_t coreid() {
+	uint32_t ret;
+	__asm__ volatile("csrr %0, mhartid" : "=r" (ret));
+	return ret;
 }
 
 /**

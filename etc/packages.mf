@@ -4,9 +4,13 @@
 zephyr@ssh://github.com:mballance/zephyr.git
 # RISC-V-IoT-Contest@https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 # fwuart@ssh://github.com:Featherweight-IP/fwuart.git
+bmk@ssh://github.com:mballance/bmk.git
 fwuart@http://github.com/Featherweight-IP/fwuart.git
 fwspi-initiator@ssh://github.com:Featherweight-IP/fwspi-initiator.git
+fw-wishbone-sram-ctrl@ssh://github.com:Featherweight-IP/fw-wishbone-sram-ctrl.git
+fw-wishbone-interconnect@ssh://github.com:Featherweight-IP/fw-wishbone-interconnect.git
 fwprotocol-defs@http://github.com/Featherweight-IP/fwprotocol-defs.git
+fw-local-intc@ssh://github.com:Featherweight-IP/fw-local-intc.git
 riscv-compliance@http://github.com/riscv/riscv-compliance.git depth=1
 riscv-formal@https://git@github.com/SymbioticEDA/riscv-formal.git depth=1
 embench-iot@https://github.com/embench/embench-iot.git depth=1

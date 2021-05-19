@@ -63,7 +63,7 @@ parameter [4:0]
    * op_b = regs[rs2] | imm
    * op = mdu_op_type
    */
-  OP_TYPE_MDS    = (OP_TYPE_AMO+5'd1),
+  OP_TYPE_MDS    = (OP_TYPE_AMO+5'd1), // 4
   
   /**
    * OP_TYPE_JUMP (4)
@@ -72,12 +72,12 @@ parameter [4:0]
    * op = OPA
    * op_c = offset of jump base
    */
-  OP_TYPE_JUMP   = (OP_TYPE_MDS+5'd1), // 4
+  OP_TYPE_JUMP   = (OP_TYPE_MDS+5'd1), // 5
   
   /**
    * 
    */
-  OP_TYPE_SYSTEM = (OP_TYPE_JUMP+5'd1),
+  OP_TYPE_SYSTEM = (OP_TYPE_JUMP+5'd1), // 6
 
   /**
    * OP_TYPE_CSR (6)

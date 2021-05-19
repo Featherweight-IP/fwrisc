@@ -4,7 +4,7 @@ pyelftools
 pyyaml
 cocotb
 
-vlsim
+# vlsim
 
 -e git+ssh://git@github.com/fvutils/pyhvl-rpc.git#egg=pyhvl-rpc
 -e git+ssh://git@github.com/pybfms/pybfms.git#egg=pybfms
@@ -13,5 +13,7 @@ vlsim
 -e git+ssh://git@github.com/pybfms/pybfms_mem_core.git#egg=pybfms_mem_core
 -e git+ssh://git@github.com/pybfms/pybfms_riscv_debug.git#egg=pybfms_riscv_debug
 -e git+ssh://git@github.com/pybfms/pybfms-core-debug-common.git#egg=pybfms-core-debug-common
+
 -e git+ssh://git@github.com/fvutils/mkdv.git#egg=mkdv
+-e git+ssh://git@github.com/fvutils/vlsim.git#egg=vlsim
 

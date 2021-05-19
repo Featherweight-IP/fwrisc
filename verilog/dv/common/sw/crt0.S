@@ -39,13 +39,63 @@ _start:
   mv x30, x1
   mv x31, x1
 
-  // Setup exception handling
-  la t0, exception
-  csrw mtvec, t0
+	// Setup exception handling
+	la t0, exception
+	csrw mtvec, t0
 
-  // Initialize stack
-  la sp, _stack_top
-  addi sp, sp, -4
+	la t0, core_data
+	la t1, sizeof_core_data_s
+	lw t1, 0(t1)
+
+	// Poor-man's multiply to determine which coredata is ours
+	csrr t2, mhartid
+	beqz t2, 2f
+1:
+	add t0, t0, t1
+	addi t2, t2, -1
+	bnez t2, 1b
+2:
+	// Zero out the sp
+	sw zero, 256(t0)
+	mv t3, t0
+
+	csrw mscratch, t3
+
+	csrr t2, mhartid
+	beqz t2, primary_core_startup
+
+// Enable interrupts for the core
+	li    t0, (1 << 11)
+	csrrs t0, mie, t0
+
+nonprimary_core_park:
+	wfi
+	lw		t0, 256(t3)
+
+	// See if we have a stack yet
+	beqz	t0, nonprimary_core_park
+
+	// Load the entry function
+	lw		t1, 260(t3)
+
+	// parameter is coreid
+	mv		a0, t2
+	mv		sp, t0
+
+	jalr	t1
+
+	// When we return, spin forever
+1:
+	j		1b
+
+primary_core_startup:
+
+	// Initialize stack
+	la sp, _stack_top
+	addi sp, sp, -4
+	// Store the stack top to core-data
+	sw sp, 0(t3)
+
 
 /*
   // Initialize the global pointer
@@ -69,17 +119,20 @@ zero_loop:
 zero_loop_end:
 #endif /* BSS_CLEARED */
 
-  call main
+	csrr a0, mhartid
+	call main
 
   // Halt
 1:
 	j 1b
 
 exception:
-	// Save the old sp first
-	csrw mscratch, sp
-	la sp, exception_stack
-	addi sp, sp, 256-4
+
+	// Save the current SP and grab the core-data pointer
+	csrrs sp, mscratch, sp
+
+    // Find the top
+    addi sp, sp, 256-4
 
 	// Now, save everything
 	sw x1, 0(sp)
@@ -118,6 +171,10 @@ exception:
 	csrr t0, mscratch
 	sw t0, -4(sp)
 
+	// Restore the core-data pointer in mscratch
+    addi t0, sp, -(256-4)
+    csrw mscratch, t0
+
 	// Save the mepc
 	csrr t0, mepc
 	sw t0, -124(sp)
@@ -128,8 +185,8 @@ exception:
 	la t0, _exception_handler
 	jalr ra, t0
 
-	// On return, adjust the sp
-	la sp, exception_stack
+	// On return, re-acquire the core-data from mscratch
+	csrr sp, mscratch
 	addi sp, sp, 256-4
 
 	// Re-load mepc

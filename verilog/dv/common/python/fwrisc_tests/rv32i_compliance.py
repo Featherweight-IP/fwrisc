@@ -120,12 +120,9 @@ async def test(top):
                     j += 4
 
     tube = ComplianceTestTube(u_sram, u_dbg_bfm, write_str, write_num)
-    u_dbg_bfm.add_instr_exec_cb(tube.instr_exec)
+    u_dbg_bfm.add_on_exec_cb(tube.instr_exec)
     
-    addr = await u_dbg_bfm.wait_exec({"self_loop"}, 100)
-    
-
-    addr = await u_dbg_bfm.wait_exec({"self_loop"}, 100000)
+    addr = await u_dbg_bfm.on_exec({"self_loop"})
     
     with open(ref_file, "rb") as ref_fp:
                  

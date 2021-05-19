@@ -4,23 +4,53 @@ Created on Mar 18, 2021
 @author: mballance
 '''
 import hvlrpc
+import pybfms
 
 @hvlrpc.api_exp
 class BareMetalSupport(object):
     
+    _objections = 0
+    _objections_ev = None
+    
+    def __init__(self, coreid=""):
+        self.coreid = coreid
+    
     @hvlrpc.func
     def record_pass(self, m : str):
-        print("PASS: " + m)
+        print("%s: PASS: %s" % (self.coreid, m))
         
     @hvlrpc.func
     def record_fail(self, m : str):
-        print("FAIL: " + m)
+        print("%s: FAIL: %s" % (self.coreid, m))
         
     @hvlrpc.func
     def endtest(self):
         print("endtest")
-        pass
-        
+        BareMetalSupport.drop_objection()
+   
+    @classmethod 
+    def raise_objection(cls):
+        if cls._objections_ev is None:
+            cls._objections_ev = pybfms.event()
+        cls._objections += 1
+
+    @classmethod        
+    def drop_objection(cls):
+        if cls._objections_ev is None:
+            cls._objections_ev = pybfms.event()
+        if cls._objections > 0:
+            cls._objections -= 1
+            if cls._objections == 0:
+                cls._objections_ev.set()
+
+    @classmethod            
+    async def wait(cls):
+        if cls._objections_ev is None:
+            cls._objections_ev = pybfms.event()
+            
+        while BareMetalSupport._objections > 0:
+            await BareMetalSupport._objections_ev.wait()
+            BareMetalSupport._objections_ev.clear()
     
     @hvlrpc.func
     def vprint(self, fmt : str, ap : hvlrpc.va_list):
@@ -56,7 +86,7 @@ class BareMetalSupport(object):
                     msg += fmt[i:]
                     i = len(fmt)
                     
-        print(msg)
+        print("%s: %s" % (self.coreid, msg))
                     
         
                 

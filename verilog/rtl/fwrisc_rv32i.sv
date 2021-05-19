@@ -10,11 +10,11 @@
 module fwrisc_rv32i #(
 		parameter[31:0] VENDORID = 0,
 		parameter[31:0] ARCHID = 0,
-		parameter[31:0] IMPID = 0,
-		parameter[31:0] HARTID = 0
+		parameter[31:0] IMPID = 0
 		) (
 		input			clock,
 		input			reset,
+		input[31:0]		hartid,
 		
 		output[31:0]	iaddr,
 		input[31:0]		idata,
@@ -38,11 +38,11 @@ module fwrisc_rv32i #(
 		.ENABLE_COUNTERS(    1),
 		.VENDORID(           VENDORID),
 		.ARCHID(             ARCHID),
-		.IMPID(              IMPID),
-		.HARTID(             HARTID)
+		.IMPID(              IMPID)
 		) u_core (
 		.clock              (clock             ), 
 		.reset              (reset             ), 
+		.hartid             (hartid            ),
 		.iaddr              (iaddr             ), 
 		.idata              (idata             ), 
 		.ivalid             (ivalid            ), 

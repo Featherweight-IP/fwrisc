@@ -135,8 +135,8 @@ module fwrisc_mem (
 										2'b11: ack_data <= drdata[31:24];
 									endcase
 								end
-								OP_LH:  ack_data <= (daddr[1])?$signed(drdata[15:0]):$signed(drdata[31:16]);
-								OP_LHU: ack_data <= (daddr[1])?drdata[15:0]:drdata[31:16];
+								OP_LH:  ack_data <= (daddr[1])?$signed(drdata[31:16]):$signed(drdata[15:0]);
+								OP_LHU: ack_data <= (daddr[1])?drdata[31:16]:drdata[15:0];
 								OP_LW:  ack_data <= drdata;
 							endcase
 						end

@@ -3,7 +3,7 @@ mkdv.with:
     variables:
         - MKDV_TOOL: 
             - vlsim
-            - icarus
+              #            - icarus
     jobs:
         - baremetal:
             path: baremetal.yaml

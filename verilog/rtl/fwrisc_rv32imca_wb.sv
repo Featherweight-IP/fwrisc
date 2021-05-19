@@ -140,7 +140,7 @@ module fwrisc_rv32imca_wb #(
 				end
 				2'b01: begin // data
 					if (cyc && stb && ack) begin
-						wb_state <= 2'b00;
+						wb_state <= 2'b11;
 						dready_r <= 1'b1;
 						dat_r_r <= dat_r;
 						cyc_r <= 1'b0;
@@ -149,12 +149,15 @@ module fwrisc_rv32imca_wb #(
 				end
 				2'b10: begin // instruction
 					if (cyc && stb && ack) begin
-						wb_state <= 2'b00;
+						wb_state <= 2'b11;
 						iready_r <= 1'b1;
 						dat_r_r <= dat_r;
 						cyc_r <= 1'b0;
 						stb_r <= 1'b0;
 					end
+				end
+				2'b11: begin // post-cycle turn-around
+					wb_state <= 2'b00;
 				end
 			endcase
 		end

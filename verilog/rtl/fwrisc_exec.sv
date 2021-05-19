@@ -91,7 +91,8 @@ module fwrisc_exec #(
 		// Store the PC to EPC
 		STATE_EXCEPTION_1   = (STATE_LDST_COMPLETE + 4'd1),
 		STATE_EXCEPTION_2   = (STATE_EXCEPTION_1 + 4'd1),
-		STATE_EXCEPTION_3   = (STATE_EXCEPTION_2 + 4'd1) // 8
+		STATE_EXCEPTION_3   = (STATE_EXCEPTION_2 + 4'd1), // 8
+		STATE_WFI_PARK      = (STATE_EXCEPTION_3 + 4'd1)
 		;
 
 	reg [3:0]				exec_state;
@@ -293,17 +294,25 @@ module fwrisc_exec #(
 								end
 							
 								OP_TYPE_SYSTEM: begin
-									if (op == OP_TYPE_ERET) begin
-										instr_complete <= 1'b1;
-										tret <= 1'b1;
-										pc <= op_a; 
-										pc_seq <= 0;
-										exec_state <= STATE_EXECUTE;
-									end else begin
-										mcause <= (op == OP_TYPE_EBREAK)?3:11; // MCALL/MBREAK
-										mcause_int <= 1'b0;
-										exec_state <= STATE_EXCEPTION_1;
-									end
+									case (op) // synopsys parallel_case full_case
+										OP_TYPE_ERET: begin
+											instr_complete <= 1'b1;
+											tret <= 1'b1;
+											pc <= op_a; 
+											pc_seq <= 0;
+											exec_state <= STATE_EXECUTE;
+										end
+										OP_TYPE_EBREAK,OP_TYPE_ECALL: begin
+											mcause <= (op == OP_TYPE_EBREAK)?3:11; // MCALL/MBREAK
+											mcause_int <= 1'b0;
+											exec_state <= STATE_EXCEPTION_1;
+										end
+										OP_TYPE_WFI: begin
+											// Wait for an interrupt request before
+											// proceeding
+											exec_state <= STATE_WFI_PARK;
+										end
+									endcase
 								end
 							
 								/**
@@ -400,6 +409,14 @@ module fwrisc_exec #(
 					instr_complete <= 1'b1;
 					trap <= 1'b1;
 					exec_state <= STATE_EXECUTE;
+				end
+				STATE_WFI_PARK: begin
+					if (ei_req) begin
+						pc <= pc_next;
+						pc_seq <= pc_seq_next;
+						exec_state <= STATE_EXECUTE;
+						instr_complete <= 1'b1;
+					end
 				end
 			endcase
 		end
@@ -517,7 +534,7 @@ module fwrisc_exec #(
 			mem_req_amo <= (op_type == OP_TYPE_AMO);
 			mem_req_valid <= (
 				exec_state == STATE_EXECUTE 
-				&& (op_type == OP_TYPE_LDST || op_type = OP_TYPE_AMO)
+				&& (op_type == OP_TYPE_LDST || op_type == OP_TYPE_AMO)
 				&& decode_valid && !ldst_addr_misaligned);
 		end
 	end

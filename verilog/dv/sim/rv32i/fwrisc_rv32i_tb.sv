@@ -32,20 +32,7 @@ module fwrisc_rv32i_tb(input clock);
 `ifdef IVERILOG
 	// Icarus requires help with timeout 
 	// and wave capture
-        reg[31:0]               timeout;
-        initial begin
-                if ($test$plusargs("dumpvars")) begin
-                        $dumpfile("simx.vcd");
-                        $dumpvars(0, fwrisc_rv32i_tb);
-                end
-                if (!$value$plusargs("timeout=%d", timeout)) begin
-                        timeout=1000;
-                end
-                $display("--> Wait for timeout");
-                # timeout;
-                $display("<-- Wait for timeout");
-                $finish();
-        end
+	`include "iverilog_control.svh"
 `endif
 
 	
@@ -70,6 +57,7 @@ module fwrisc_rv32i_tb(input clock);
 	fwrisc_rv32i u_dut(
 		.clock   (clock  ), 
 		.reset   (reset  ), 
+		.hartid  (32'h0  ),
 		.iaddr   (iaddr  ), 
 		.idata   (idata  ), 
 		.ivalid  (ivalid ), 

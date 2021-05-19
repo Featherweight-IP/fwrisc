@@ -273,8 +273,9 @@ module fwrisc_decode #(
 			endcase
 
 			
-			case (op_type) // synopsys parallel_case
+			case (op_type) // synopsys parallel_case full_case
 				OP_TYPE_ARITH: begin
+					// TODO: must trap and convert FENCE to something innocuous
 					if (instr[2]) begin // AUIPC or LUI
 						op_w = (instr[5])?OP_OPA:OP_ADD;
 					end else begin
@@ -326,8 +327,8 @@ module fwrisc_decode #(
 						5'b00100: op_w = OP_AMO_XOR;
 						5'b01100: op_w = OP_AMO_AND;
 						5'b01000: op_w = OP_AMO_OR;
-						5'b10000: op_w = OP_AMO_MIN;
-						5'b10100: op_w = OP_AMO_MAX;
+						5'b10000: op_w = OP_AMO_MINS;
+						5'b10100: op_w = OP_AMO_MAXS;
 						5'b11000: op_w = OP_AMO_MINU;
 						5'b11100: op_w = OP_AMO_MAXU;
 					endcase
@@ -346,9 +347,10 @@ module fwrisc_decode #(
 					endcase
 				end
 				OP_TYPE_SYSTEM: begin
-					case (instr[31:28])
+					case (instr[31:28]) // synopsys parallel_case full_case
 						4'b0000: op_w = (instr[20])?OP_TYPE_EBREAK:OP_TYPE_ECALL;
-						default /*4'b0001*/: op_w = OP_TYPE_ERET;
+						4'b0011: op_w = OP_TYPE_ERET;
+						4'b0001: op_w = OP_TYPE_WFI;
 					endcase
 				end
 				default: op_w = 0; // TODO:

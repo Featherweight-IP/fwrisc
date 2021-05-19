@@ -14,6 +14,9 @@ MKDV_PYTHONPATH += $(DV_COMMON_DIR)/python
 PATH:=$(PACKAGES_DIR)/python/bin:$(PATH)
 export PATH
 
+include $(PACKAGES_DIR)/fw-local-intc/verilog/rtl/defs_rules.mk
+include $(PACKAGES_DIR)/fw-wishbone-interconnect/verilog/rtl/defs_rules.mk
+include $(PACKAGES_DIR)/fw-wishbone-sram-ctrl/verilog/rtl/defs_rules.mk
 include $(FWRISC_DIR)/verilog/rtl/defs_rules.mk
 
 include $(DV_MK)

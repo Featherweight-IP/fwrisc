@@ -6,7 +6,7 @@
   <pluginPaths/>
   <libraryPaths/>
   <argFilePaths>
-    <argFilePath path="${project_loc}/sve.F"/>
+    <argFilePath path="${project_loc}/sve_top.F"/>
   </argFilePaths>
   <sourceCollections/>
   <projectRefs/>

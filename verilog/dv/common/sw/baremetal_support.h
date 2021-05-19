@@ -8,8 +8,26 @@
 #ifndef INCLUDED_BAREMETAL_SUPPORT_H
 #define INCLUDED_BAREMETAL_SUPPORT_H
 #include <stdarg.h>
+#include <stdint.h>
+
+#ifndef N_CORES
+#define N_CORES 1
+#endif
+
+typedef struct core_data_s {
+	uint32_t			exception_stack[64];
+	uint32_t			*sp;
+	void (*main_f)(uint32_t);
+} core_data_t;
 
 extern unsigned int outstr_addr;
+
+void config_nonprimary(
+		uint32_t		core,
+		uint32_t 		*sp,
+		void (*main_f)(uint32_t));
+
+uint32_t coreid();
 
 void outstr(const char *s);
 
