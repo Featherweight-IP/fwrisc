@@ -84,25 +84,34 @@ module fwrisc_mem (
 							dwstb <= 4'b1111;
 						end else begin
 							case (req_op) // synopsys parallel_case full_case
-								OP_SB: begin
+								OP_SB,OP_LB,OP_LBU: begin
 									case (req_addr[1:0]) // synopsys parallel_case full_case
 										2'b00: dwstb <= 4'b0001;
 										2'b01: dwstb <= 4'b0010;
 										2'b10: dwstb <= 4'b0100;
 										2'b11: dwstb <= 4'b1000;
 									endcase
-									dwdata <= {4{req_data[7:0]}};
 								end
-								OP_SH: begin
+								OP_SH,OP_LH,OP_LHU: begin
 									if (req_addr[1]) begin
 										dwstb <= 4'b1100;
 									end else begin
 										dwstb <= 4'b0011;
 									end
+								end
+								OP_SW,OP_LW: begin
+									dwstb <= 4'b1111;
+								end
+							endcase
+							
+							case (req_op) // synopsys parallel_case full_case
+								OP_SB: begin
+									dwdata <= {4{req_data[7:0]}};
+								end
+								OP_SH: begin
 									dwdata <= {2{req_data[15:0]}};
 								end
 								OP_SW: begin
-									dwstb <= 4'b1111;
 									dwdata <= req_data;
 								end
 							endcase

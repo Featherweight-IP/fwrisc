@@ -258,6 +258,8 @@ module fwrisc #(
 		.pc        (tracer_pc                 ), 
 		.instr     (tracer_instr              ), 
 		.ivalid    (instr_complete            ), 
+		.trap      (trap                      ),
+		.tret      (tret                      ),
 		.ra_raddr  (ra_raddr                  ), 
 		.ra_rdata  (ra_rdata                  ), 
 		.rb_raddr  (rb_raddr                  ), 

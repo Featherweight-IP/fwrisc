@@ -32,6 +32,8 @@ module fwrisc_tracer (
 		// True during execute stage. 
 		// Note that write-back will occur at the same time
 		input			ivalid,
+		input			trap,
+		input			tret,
 		// ra, rb
 		input [5:0]		ra_raddr,
 		input [31:0]	ra_rdata,
@@ -60,6 +62,8 @@ module fwrisc_tracer (
 				// True during execute stage. 
 				// Note that write-back will occur at the same time
 			.ivalid(		ivalid),
+			.trap(          trap),
+			.tret(          tret),
 				// ra, rb
 			.ra_raddr(		ra_raddr),
 			.ra_rdata(		ra_rdata),

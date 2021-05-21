@@ -17,6 +17,9 @@ module fwrisc_dbg_bfm(
 		// True during execute stage. 
 		// Note that write-back will occur at the same time
 		input			ivalid,
+		input			trap,
+		input			tret,
+		
 		// ra, rb
 		input [4:0]		ra_raddr,
 		input [31:0]	ra_rdata,
@@ -41,7 +44,8 @@ module fwrisc_dbg_bfm(
 	
 	wire 				rv_dbg_valid     = ivalid;
 	wire[31:0] 			rv_dbg_instr     = instr;
-	wire				rv_dbg_trap      = 0; // U_CORE_PATH .trap;
+	wire				rv_dbg_trap      = trap; 
+	wire				rv_dbg_tret      = tret; 
 	reg[4:0] 			rv_dbg_rd_addr   = 0; 
 	reg[31:0] 			rv_dbg_rd_wdata  = 0;
 	wire[31:0]			rv_dbg_pc        = pc;
@@ -65,7 +69,7 @@ module fwrisc_dbg_bfm(
 					rv_dbg_mem_wmask <= mstrb;
 					rv_dbg_mem_data <= mdata;
 				end else begin
-					rv_dbg_mem_rmask <= 'hf; // TMP
+					rv_dbg_mem_rmask <= mstrb;
 					rv_dbg_mem_data <= mdata;
 				end
 			end
@@ -82,6 +86,7 @@ module fwrisc_dbg_bfm(
 			.valid( 			rv_dbg_valid),
 			.instr( 			rv_dbg_instr),
 			.intr(				rv_dbg_trap),
+			.iret(				rv_dbg_tret),
 			.rd_addr( 			rv_dbg_rd_addr),
 			.rd_wdata( 			rv_dbg_rd_wdata),
 			.pc(				rv_dbg_pc),
