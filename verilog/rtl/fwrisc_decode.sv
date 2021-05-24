@@ -156,7 +156,8 @@ module fwrisc_decode #(
 				3'b000: i_type = I_TYPE_L;
 				3'b001: i_type = (instr[2])?I_TYPE_U:I_TYPE_I;
 				// ??
-				3'b010: i_type = I_TYPE_S;
+				// instr[2] -> AMO with RTYPE format
+				3'b010: i_type = (instr[2])?I_TYPE_R:I_TYPE_S;
 				3'b011: i_type = (instr[2])?I_TYPE_U:I_TYPE_R;
 				3'b110: begin
 					case (instr[3:2])

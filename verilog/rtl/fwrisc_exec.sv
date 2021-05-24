@@ -65,6 +65,7 @@ module fwrisc_exec #(
 		output[31:0]		daddr,
 		output				dvalid,
 		output				dwrite,
+		output[3:0]			damo,
 		output[31:0]		dwdata,
 		output[3:0]			dwstb,
 		input[31:0]			drdata,
@@ -432,7 +433,8 @@ module fwrisc_exec #(
 	wire alu_op_b_sel_c = (
 			(exec_state == STATE_BRANCH_TAKEN)
 			|| (exec_state == STATE_JUMP)
-			|| (exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST)
+			|| (exec_state == STATE_EXECUTE && 
+				(op_type == OP_TYPE_LDST || op_type == OP_TYPE_AMO))
 			);
 	wire alu_op_sel_add = (
 			(exec_state == STATE_EXECUTE && op_type == OP_TYPE_LDST)
@@ -458,7 +460,6 @@ module fwrisc_exec #(
 			default: alu_op = op;
 		endcase
 	end
-	
 	
 	// TODO: rd_wen
 	always @* begin
@@ -554,6 +555,7 @@ module fwrisc_exec #(
 		.dwdata     (dwdata        ), 
 		.dwstb      (dwstb         ), 
 		.dwrite     (dwrite        ), 
+		.damo       (damo          ),
 		.drdata     (drdata        ), 
 		.dready     (dready        ));
 

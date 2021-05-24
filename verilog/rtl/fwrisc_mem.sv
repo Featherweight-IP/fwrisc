@@ -45,6 +45,7 @@ module fwrisc_mem (
 		output reg[31:0]	dwdata,
 		output reg[3:0]		dwstb,
 		output reg			dwrite,
+		output reg[3:0]		damo,
 		input[31:0]			drdata,
 		input				dready
 		);
@@ -81,8 +82,10 @@ module fwrisc_mem (
 
 						if (req_amo) begin
 							dwdata <= req_data;
-							dwstb <= 4'b1111;
+							dwstb <= {4{1'b1}};
+							damo <= req_op;
 						end else begin
+							damo <= {4{1'b0}};
 							case (req_op) // synopsys parallel_case full_case
 								OP_SB,OP_LB,OP_LBU: begin
 									case (req_addr[1:0]) // synopsys parallel_case full_case

@@ -59,6 +59,7 @@ module fwrisc_rv32imca_wb #(
 		.dwdata             (dwdata            ), 
 		.dwstb              (dwstb             ), 
 		.dwrite             (dwrite            ), 
+		.damo               (damo              ),
 		.drdata             (drdata            ), 
 		.dready             (dready            ), 
 		.irq                (irq               ));

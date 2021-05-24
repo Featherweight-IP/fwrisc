@@ -70,9 +70,6 @@ module fwrisc #(
 	wire[31:0]				dep_lo;
 	wire[31:0]				dep_hi;
 	
-	// TODO:
-	assign damo = {4{1'b0}};
-	
 	assign int_reset = (reset | soft_reset_count != 0);
 	
 	always @(posedge clock) begin
@@ -184,6 +181,7 @@ module fwrisc #(
 		.dvalid          (dvalid         ),
 		.daddr           (daddr          ),
 		.dwrite          (dwrite         ),
+		.damo            (damo           ),
 		.dwdata          (dwdata         ),
 		.dwstb           (dwstb          ),
 		.drdata          (drdata         ),
