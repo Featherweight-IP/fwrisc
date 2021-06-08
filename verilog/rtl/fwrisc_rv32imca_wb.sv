@@ -18,6 +18,8 @@ module fwrisc_rv32imca_wb #(
 		input				clock,
 		input				reset,
 		input[31:0]			hartid,
+		// Boot location
+		input[31:0]			resvec,
 		`WB_INITIATOR_TAG_PORT( , 32, 32, 1, 1, 4),
 		input				irq
 		);
@@ -48,6 +50,7 @@ module fwrisc_rv32imca_wb #(
 		.clock              (clock             ), 
 		.reset              (reset             ), 
 		.hartid             (hartid            ), 
+		.resvec             (resvec            ),
 		
 		.iaddr              (iaddr             ), 
 		.idata              (idata             ), 

@@ -36,6 +36,7 @@ module fwrisc #(
 		input			reset,
 
 		input[31:0]		hartid,
+		input[31:0]     resvec,
 		
 		output[31:0]	iaddr,
 		input[31:0]		idata,
@@ -159,6 +160,7 @@ module fwrisc #(
 		) u_exec (
 		.clock           (clock          ), 
 		.reset           (int_reset      ), 
+		.resvec          (resvec         ),
 		.decode_valid    (decode_valid   ),
 		.instr_complete  (instr_complete ), 
 		.trap            (trap           ),
