@@ -11,9 +11,13 @@
  * TODO: Add module documentation
  */
 module fwrisc_rv32imca_wb #(
-		parameter VENDORID 	= 0,
-		parameter ARCHID 	= 0,
-		parameter IMPID 	= 0
+		parameter[31:0] VENDORID 	= 0,
+		parameter[31:0] ARCHID 	= 0,
+		parameter[31:0] IMPID 	= 0,
+		parameter[31:0]	FIXED_HARTID = 0,
+		parameter       USE_FIXED_HARTID = 1,
+		parameter[31:0] FIXED_RESVEC = 32'h80000000,
+		parameter       USE_FIXED_RESVEC = 1
 		) (
 		input				clock,
 		input				reset,
@@ -45,7 +49,11 @@ module fwrisc_rv32imca_wb #(
 		.ENABLE_COUNTERS    (0			), 
 		.VENDORID           (VENDORID	), 
 		.ARCHID             (ARCHID		), 
-		.IMPID              (IMPID		)
+		.IMPID              (IMPID		),
+		.FIXED_HARTID       (FIXED_HARTID),
+		.USE_FIXED_HARTID   (USE_FIXED_HARTID),
+		.FIXED_RESVEC       (FIXED_RESVEC),
+		.USE_FIXED_RESVEC   (USE_FIXED_RESVEC)
 		) fwrisc (
 		.clock              (clock             ), 
 		.reset              (reset             ), 
