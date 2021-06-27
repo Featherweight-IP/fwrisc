@@ -31,9 +31,9 @@ package:
           type: python
           src: pypi
         - name: vlsim
-          type: pypi
+          src: pypi
         - name: cocotb
-          type: pypi
+          src: pypi
         - name: pybfms-generic-sram
           url: https://github.com/pybfms/pybfms-generic-sram.git
           type: python
