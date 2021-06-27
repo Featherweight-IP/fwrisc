@@ -8,36 +8,33 @@ package:
     dev-deps:
         - name: fwprotocol-defs
           url: http://github.com/Featherweight-IP/fwprotocol-defs.git
-          type: raw
+
           #        - name: memory_primitives
           #url: http://github.com/mballance/memory_primitives.git
           #type: raw
         - name: zephyr
           url: https://github.com/mballance/zephyr.git
           type: raw
+
         - name: RISC-V-IoT-Contest
           url: https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
-          type: raw
+
         - name: fwuart
           url: https://github.com/Featherweight-IP/fwuart.git
-          type: raw
+
         - name: riscv-compliance
           url: https://github.com/riscv/riscv-compliance.git
-          type: raw
+
         - name: pyelftools
-          type: python
           src: pypi
         - name: pyyaml
-          type: python
           src: pypi
+        - name: pybfms-generic-sram
+          url: https://github.com/pybfms/pybfms-generic-sram.git
         - name: vlsim
           src: pypi
         - name: cocotb
           src: pypi
-        - name: pybfms-generic-sram
-          url: https://github.com/pybfms/pybfms-generic-sram.git
-          type: python
         - name: mkdv
           url: https://github.com/fvutils/mkdv.git
-          type: python
 
