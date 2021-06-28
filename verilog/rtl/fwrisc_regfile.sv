@@ -176,6 +176,10 @@ module fwrisc_regfile #(
 			if (rd_wen && rd_waddr == CSR_MEPC) begin
 				mepc <= rd_wdata;
 			end
+			if (rd_wen && rd_waddr == CSR_MCAUSE) begin
+				mcause_int_r <= rd_wdata[31];
+				mcause_r <= rd_wdata[3:0];
+			end
 		end
 	end
 
