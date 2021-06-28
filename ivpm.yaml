@@ -1,6 +1,6 @@
 package:
     name: fwrisc
-    version: None
+    version: 1.0.0
     deps:
         - name: fwprotocol-defs
           url: http://github.com/Featherweight-IP/fwprotocol-defs.git

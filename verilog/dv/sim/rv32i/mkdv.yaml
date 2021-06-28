@@ -5,12 +5,11 @@
 #            - vlsim
 #              #            - icarus
     jobs:
-        - baremetal:
-            path: baremetal.yaml
-
-        - instr:
-            path: instr.yaml
+    - baremetal:
+        path: baremetal.yaml
+    - instr:
+        path: instr.yaml
   
-        - riscv_compliance:
-            path: riscv_compliance.yaml
+    - riscv_compliance:
+        path: riscv_compliance.yaml
 

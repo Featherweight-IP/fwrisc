@@ -2,7 +2,7 @@
 #* rv32c unit tests
 #****************************************************************************
 
-tests:
+jobs:
     - arith.cadd:
        variables:
          - SW_IMAGE: arith_cadd.elf

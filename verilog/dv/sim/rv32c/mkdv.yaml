@@ -1,5 +1,5 @@
 
-tests:
+jobs:
     - instr:
         path: instr.yaml
       
