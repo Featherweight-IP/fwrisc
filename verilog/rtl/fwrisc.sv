@@ -30,12 +30,17 @@ module fwrisc #(
 		parameter ENABLE_COUNTERS=1,
 		parameter[31:0] VENDORID = 0,
 		parameter[31:0] ARCHID = 0,
-		parameter[31:0] IMPID = 0
+		parameter[31:0] IMPID = 0,
+		parameter[31:0]	FIXED_HARTID = 0,
+		parameter       USE_FIXED_HARTID = 1,
+		parameter[31:0] FIXED_RESVEC = 32'h80000000,
+		parameter       USE_FIXED_RESVEC = 1
 		) (
 		input			clock,
 		input			reset,
 
 		input[31:0]		hartid,
+		input[31:0]     resvec,
 		
 		output[31:0]	iaddr,
 		input[31:0]		idata,
@@ -159,6 +164,9 @@ module fwrisc #(
 		) u_exec (
 		.clock           (clock          ), 
 		.reset           (int_reset      ), 
+		.resvec          (
+			(USE_FIXED_RESVEC)?FIXED_RESVEC:resvec
+			),
 		.decode_valid    (decode_valid   ),
 		.instr_complete  (instr_complete ), 
 		.trap            (trap           ),
@@ -230,7 +238,9 @@ module fwrisc #(
 		) u_regfile (
 		.clock            (clock              ), 
 		.reset            (int_reset          ),
-		.hartid           (hartid             ),
+		.hartid           (
+			(USE_FIXED_HARTID)?FIXED_HARTID:hartid
+			),
 		.soft_reset_req   (soft_reset_req     ),
 		.instr_complete   (instr_complete     ), 
 		.trap             (trap               ),

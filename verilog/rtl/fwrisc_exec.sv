@@ -30,6 +30,7 @@ module fwrisc_exec #(
 		)(
 		input				clock,
 		input				reset,
+		input[31:0]         resvec,
 		input				decode_valid,
 		output reg 			instr_complete,
 		output reg			trap, // Exception
@@ -217,7 +218,7 @@ module fwrisc_exec #(
 			instr_complete <= 1'b0;
 			trap <= 1'b0;
 			tret <= 1'b0;
-			pc <= 'h8000_0000;
+			pc <= resvec;
 			pc_seq <= 1;
 			mcause <= 4'b0;
 			mcause_int <= 1'b0;
