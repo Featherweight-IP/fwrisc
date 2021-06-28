@@ -1,6 +1,6 @@
 MKDV_MK := $(abspath $(lastword $(MAKEFILE_LIST)))
 TEST_DIR := $(dir $(MKDV_MK))
-MKDV_TOOL ?= vlsim
+MKDV_TOOL ?= icarus
 MKDV_PLUGINS += cocotb pybfms
 RISCV_CC=riscv64-zephyr-elf-gcc
 
