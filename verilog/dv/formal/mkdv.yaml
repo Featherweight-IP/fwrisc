@@ -1,0 +1,5 @@
+
+jobs:
+    - decode:
+        path: decode
+

@@ -1,4 +1,4 @@
-tests:
+jobs:
     - cadd-01:
         variables:
             - SW_IMAGE: cadd-01.elf

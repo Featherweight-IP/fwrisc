@@ -1,7 +1,5 @@
 
-tests:
+jobs:
     - rv32i:
-        path: rv32i/mkdv.yaml
+        path: rv32i
 
-    - rv32c:
-        path: rv32c/mkdv.yaml

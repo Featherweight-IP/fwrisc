@@ -7,10 +7,14 @@ jobs:
        variables:
          - SW_IMAGE: arith_add.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
+       description: |
+         Exercises the *add* instruction (register-to-register)
+
     - arith.addi:
        variables:
          - SW_IMAGE: arith_addi.elf
          - MKDV_COCOTB_MODULE: fwrisc_tests.rv32i_instr
+
     - arith.addi.neg:
        variables:
          - SW_IMAGE: arith_addi_neg.elf

@@ -1,16 +1,16 @@
 
-mkdv.with:
-    variables:
-        - MKDV_TOOL: 
-            - vlsim
-              #            - icarus
-    jobs:
-        - baremetal:
-            path: baremetal.yaml
+#mkdv.with:
+#    variables:
+#        - MKDV_TOOL: 
+#            - vlsim
+#              #            - icarus
+jobs:
+    - baremetal:
+        path: baremetal.yaml
 
-        - instr:
-            path: instr.yaml
+    - instr:
+        path: instr.yaml
   
-        - riscv_compliance:
-            path: riscv_compliance.yaml
+    - riscv_compliance:
+        path: riscv_compliance.yaml
 

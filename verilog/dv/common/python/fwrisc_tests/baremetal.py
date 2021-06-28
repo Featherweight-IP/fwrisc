@@ -17,7 +17,7 @@ class Tube(object):
         self.addr = addr
         self.out = ""
 
-    def memwrite(self, addr, data, mask):
+    def memwrite(self, pc, addr, data, mask):
         if addr == self.addr:
             ch = data & 0xFF
             

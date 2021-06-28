@@ -22,7 +22,8 @@ module fwrisc_rv32imc(
 		output[3:0]		dwstb,
 		output			dwrite,
 		input[31:0]		drdata,
-		input			dready
+		input			dready,
+		input			irq
 		);
 
 	fwrisc #(
@@ -43,7 +44,8 @@ module fwrisc_rv32imc(
 			.dwstb              (dwstb             ), 
 			.dwrite             (dwrite            ), 
 			.drdata             (drdata            ), 
-			.dready             (dready            ));
+			.dready             (dready            ),
+			.irq                (irq               ));
 
 endmodule
 

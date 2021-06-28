@@ -1,0 +1,15 @@
+
+jobs:
+    - formal:
+        path: formal/mkdv.yaml
+
+    - sim:
+        path: sim/mkdv.yaml
+        with: 
+            - icarus:
+                setup-vars:
+                    MKDV_TOOL: icarus
+            - vlsim:
+                setup-vars:
+                    MKDV_TOOL: vlsim
+

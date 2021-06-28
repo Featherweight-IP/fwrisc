@@ -6,6 +6,8 @@ MKDV_TEST ?= i32_btype
 SBY_MODE ?= cover
 SBY_DEPTH ?= 64
 
+SBY_OPTIONS += mode=$(SBY_MODE) depth=$(SBY_DEPTH)
+
 MKDV_TESTS += i32_btype i32_itype i32_lui i32_rtype
 
 ifeq (,$(findstring $(MKDV_TEST),$(MKDV_TESTS)))
