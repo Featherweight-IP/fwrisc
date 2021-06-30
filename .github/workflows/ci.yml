@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Regression
         run: |
+          echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u mballance --password-stdin
           docker pull ghcr.io/featherweight-ip/fw-dv-tools:latest
           docker run -v `pwd`:/project ghcr.io/featherweight-ip/fw-dv-tools:latest /project/regress.sh
 
