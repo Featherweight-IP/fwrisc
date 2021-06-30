@@ -4,6 +4,8 @@ python3 -m pip install ivpm
 
 cd /project
 
-ivpm update
+# Fetch development packages and dependencies
+# using non-SSH git
+ivpm update --anonymous-git
 
 
