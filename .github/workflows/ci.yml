@@ -7,6 +7,7 @@ on:
 
 jobs:
     ci-linux:
+    steps:
     - name: Regression
       run: |
         docker pull ghcr.io/featherweight-ip/fw-dv-tools:latest
