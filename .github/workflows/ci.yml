@@ -7,4 +7,8 @@ on:
 
 jobs:
     ci-linux:
+    - name: Regression
+      run: |
+        docker pull ghcr.io/featherweight-ip/fw-dv-tools:latest
+        docker run -v `pwd`:/project ghcr.io/featherweight-ip/fw-dv-tools:latest /project/regress.sh
 
