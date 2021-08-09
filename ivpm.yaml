@@ -6,8 +6,19 @@ package:
           url: http://github.com/Featherweight-IP/fwprotocol-defs.git
           type: raw
     dev-deps:
+        #************************************************************
+        # IPs
+        #************************************************************
         - name: fwprotocol-defs
-          url: http://github.com/Featherweight-IP/fwprotocol-defs.git
+          url: http://github.com/featherweight-ip/fwprotocol-defs.git
+        - name: fw-wishbone-sram-ctrl
+          url: http://github.com/featherweight-ip/fw-wishbone-sram-ctrl.git
+        - name: fw-wishbone-interconnect
+          url: http://github.com/featherweight-ip/fw-wishbone-interconnect.git
+        - name: fw-local-intc
+          url: http://github.com/featherweight-ip/fw-local-intc.git
+        - name: fwuart
+          url: https://github.com/Featherweight-IP/fwuart.git
 
           #        - name: memory_primitives
           #url: http://github.com/mballance/memory_primitives.git
@@ -19,18 +30,28 @@ package:
         - name: RISC-V-IoT-Contest
           url: https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
 
-        - name: fwuart
-          url: https://github.com/Featherweight-IP/fwuart.git
+        #************************************************************
+        # BFMs
+        #************************************************************
+        - name: pybfms
+          url: https://github.com/pybfms/pybfms.git
+        - name: pybfms-generic-sram
+          url: https://github.com/pybfms/pybfms-generic-sram.git
+        - name: pybfms-riscv-debug
+          url: https://github.com/pybfms/pybfms-riscv-debug.git
+        - name: pybfms-gpio
+          url: https://github.com/pybfms/pybfms-gpio.git
 
         - name: riscv-compliance
           url: https://github.com/riscv/riscv-compliance.git
 
+        #************************************************************
+        # Python infrastructure
+        #************************************************************
         - name: pyelftools
           src: pypi
         - name: pyyaml
           src: pypi
-        - name: pybfms-generic-sram
-          url: https://github.com/pybfms/pybfms-generic-sram.git
         - name: vlsim
           src: pypi
         - name: cocotb

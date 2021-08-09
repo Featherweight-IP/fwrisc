@@ -4,10 +4,9 @@
 #        - MKDV_TOOL: 
 #            - vlsim
 #              #            - icarus
-jobs:
+    jobs:
     - baremetal:
         path: baremetal.yaml
-
     - instr:
         path: instr.yaml
   
