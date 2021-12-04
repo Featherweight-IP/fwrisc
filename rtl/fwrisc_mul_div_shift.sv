@@ -126,7 +126,7 @@ module fwrisc_mul_div_shift #(
 					end
 				endcase
 				if (op == OP_DIV) begin
-					div_sign <= (in_a[31] != in_a[31]);
+					div_sign <= (in_a[31] != in_b[31]);
 				end else begin
 					// OP_REM and others
 					div_sign <= in_a[31];
