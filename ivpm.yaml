@@ -1,0 +1,98 @@
+package:
+    name: fwrisc
+    version: None
+    deps:
+        - name: simscripts
+          url: http://github.com/mballance/simscripts.git
+          type: raw
+        - name: memory_primitives
+          url: http://github.com/mballance/memory_primitives.git
+          type: raw
+        - name: zephyr
+          url: https://github.com/zephyrproject-rtos/zephyr/archive/zephyr-v2.2.0.tar.gz
+          type: raw
+        - name: RISC-V-IoT-Contest
+          url: https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
+          type: raw
+        - name: fwuart
+          url: http://github.com/Featherweight-IP/fwuart.git
+          type: raw
+        - name: fwprotocol-defs
+          url: http://github.com/Featherweight-IP/fwprotocol-defs.git
+          type: raw
+        - name: riscv-compliance
+          url: http://github.com/riscv/riscv-compliance.git
+          type: raw
+        - name: pyelftools
+          type: python
+          src: pypi
+        - name: pyyaml
+          type: python
+          src: pypi
+        - name: vlsim
+          type: python
+          src: pypi
+        - name: cocotb
+          type: python
+          src: pypi
+        - name: pybfms
+          type: python
+          src: pypi
+        - name: pybfms_mem_core
+          url: https://github.com/pybfms/pybfms_mem_core.git
+          type: python
+        - name: fltools
+          url: https://github.com/fvutils/fltools.git
+          type: python
+    dev-deps:
+        - name: simscripts
+          url: http://github.com/mballance/simscripts.git
+          type: raw
+        - name: memory_primitives
+          url: http://github.com/mballance/memory_primitives.git
+          type: raw
+        - name: zephyr
+          url: https://github.com/zephyrproject-rtos/zephyr/archive/zephyr-v2.2.0.tar.gz
+          type: raw
+        - name: RISC-V-IoT-Contest
+          url: https://github.com/Thales-RISC-V/RISC-V-IoT-Contest.git
+          type: raw
+        - name: fwuart
+          url: http://github.com/Featherweight-IP/fwuart.git
+          type: raw
+        - name: fwprotocol-defs
+          url: http://github.com/Featherweight-IP/fwprotocol-defs.git
+          type: raw
+        - name: riscv-compliance
+          url: http://github.com/riscv/riscv-compliance.git
+          type: raw
+        - name: pyelftools
+          type: python
+          src: pypi
+        - name: pyyaml
+          type: python
+          src: pypi
+        - name: vlsim
+          url: http://github.com/mballance/vlsim.git
+          type: python
+        - name: cocotb
+          url: https://github.com/fvutils/cocotb.git
+          type: python
+        - name: bfm_core
+          url: https://github.com/pybfms/bfm_core.git
+          type: python
+        - name: rv_bfms
+          url: https://github.com/pybfms/rv_bfms.git
+          type: python
+        - name: generic_sram_bfms
+          url: https://github.com/pybfms/generic_sram_bfms.git
+          type: python
+        - name: pybfms_mem_core
+          url: https://github.com/pybfms/pybfms_mem_core.git
+          type: python
+        - name: fltools
+          url: https://github.com/fvutils/fltools.git
+          type: python
+        - name: migen
+          type: python
+          src: pypi
